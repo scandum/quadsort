@@ -18,7 +18,7 @@
 */
 
 /*
-	quadsort 1.1
+	quadsort 1.1.1
 */
 
 #include <stdlib.h>
@@ -29,93 +29,9 @@
 
 typedef int CMPFUNC (const void *a, const void *b);
 
-void tail_sort32(void *array, size_t nmemb, CMPFUNC *cmp)
-{
-	int *pta = array;
-	register int swap;
-
-	switch (nmemb)
-	{
-		case 1:
-			return;
-		case 2:
-			if (cmp(&pta[0], &pta[1]) > 0)
-			{
-				swap = pta[0];
-				pta[0] = pta[1];
-				pta[1] = swap;
-			}
-			return;
-		case 3:
-			if (cmp(&pta[0], &pta[1]) > 0)
-			{
-				swap = pta[0];
-				pta[0] = pta[1];
-				pta[1] = swap;
-			}
-			if (cmp(&pta[1], &pta[2]) > 0)
-			{
-				swap = pta[1];
-				pta[1] = pta[2];
-				pta[2] = swap;
-			}
-			if (cmp(&pta[0], &pta[1]) > 0)
-			{
-				swap = pta[0];
-				pta[0] = pta[1];
-				pta[1] = swap;
-			}
-			return;
-		default:
-			assert(nmemb < 1 && nmemb > 3);
-	}
-}
-
-void tail_sort64(void *array, size_t nmemb, CMPFUNC *cmp)
-{
-	int *pta = array;
-	register long long swap;
-
-	switch (nmemb)
-	{
-		case 1:
-			return;
-		case 2:
-			if (cmp(&pta[0], &pta[1]) > 0)
-			{
-				swap = pta[0];
-				pta[0] = pta[1];
-				pta[1] = swap;
-			}
-			return;
-		case 3:
-			if (cmp(&pta[0], &pta[1]) > 0)
-			{
-				swap = pta[0];
-				pta[0] = pta[1];
-				pta[1] = swap;
-			}
-			if (cmp(&pta[1], &pta[2]) > 0)
-			{
-				swap = pta[1];
-				pta[1] = pta[2];
-				pta[2] = swap;
-			}
-			if (cmp(&pta[0], &pta[1]) > 0)
-			{
-				swap = pta[0];
-				pta[0] = pta[1];
-				pta[1] = swap;
-			}
-			return;
-		default:
-			assert(nmemb < 1 && nmemb > 3);
-	}
-}
-
 void quad_swap32(void *array, void *swap, size_t nmemb, CMPFUNC *cmp)
 {
-	size_t offset, i;
+	size_t offset;
 	register int *pts, *pta;
 
 	pta = array;
@@ -194,15 +110,47 @@ void quad_swap32(void *array, void *swap, size_t nmemb, CMPFUNC *cmp)
 		pta += 4;
 	}
 
-	if (offset < nmemb)
+	switch (nmemb - offset)
 	{
-		tail_sort32(pta, nmemb - offset, cmp);
+		case 0:
+		case 1:
+			return;
+		case 2:
+			if (cmp(&pta[0], &pta[1]) > 0)
+			{
+				pts[0] = pta[0];
+				pta[0] = pta[1];
+				pta[1] = pts[0];
+			}
+			return;
+		case 3:
+			if (cmp(&pta[0], &pta[1]) > 0)
+			{
+				pts[0] = pta[0];
+				pta[0] = pta[1];
+				pta[1] = pts[0];
+			}
+			if (cmp(&pta[1], &pta[2]) > 0)
+			{
+				pts[0] = pta[1];
+				pta[1] = pta[2];
+				pta[2] = pts[0];
+			}
+			if (cmp(&pta[0], &pta[1]) > 0)
+			{
+				pts[0] = pta[0];
+				pta[0] = pta[1];
+				pta[1] = pts[0];
+			}
+			return;
+		default:
+			assert(nmemb < 1 && nmemb > 3);
 	}
 }
 
 void quad_swap64(void *array, void *swap, size_t nmemb, CMPFUNC *cmp)
 {
-	size_t offset, i;
+	size_t offset;
 	register long long *pts, *pta;
 
 	pta = array;
@@ -281,9 +229,41 @@ void quad_swap64(void *array, void *swap, size_t nmemb, CMPFUNC *cmp)
 		pta += 4;
 	}
 
-	if (offset < nmemb)
+	switch (nmemb - offset)
 	{
-		tail_sort32(pta, nmemb - offset, cmp);
+		case 0:
+		case 1:
+			return;
+		case 2:
+			if (cmp(&pta[0], &pta[1]) > 0)
+			{
+				pts[0] = pta[0];
+				pta[0] = pta[1];
+				pta[1] = pts[0];
+			}
+			return;
+		case 3:
+			if (cmp(&pta[0], &pta[1]) > 0)
+			{
+				pts[0] = pta[0];
+				pta[0] = pta[1];
+				pta[1] = pts[0];
+			}
+			if (cmp(&pta[1], &pta[2]) > 0)
+			{
+				pts[0] = pta[1];
+				pta[1] = pta[2];
+				pta[2] = pts[0];
+			}
+			if (cmp(&pta[0], &pta[1]) > 0)
+			{
+				pts[0] = pta[0];
+				pta[0] = pta[1];
+				pta[1] = pts[0];
+			}
+			return;
+		default:
+			assert(nmemb < 1 && nmemb > 3);
 	}
 }
 
