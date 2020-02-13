@@ -93,24 +93,24 @@ due to the elimination of wasteful swapping. In C this looks as following:
     {
        if (pts[0] <= pts[2])
        {
-           pta[0] = pts[0];
-           pta[1] = pts[2];
+           val[0] = tmp[0];
+           val[1] = tmp[2];
        }
        else
        {
-           pta[0] = pts[2];
-           pta[1] = pts[0];
+           val[0] = tmp[2];
+           val[1] = tmp[0];
        }
 
        if (pts[1] <= pts[3])
        {
-           pta[2] = pts[1];
-           pta[3] = pts[3];
+           val[2] = tmp[1];
+           val[3] = tmp[3];
        }
        else
        {
-           pta[2] = pts[3];
-           pta[3] = pts[1];
+           val[2] = tmp[3];
+           val[3] = tmp[1];
        }
     }
 
