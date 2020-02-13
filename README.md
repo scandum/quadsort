@@ -199,3 +199,47 @@ Cache optimization
 As currently implemented quadsort is not cache efficient for large arrays.
 This can be alleviated by pre-sorting large blocks. This (and other hardware
 specific optimizations) is not within the scope of the current implementation.
+
+Big O
+-----
+
+The best case performance is O(n) comparisons for sorted data and reverse-sorted data.
+The worst case performance is O(n log n).
+The average case performance is O(n log n).
+
+Benchmarks
+----------
+The following benchmark was on WSL gcc version 7.4.0 (Ubuntu 7.4.0-1ubuntu1~18.04.1)
+with minimal background interference. Each test was ran 100 times and only the best
+run is reported.
+
+        Quad Sort: sorted 1000000 elements in 0.127645 seconds. (random order)
+       Quick Sort: sorted 1000000 elements in 0.136306 seconds. (random order)
+
+        Quad Sort: sorted 1000000 elements in 0.002521 seconds. (forward order)
+       Quick Sort: sorted 1000000 elements in 0.029430 seconds. (forward order)
+       
+        Quad Sort: sorted 1000000 elements in 0.014468 seconds. (reverse order)
+       Quick Sort: sorted 1000000 elements in 0.030888 seconds. (reverse order)
+
+        Quad Sort: sorted 1000000 elements in 0.032876 seconds. (random tail)
+       Quick Sort: sorted 1000000 elements in 0.053318 seconds. (random tail)
+
+For the sake completeness I ran this benchmark once again.
+
+        Quad Sort: sorted 1000000 elements in 0.127452 seconds. (random order)
+       Quick Sort: sorted 1000000 elements in 0.136210 seconds. (random order)
+
+        Quad Sort: sorted 1000000 elements in 0.002457 seconds. (forward order)
+       Quick Sort: sorted 1000000 elements in 0.029419 seconds. (forward order)
+
+        Quad Sort: sorted 1000000 elements in 0.014460 seconds. (reverse order)
+       Quick Sort: sorted 1000000 elements in 0.030880 seconds. (reverse order)
+
+        Quad Sort: sorted 1000000 elements in 0.032865 seconds. (random tail)
+       Quick Sort: sorted 1000000 elements in 0.053329 seconds. (random tail)
+
+As the numbers are similar enough I consider them valid. I would say they speak for themselves. If you want to quickly run an independent benchmark yourself you can quickly do so at this link.
+
+https://www.onlinegdb.com/ry6JnKZXI
+
