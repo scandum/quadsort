@@ -91,7 +91,7 @@ due to the elimination of wasteful swapping. In C this looks as following:
     }
     else
     {
-       if (pts[0] <= pts[2])
+       if (tmp[0] <= tmp[2])
        {
            val[0] = tmp[0];
            val[1] = tmp[2];
@@ -102,7 +102,7 @@ due to the elimination of wasteful swapping. In C this looks as following:
            val[1] = tmp[0];
        }
 
-       if (pts[1] <= pts[3])
+       if (tmp[1] <= tmp[3])
        {
            val[2] = tmp[1];
            val[3] = tmp[3];
