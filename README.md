@@ -43,8 +43,8 @@ reverse-order. In the visualization above in-order is checked first and
 reverse-order is checked second. If both checks fail the final arrangement is
 known and two checks remain to determine the final order.
 
-This eliminates 1 wasteful comparisons for in order sequences while creating
-an additional comparison for random sequences. However, in the real world we
+This eliminates 1 wasteful comparison for in-order sequences while creating
+1 additional comparison for random sequences. However, in the real world we
 are rarely comparing truly random data, so in any instance where data is
 more likely to be orderly than disorderly this shift in probability will give
 an advantage.
@@ -124,8 +124,9 @@ In the first stage of quadsort the quad swap is used to pre-sort the
 array into sorted 4-element blocks as described above.
 
 The second stage still uses an approach similar to the quad swap to detect
-in order and reverse-order arrangements, but as it's sorting blocks of 4 or
-more the final step needs to be handled like the traditional merge sort.
+in-order and reverse-order arrangements, but as it's sorting blocks of 4 or
+more elements the final step needs to be handled like the traditional merge
+sort.
 
 This can be visualized as following:
 
@@ -168,11 +169,11 @@ Boundary checks
 Another issue with the traditional merge sort is that it performs wasteful
 boundary checks. This looks as following:
 
-if (a < a_max && b < b_max)
-    if (a < b)
-        [insert a]
-    else
-        [insert b]
+    if (a < a_max && b < b_max)
+        if (a < b)
+            [insert a]
+        else
+            [insert b]
 
 To optimize this quadsort compares the last element of sequence A against
 the last element of sequence B. If the last element of sequence A is smaller
@@ -207,6 +208,9 @@ The best case performance is O(n) comparisons for sorted data and reverse-sorted
 The worst case performance is O(n log n).
 The average case performance is O(n log n).
 
+The memory overhead is O(n) though in theory it should be possible to write a quadsort
+that is O(1).
+
 Benchmarks
 ----------
 The following benchmark was on WSL gcc version 7.4.0 (Ubuntu 7.4.0-1ubuntu1~18.04.1)
@@ -225,7 +229,7 @@ run is reported.
         Quad Sort: sorted 1000000 elements in 0.032876 seconds. (random tail)
        Quick Sort: sorted 1000000 elements in 0.053318 seconds. (random tail)
 
-For the sake completeness I ran this benchmark once again.
+For the sake of completeness I ran this benchmark once again.
 
         Quad Sort: sorted 1000000 elements in 0.127452 seconds. (random order)
        Quick Sort: sorted 1000000 elements in 0.136210 seconds. (random order)
@@ -239,7 +243,6 @@ For the sake completeness I ran this benchmark once again.
         Quad Sort: sorted 1000000 elements in 0.032865 seconds. (random tail)
        Quick Sort: sorted 1000000 elements in 0.053329 seconds. (random tail)
 
-As the numbers are similar enough I consider them valid. I would say they speak for themselves. If you want to quickly run an independent benchmark yourself you can quickly do so at this link.
+As the numbers are similar enough I consider them valid. If you want to quickly run an independent benchmark yourself you can do so at this link.
 
 https://www.onlinegdb.com/ry6JnKZXI
-
