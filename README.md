@@ -225,7 +225,7 @@ run is reported.
         Quad Sort: sorted 1000000 elements in 0.032876 seconds. (random tail)
        Quick Sort: sorted 1000000 elements in 0.053318 seconds. (random tail)
 
-For the sake completeness I ran this benchmark once again.
+For the sake of completeness I ran this benchmark once again.
 
         Quad Sort: sorted 1000000 elements in 0.127452 seconds. (random order)
        Quick Sort: sorted 1000000 elements in 0.136210 seconds. (random order)
