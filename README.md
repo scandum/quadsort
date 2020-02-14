@@ -24,24 +24,29 @@ During the first stage the four variables are partially sorted in the four
 temporary variables, in the second stage they are fully sorted back to the
 original four variables.
 
-       A --> A,B --> A,C
-       B --> A,B --> A,B,C,D
-       C --> C,D --> A,B,C,D
-       D --> C,D --> B,D
+            [A]       [T] ╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴                  [A]🠆
+               ＼   ／   ＼                   ＼             ／
+                 (?)        ╴                    ╴         ╴
+               ／   ＼        ＼                   ＼   ／
+            [A]       [T]╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴        (?)       [A]🠆
+                         ＼        ＼         ＼   ／   ＼   ／
+                           (?)🠆      (?)🠆                 ╴
+                         ／        ／         ／   ＼   ／   ＼
+            [A]       [T]╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴        (?)       [A]🠆
+               ＼   ／        ／                   ／   ＼
+                 (?)        ╴                    ╴         ╴
+               ／   ＼   ／                   ／             ＼
+            [A]       [T]╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴                  [A]🠆
 
-This allows for the distribution visualised above. The quad swap elimates 2
-wasteful swap operations and allows to make several deductions about the final
-ordering.
 
-       A --> A,B --> A? --> C? --> A,C
-       B --> A,B --> B? --> D? --> A,C
-       C --> C,D --> C? --> A? --> B,D
-       D --> C,D --> D? --> B? --> B,D
+This process is visualized in the diagram above.
 
-The next step is checking if the four temporary variables are in order or in
-reverse-order. In the visualization above in-order is checked first and
-reverse-order is checked second. If both checks fail the final arrangement is
-known and two checks remain to determine the final order.
+After the first round of sorting a single checks determines if the four
+temporary variables are sorted in order, if that's the case the swap
+finishes up immediately. Next it checks if the temporary variables
+are sorted in reverse-order, if that's the case the swap finishes up
+immediately. If both checks fail the final arrangement is known and
+two checks remain to determine the final order.
 
 This eliminates 1 wasteful comparison for in-order sequences while creating
 1 additional comparison for random sequences. However, in the real world we
