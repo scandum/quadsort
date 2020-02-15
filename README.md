@@ -24,7 +24,6 @@ During the first stage the four variables are partially sorted in the four
 temporary variables, in the second stage they are fully sorted back to the
 original four variables.
 ```
-/*
             [A]       [S] ╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴                  [A]🠆
                ＼   ／   ＼                   ＼             ／
                  (?)        ╴                    ╴         ╴
@@ -38,7 +37,6 @@ original four variables.
                  (?)        ╴                    ╴         ╴
                ／   ＼   ／                   ／             ＼
             [A]       [S]╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴                  [A]🠆
-*/
 ```
 
 
