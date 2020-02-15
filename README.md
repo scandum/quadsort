@@ -197,8 +197,8 @@ skip this will result in no additional swap operation if the entire sequence
 is in order. Regardless, if a program sorts in intervals it should pick an
 optimal array size to do so.
 
-Since a suboptimal array size isn't disastrous for quadsort I haven't
-bothered implementing a solution.
+A suboptimal array size is not disastrous for quadsort and it's outside of
+the scope of the document to provide a solution.
 
 Big O
 -----
@@ -213,39 +213,39 @@ that is O(1).
 Benchmarks
 ----------
 The following benchmark was on WSL gcc version 7.4.0 (Ubuntu 7.4.0-1ubuntu1~18.04.1)
-with minimal background interference. Each test was ran 100 times and only the best
-run is reported.
+with minimal background interference. The source code was compiled using gcc -O3 quadsort.c.
+Each test was ran 100 times and only the best run is reported.
 
-        Quad Sort: sorted 1000000 elements in 0.127645 seconds. (random order)
-       Quick Sort: sorted 1000000 elements in 0.136306 seconds. (random order)
+         quadsort: sorted 1000000 elements in 0.074616 seconds. (random order)
+            qsort: sorted 1000000 elements in 0.101402 seconds. (random order)
 
-        Quad Sort: sorted 1000000 elements in 0.002521 seconds. (forward order)
-       Quick Sort: sorted 1000000 elements in 0.029430 seconds. (forward order)
-       
-        Quad Sort: sorted 1000000 elements in 0.014468 seconds. (reverse order)
-       Quick Sort: sorted 1000000 elements in 0.030888 seconds. (reverse order)
+         quadsort: sorted 1000000 elements in 0.000912 seconds. (forward order)
+            qsort: sorted 1000000 elements in 0.027091 seconds. (forward order)
 
-        Quad Sort: sorted 1000000 elements in 0.032876 seconds. (random tail)
-       Quick Sort: sorted 1000000 elements in 0.053318 seconds. (random tail)
+         quadsort: sorted 1000000 elements in 0.004904 seconds. (reverse order)
+            qsort: sorted 1000000 elements in 0.025820 seconds. (reverse order)
 
-For the sake of completeness I ran this benchmark once again.
+         quadsort: sorted 1000000 elements in 0.018378 seconds. (random tail)
+            qsort: sorted 1000000 elements in 0.043725 seconds. (random tail)
 
-        Quad Sort: sorted 1000000 elements in 0.127452 seconds. (random order)
-       Quick Sort: sorted 1000000 elements in 0.136210 seconds. (random order)
+For verification the benchmark was ran once again.
 
-        Quad Sort: sorted 1000000 elements in 0.002457 seconds. (forward order)
-       Quick Sort: sorted 1000000 elements in 0.029419 seconds. (forward order)
+         quadsort: sorted 1000000 elements in 0.074633 seconds. (random order)
+            qsort: sorted 1000000 elements in 0.101327 seconds. (random order)
 
-        Quad Sort: sorted 1000000 elements in 0.014460 seconds. (reverse order)
-       Quick Sort: sorted 1000000 elements in 0.030880 seconds. (reverse order)
+         quadsort: sorted 1000000 elements in 0.000916 seconds. (forward order)
+            qsort: sorted 1000000 elements in 0.027073 seconds. (forward order)
 
-        Quad Sort: sorted 1000000 elements in 0.032865 seconds. (random tail)
-       Quick Sort: sorted 1000000 elements in 0.053329 seconds. (random tail)
+         quadsort: sorted 1000000 elements in 0.004910 seconds. (reverse order)
+            qsort: sorted 1000000 elements in 0.025790 seconds. (reverse order)
 
-As the numbers are similar enough I consider them valid. In this benchmark quadsort is
+         quadsort: sorted 1000000 elements in 0.018381 seconds. (random tail)
+            qsort: sorted 1000000 elements in 0.043778 seconds. (random tail)
+
+The numbers are similar so they should be valid. In this benchmark quadsort is
 compared against glibc qsort() using the same general purpose interface and without
 any known unfair advantages.
 
 If you want to quickly run an independent benchmark yourself you can do so at this link. 
 
-https://www.onlinegdb.com/ry6JnKZXI
+https://rextester.com/EVV58868
