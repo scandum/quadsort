@@ -23,25 +23,26 @@ Instead the quad swap sorts four variables using four temporary variables.
 During the first stage the four variables are partially sorted in the four
 temporary variables, in the second stage they are fully sorted back to the
 original four variables.
-
+```
             [A]       [T] ╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴                  [A]🠆
                ＼   ／   ＼                   ＼             ／
                  (?)        ╴                    ╴         ╴
                ／   ＼        ＼                   ＼   ／
             [A]       [T]╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴        (?)       [A]🠆
                          ＼        ＼         ＼   ／   ＼   ／
-                           (?)🠆      (?)🠆                 ╴
+                           (?)🠆      (?)🠆      ╴         ╴
                          ／        ／         ／   ＼   ／   ＼
             [A]       [T]╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴        (?)       [A]🠆
                ＼   ／        ／                   ／   ＼
                  (?)        ╴                    ╴         ╴
                ／   ＼   ／                   ／             ＼
             [A]       [T]╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴                  [A]🠆
+```
 
 
 This process is visualized in the diagram above.
 
-After the first round of sorting a single checks determines if the four
+After the first round of sorting a single if check determines if the four
 temporary variables are sorted in order, if that's the case the swap
 finishes up immediately. Next it checks if the temporary variables
 are sorted in reverse-order, if that's the case the swap finishes up
@@ -54,9 +55,8 @@ are rarely comparing truly random data, so in any instance where data is
 more likely to be orderly than disorderly this shift in probability will give
 an advantage.
 
-By changing the comparison order probability can be shifted to give random
-data the advantage. Regardless, there should be a slight overall advantage
-due to the elimination of wasteful swapping. In C this looks as following:
+There should also be a slight overall performance increase due to the
+elimination of wasteful swapping. In C this looks as following:
 
     if (val[0] > val[1])
     {
@@ -128,7 +128,7 @@ quadsort
 In the first stage of quadsort the quad swap is used to pre-sort the
 array into sorted 4-element blocks as described above.
 
-The second stage still uses an approach similar to the quad swap to detect
+The second stage uses an approach similar to the quad swap to detect
 in-order and reverse-order arrangements, but as it's sorting blocks of 4 or
 more elements the final step needs to be handled like the traditional merge
 sort.
@@ -161,9 +161,10 @@ for randomly sorted data this if check becomes increasingly unlikely to be
 true as the block size increases. Fortunately the frequency of this if check
 is quartered each loop, while the potential benefit is quadrupled each loop.
 
-In the case of partial order or partial reverse-order the comparisons in the
-merge itself are unnecessary and subsequently omitted. The data still needs
-to be swapped but this is a less computational intensive procedure.
+In the case only 2 out of 4 blocks are in order or in reverse-order the
+comparisons in the merge itself are unnecessary and subsequently omitted.
+The data still needs to be swapped but this is a less computational
+intensive procedure.
 
 This allows quadsort to sort in order and reverse-order sequences using
 n + log n comparisons instead of n * log n comparisons.
@@ -248,6 +249,10 @@ For the sake of completeness I ran this benchmark once again.
         Quad Sort: sorted 1000000 elements in 0.032865 seconds. (random tail)
        Quick Sort: sorted 1000000 elements in 0.053329 seconds. (random tail)
 
-As the numbers are similar enough I consider them valid. If you want to quickly run an independent benchmark yourself you can do so at this link.
+As the numbers are similar enough I consider them valid. In this benchmark quadsort is
+compared against glibc qsort() using the same general purpose interface and without
+any known unfair advantages.
+
+If you want to quickly run an independent benchmark yourself you can do so at this link. 
 
 https://www.onlinegdb.com/ry6JnKZXI
