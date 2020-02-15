@@ -200,13 +200,6 @@ optimal array size to do so.
 Since a suboptimal array size isn't disastrous for quadsort I haven't
 bothered implementing a solution.
 
-Cache optimization
-------------------
-
-As currently implemented quadsort is not cache efficient for large arrays.
-This can be alleviated by pre-sorting large blocks. This (and other hardware
-specific optimizations) is not within the scope of the current implementation.
-
 Big O
 -----
 
