@@ -18,7 +18,7 @@
 */
 
 /*
-	quadsort 1.1.1.1
+	quadsort 1.1.1.2
 */
 
 #include <stdlib.h>
@@ -27,12 +27,13 @@
 #include <sys/time.h>
 #include <assert.h>
 
+
 typedef int CMPFUNC (const void *a, const void *b);
 
-void quad_swap32(void *array, void *swap, size_t nmemb, CMPFUNC *cmp)
+void quad_swap32(int *array, int *swap, size_t nmemb, CMPFUNC *cmp)
 {
 	size_t offset;
-	register int *pts, *pta;
+	register int *pta, *pts;
 
 	pta = array;
 	pts = swap;
@@ -265,7 +266,7 @@ void quad_swap64(void *array, void *swap, size_t nmemb, CMPFUNC *cmp)
 	}
 }
 
-void quad_sort32(void *array, void *swap, size_t nmemb, CMPFUNC *cmp)
+void quad_sort32(int *array, int *swap, size_t nmemb, CMPFUNC *cmp)
 {
 	size_t offset, block = 4;
 	register int *pta, *pts, *c, *c_max, *d, *d_max, *end;
@@ -306,9 +307,19 @@ void quad_sort32(void *array, void *swap, size_t nmemb, CMPFUNC *cmp)
 						d = c_max;
 						d_max = offset + block * 4 <= nmemb ? d + block * 2 : end;
 
+						while (c < c_max - 8)
+						{
+							*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
+							*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
+						}
 						while (c < c_max)
 							*pts++ = *c++;
 
+						while (d < d_max - 8)
+						{
+							*pts++ = *d++; *pts++ = *d++; *pts++ = *d++; *pts++ = *d++;
+							*pts++ = *d++; *pts++ = *d++; *pts++ = *d++; *pts++ = *d++;
+						}
 						while (d < d_max)
 							*pts++ = *d++;
 
@@ -338,6 +349,11 @@ void quad_sort32(void *array, void *swap, size_t nmemb, CMPFUNC *cmp)
 					c = pta;
 					c_max = pta + block * 2;
 
+					while (c < c_max - 8)
+					{
+						*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
+						*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
+					}
 					while (c < c_max)
 						*pts++ = *c++;
 
@@ -370,14 +386,28 @@ void quad_sort32(void *array, void *swap, size_t nmemb, CMPFUNC *cmp)
 					}
 					*pts++ = *c++;
 				}
+				while (d < d_max - 4)
+				{
+					*pts++ = *d++; *pts++ = *d++; *pts++ = *d++; *pts++ = *d++;
+				}
 				while (d < d_max)
 					*pts++ = *d++;
 			}
 			else if (cmp(c, d_max - 1) > 0)
 			{
+				while (d < d_max - 8)
+				{
+					*pts++ = *d++; *pts++ = *d++; *pts++ = *d++; *pts++ = *d++;
+					*pts++ = *d++; *pts++ = *d++; *pts++ = *d++; *pts++ = *d++;
+				}
 				while (d < d_max)
 					*pts++ = *d++;
 
+				while (c < c_max - 8)
+				{
+					*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
+					*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
+				}
 				while (c < c_max)
 					*pts++ = *c++;
 			}
@@ -392,10 +422,12 @@ void quad_sort32(void *array, void *swap, size_t nmemb, CMPFUNC *cmp)
 					*pts++ = *d++;
 				}
 
-				while (c < c_max)
+				while (c < c_max - 4)
 				{
-					*pts++ = *c++;
+					*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
 				}
+				while (c < c_max)
+					*pts++ = *c++;
 			}
 
 			step2:
@@ -420,13 +452,29 @@ void quad_sort32(void *array, void *swap, size_t nmemb, CMPFUNC *cmp)
 							}
 							*pts++ = *c++;
 						}
+
+						while (d < d_max - 4)
+						{
+							*pts++ = *d++; *pts++ = *d++; *pts++ = *d++; *pts++ = *d++;
+						}
 						while (d < d_max)
 							*pts++ = *d++;
 					}
 					else if (cmp(c, d_max - 1) > 0)
 					{
+						while (d < d_max - 8)
+						{
+							*pts++ = *d++; *pts++ = *d++; *pts++ = *d++; *pts++ = *d++;
+							*pts++ = *d++; *pts++ = *d++; *pts++ = *d++; *pts++ = *d++;
+						}
 						while (d < d_max)
 							*pts++ = *d++;
+
+						while (c < c_max - 8)
+						{
+							*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
+							*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
+						}
 						while (c < c_max)
 							*pts++ = *c++;
 					}
@@ -440,14 +488,25 @@ void quad_sort32(void *array, void *swap, size_t nmemb, CMPFUNC *cmp)
 							}
 							*pts++ = *d++;
 						}
+
+						while (c < c_max - 4)
+						{
+							*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
+						}
 						while (c < c_max)
 							*pts++ = *c++;
 					}
 				}
 				else
 				{
-					while (c < end)
-						*pts++ = *c++;
+					d = c;
+					d_max = end;
+
+					pts = swap;
+					c = pts;
+					c_max = c + block * 2;
+
+					goto quickstep;
 				}
 			}
 
@@ -464,6 +523,8 @@ void quad_sort32(void *array, void *swap, size_t nmemb, CMPFUNC *cmp)
 				d = c_max;
 				d_max = offset + block * 4 <= nmemb ? d + block * 2 : pts + nmemb - offset;
 
+				quickstep:
+
 				if (cmp(c_max - 1, d_max - 1) <= 0)
 				{
 					while (c < c_max)
@@ -474,13 +535,33 @@ void quad_sort32(void *array, void *swap, size_t nmemb, CMPFUNC *cmp)
 						}
 						*pta++ = *c++;
 					}
+
+					while (d < d_max - 4)
+					{
+						*pta++ = *d++; *pta++ = *d++; *pta++ = *d++; *pta++ = *d++;
+					}
 					while (d < d_max)
 						*pta++ = *d++;
 				}
 				else if (cmp(c, d_max - 1) > 0)
 				{
+					while (d < d_max - 16)
+					{
+						*pta++ = *d++; *pta++ = *d++; *pta++ = *d++; *pta++ = *d++;
+						*pta++ = *d++; *pta++ = *d++; *pta++ = *d++; *pta++ = *d++;
+						*pta++ = *d++; *pta++ = *d++; *pta++ = *d++; *pta++ = *d++;
+						*pta++ = *d++; *pta++ = *d++; *pta++ = *d++; *pta++ = *d++;
+					}
 					while (d < d_max)
 						*pta++ = *d++;
+
+					while (c < c_max - 16)
+					{
+						*pta++ = *c++; *pta++ = *c++; *pta++ = *c++; *pta++ = *c++;
+						*pta++ = *c++; *pta++ = *c++; *pta++ = *c++; *pta++ = *c++;
+						*pta++ = *c++; *pta++ = *c++; *pta++ = *c++; *pta++ = *c++;
+						*pta++ = *c++; *pta++ = *c++; *pta++ = *c++; *pta++ = *c++;
+					}
 					while (c < c_max)
 						*pta++ = *c++;
 				}
@@ -494,6 +575,11 @@ void quad_sort32(void *array, void *swap, size_t nmemb, CMPFUNC *cmp)
 						}
 						*pta++ = *d++;
 					}
+
+					while (c < c_max - 4)
+					{
+						*pta++ = *c++; *pta++ = *c++; *pta++ = *c++; *pta++ = *c++;
+					}
 					while (c < c_max)
 						*pta++ = *c++;
 				}
@@ -502,6 +588,11 @@ void quad_sort32(void *array, void *swap, size_t nmemb, CMPFUNC *cmp)
 			{
 				d_max = pts + nmemb - offset;
 
+				while (c < d_max - 8)
+				{
+					*pta++ = *c++; *pta++ = *c++; *pta++ = *c++; *pta++ = *c++;
+					*pta++ = *c++; *pta++ = *c++; *pta++ = *c++; *pta++ = *c++;
+				}
 				while (c < d_max)
 					*pta++ = *c++;
 			}
@@ -552,9 +643,19 @@ void quad_sort64(void *array, void *swap, size_t nmemb, CMPFUNC *cmp)
 						d = c_max;
 						d_max = offset + block * 4 <= nmemb ? d + block * 2 : end;
 
+						while (c < c_max - 8)
+						{
+							*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
+							*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
+						}
 						while (c < c_max)
 							*pts++ = *c++;
 
+						while (d < d_max - 8)
+						{
+							*pts++ = *d++; *pts++ = *d++; *pts++ = *d++; *pts++ = *d++;
+							*pts++ = *d++; *pts++ = *d++; *pts++ = *d++; *pts++ = *d++;
+						}
 						while (d < d_max)
 							*pts++ = *d++;
 
@@ -584,6 +685,11 @@ void quad_sort64(void *array, void *swap, size_t nmemb, CMPFUNC *cmp)
 					c = pta;
 					c_max = pta + block * 2;
 
+					while (c < c_max - 8)
+					{
+						*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
+						*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
+					}
 					while (c < c_max)
 						*pts++ = *c++;
 
@@ -616,14 +722,28 @@ void quad_sort64(void *array, void *swap, size_t nmemb, CMPFUNC *cmp)
 					}
 					*pts++ = *c++;
 				}
+				while (d < d_max - 4)
+				{
+					*pts++ = *d++; *pts++ = *d++; *pts++ = *d++; *pts++ = *d++;
+				}
 				while (d < d_max)
 					*pts++ = *d++;
 			}
 			else if (cmp(c, d_max - 1) > 0)
 			{
+				while (d < d_max - 8)
+				{
+					*pts++ = *d++; *pts++ = *d++; *pts++ = *d++; *pts++ = *d++;
+					*pts++ = *d++; *pts++ = *d++; *pts++ = *d++; *pts++ = *d++;
+				}
 				while (d < d_max)
 					*pts++ = *d++;
 
+				while (c < c_max - 8)
+				{
+					*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
+					*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
+				}
 				while (c < c_max)
 					*pts++ = *c++;
 			}
@@ -638,10 +758,12 @@ void quad_sort64(void *array, void *swap, size_t nmemb, CMPFUNC *cmp)
 					*pts++ = *d++;
 				}
 
-				while (c < c_max)
+				while (c < c_max - 4)
 				{
-					*pts++ = *c++;
+					*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
 				}
+				while (c < c_max)
+					*pts++ = *c++;
 			}
 
 			step2:
@@ -666,13 +788,29 @@ void quad_sort64(void *array, void *swap, size_t nmemb, CMPFUNC *cmp)
 							}
 							*pts++ = *c++;
 						}
+
+						while (d < d_max - 4)
+						{
+							*pts++ = *d++; *pts++ = *d++; *pts++ = *d++; *pts++ = *d++;
+						}
 						while (d < d_max)
 							*pts++ = *d++;
 					}
 					else if (cmp(c, d_max - 1) > 0)
 					{
+						while (d < d_max - 8)
+						{
+							*pts++ = *d++; *pts++ = *d++; *pts++ = *d++; *pts++ = *d++;
+							*pts++ = *d++; *pts++ = *d++; *pts++ = *d++; *pts++ = *d++;
+						}
 						while (d < d_max)
 							*pts++ = *d++;
+
+						while (c < c_max - 8)
+						{
+							*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
+							*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
+						}
 						while (c < c_max)
 							*pts++ = *c++;
 					}
@@ -686,14 +824,25 @@ void quad_sort64(void *array, void *swap, size_t nmemb, CMPFUNC *cmp)
 							}
 							*pts++ = *d++;
 						}
+
+						while (c < c_max - 4)
+						{
+							*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
+						}
 						while (c < c_max)
 							*pts++ = *c++;
 					}
 				}
 				else
 				{
-					while (c < end)
-						*pts++ = *c++;
+					d = c;
+					d_max = end;
+
+					pts = swap;
+					c = pts;
+					c_max = c + block * 2;
+
+					goto quickstep;
 				}
 			}
 
@@ -710,6 +859,8 @@ void quad_sort64(void *array, void *swap, size_t nmemb, CMPFUNC *cmp)
 				d = c_max;
 				d_max = offset + block * 4 <= nmemb ? d + block * 2 : pts + nmemb - offset;
 
+				quickstep:
+
 				if (cmp(c_max - 1, d_max - 1) <= 0)
 				{
 					while (c < c_max)
@@ -720,13 +871,33 @@ void quad_sort64(void *array, void *swap, size_t nmemb, CMPFUNC *cmp)
 						}
 						*pta++ = *c++;
 					}
+
+					while (d < d_max - 4)
+					{
+						*pta++ = *d++; *pta++ = *d++; *pta++ = *d++; *pta++ = *d++;
+					}
 					while (d < d_max)
 						*pta++ = *d++;
 				}
 				else if (cmp(c, d_max - 1) > 0)
 				{
+					while (d < d_max - 16)
+					{
+						*pta++ = *d++; *pta++ = *d++; *pta++ = *d++; *pta++ = *d++;
+						*pta++ = *d++; *pta++ = *d++; *pta++ = *d++; *pta++ = *d++;
+						*pta++ = *d++; *pta++ = *d++; *pta++ = *d++; *pta++ = *d++;
+						*pta++ = *d++; *pta++ = *d++; *pta++ = *d++; *pta++ = *d++;
+					}
 					while (d < d_max)
 						*pta++ = *d++;
+
+					while (c < c_max - 16)
+					{
+						*pta++ = *c++; *pta++ = *c++; *pta++ = *c++; *pta++ = *c++;
+						*pta++ = *c++; *pta++ = *c++; *pta++ = *c++; *pta++ = *c++;
+						*pta++ = *c++; *pta++ = *c++; *pta++ = *c++; *pta++ = *c++;
+						*pta++ = *c++; *pta++ = *c++; *pta++ = *c++; *pta++ = *c++;
+					}
 					while (c < c_max)
 						*pta++ = *c++;
 				}
@@ -740,6 +911,11 @@ void quad_sort64(void *array, void *swap, size_t nmemb, CMPFUNC *cmp)
 						}
 						*pta++ = *d++;
 					}
+
+					while (c < c_max - 4)
+					{
+						*pta++ = *c++; *pta++ = *c++; *pta++ = *c++; *pta++ = *c++;
+					}
 					while (c < c_max)
 						*pta++ = *c++;
 				}
@@ -748,6 +924,11 @@ void quad_sort64(void *array, void *swap, size_t nmemb, CMPFUNC *cmp)
 			{
 				d_max = pts + nmemb - offset;
 
+				while (c < d_max - 8)
+				{
+					*pta++ = *c++; *pta++ = *c++; *pta++ = *c++; *pta++ = *c++;
+					*pta++ = *c++; *pta++ = *c++; *pta++ = *c++; *pta++ = *c++;
+				}
 				while (c < d_max)
 					*pta++ = *c++;
 			}
@@ -811,57 +992,122 @@ long long utime()
 
 void test_quad(int *z_array, int *r_array, int max, char *desc)
 {
-	long long start, end, cnt;
+	long long start, end, total, best;
+	int cnt, sample;
 
-	memcpy(z_array, r_array, max * sizeof(int));
+	best = 0;
 
-	if (max <= 10) printf("\e[1;31m%10d %10d %10d %10d %10d %10d %10d %10d %10d %10d\n", z_array[0], z_array[1], z_array[2], z_array[3], z_array[4], z_array[5], z_array[6], z_array[7], z_array[8], z_array[9]);
+	for (sample = 0 ; sample < 100 ; sample++)
+	{
+		memcpy(z_array, r_array, max * sizeof(int));
 
-	start = utime();
+		if (sample == 0 && max == 10) printf("\e[1;31m%10d %10d %10d %10d %10d %10d %10d %10d %10d %10d\n", z_array[0], z_array[1], z_array[2], z_array[3], z_array[4], z_array[5], z_array[6], z_array[7], z_array[8], z_array[9]);
 
-	quadsort(z_array, max, sizeof(int), cmp_int);
+		start = utime();
 
-	end = utime();
+		quadsort(z_array, max, sizeof(int), cmp_int);
 
-	if (max <= 10) printf("\e[1;32m%10d %10d %10d %10d %10d %10d %10d %10d %10d %10d\n", z_array[0], z_array[1], z_array[2], z_array[3], z_array[4], z_array[5], z_array[6], z_array[7], z_array[8], z_array[9]);
+		end = utime();
 
-	printf("\e[0m        Quad Sort: sorted %d elements in %f seconds. (%s)\n", max, (end - start) / 1000000.0, desc);
+		if (sample == 0 && max == 10) printf("\e[1;32m%10d %10d %10d %10d %10d %10d %10d %10d %10d %10d\n", z_array[0], z_array[1], z_array[2], z_array[3], z_array[4], z_array[5], z_array[6], z_array[7], z_array[8], z_array[9]);
 
-	for (cnt = 1 ; cnt < max ; cnt++) if (z_array[cnt - 1] > z_array[cnt]) {printf("        Quad Sort: not properly sorted at index %lld. (%d vs %d\n", cnt, z_array[cnt - 1], z_array[cnt]);break;}
+		total = end - start;
+
+		if (!best || total < best)
+		{
+			best = total;
+		}
+	}
+	printf("\e[0m         quadsort: sorted %d elements in %f seconds. (%s)\n", max, best / 1000000.0, desc);
+
+	for (cnt = 1 ; cnt < max ; cnt++)
+	{
+		if (z_array[cnt - 1] > z_array[cnt])
+		{
+			printf("         quadsort: not properly sorted at index %d. (%d vs %d\n", cnt, z_array[cnt - 1], z_array[cnt]);
+			break;
+		}
+	}
 }
 
 void test_quick(int *z_array, int *r_array, int max, char *desc)
 {
-	long long start, end, cnt;
+	long long start, end, total, best;
+	int cnt, sample;
 
-	memcpy(z_array, r_array, max * sizeof(int));
+	best = 0;
 
-	if (max <= 10) printf("\e[1;31m%10d %10d %10d %10d %10d %10d %10d %10d %10d %10d\n", z_array[0], z_array[1], z_array[2], z_array[3], z_array[4], z_array[5], z_array[6], z_array[7], z_array[8], z_array[9]);
+	for (sample = 0 ; sample < 100 ; sample++)
+	{
+		memcpy(z_array, r_array, max * sizeof(int));
 
-	start = utime();
+		if (sample == 0 && max == 10) printf("\e[1;31m%10d %10d %10d %10d %10d %10d %10d %10d %10d %10d\n", z_array[0], z_array[1], z_array[2], z_array[3], z_array[4], z_array[5], z_array[6], z_array[7], z_array[8], z_array[9]);
 
-	qsort(z_array, max, sizeof(int), cmp_int);
+		start = utime();
 
-	end = utime();
+		qsort(z_array, max, sizeof(int), cmp_int);
 
-	if (max <= 10) printf("\e[1;32m%10d %10d %10d %10d %10d %10d %10d %10d %10d %10d\n", z_array[0], z_array[1], z_array[2], z_array[3], z_array[4], z_array[5], z_array[6], z_array[7], z_array[8], z_array[9]);
+		end = utime();
 
-	printf("\e[0m       Quick Sort: sorted %d elements in %f seconds. (%s)\n", max, (end - start) / 1000000.0, desc);
+		if (sample == 0 && max == 10) printf("\e[1;32m%10d %10d %10d %10d %10d %10d %10d %10d %10d %10d\n", z_array[0], z_array[1], z_array[2], z_array[3], z_array[4], z_array[5], z_array[6], z_array[7], z_array[8], z_array[9]);
 
-	for (cnt = 1 ; cnt < max ; cnt++) if (z_array[cnt - 1] > z_array[cnt]) {printf("       Quick Sort: not properly sorted at index %lld. (%d vs %d\n", cnt, z_array[cnt - 1], z_array[cnt]);break;}
+		total = end - start;
+
+		if (!best || total < best)
+		{
+			best = total;
+		}
+	}
+	printf("\e[0m            qsort: sorted %d elements in %f seconds. (%s)\n", max, best / 1000000.0, desc);
+
+	for (cnt = 1 ; cnt < max ; cnt++) if (z_array[cnt - 1] > z_array[cnt]) printf("            qsort: not properly sorted at index %d. (%d vs %d\n", cnt, z_array[cnt - 1], z_array[cnt]);
+}
+
+void validate(int *a_array, int *b_array, size_t max)
+{
+	size_t cnt;
+
+	for (cnt = 1 ; cnt < max ; cnt++)
+	{
+		if (a_array[cnt - 1] > a_array[cnt])
+		{
+			printf("         quadsort: not properly sorted at index %lu. (%d vs %d\n", cnt, b_array[cnt - 1], b_array[cnt]);
+			break;
+		}
+	}
+
+	for (cnt = 1 ; cnt < max ; cnt++)
+	{
+		if (b_array[cnt - 1] > b_array[cnt])
+		{
+			printf("            qsort: not properly sorted at index %lu. (%d vs %d\n", cnt, b_array[cnt - 1], b_array[cnt]);
+			break;
+		}
+	}
+
+	for (cnt = 1 ; cnt < max ; cnt++)
+	{
+		if (a_array[cnt] != b_array[cnt])
+		{
+			printf("            qsort: a_array != b_array at index %lu. (%d vs %d\n", cnt, a_array[cnt], b_array[cnt]);
+			break;
+		}
+	}
+	printf("\n");
 }
 
 int main(int argc, char **argv)
 {
-	static int max = 1000000;
-	int cnt, rnd;
-	int *z_array, *r_array;
+	static size_t max = 1000000;
+	size_t cnt, rnd;
+	int *a_array, *b_array, *r_array;
 
 	rnd = 1;
 
 	srand(rnd);
 
-	z_array = malloc(max * sizeof(int));
+	a_array = malloc(max * sizeof(int));
+	b_array = malloc(max * sizeof(int));
 	r_array = malloc(max * sizeof(int));
 
 	srand(rnd);
@@ -871,33 +1117,36 @@ int main(int argc, char **argv)
 		r_array[cnt] = rand();
 	}
 
-	test_quad(z_array, r_array, max, "random order");
+	test_quad(a_array, r_array, max, "random order");
 
-	test_quick(z_array, r_array, max, "random order");
+	test_quick(b_array, r_array, max, "random order");
 
-	printf("\n");
+	validate(a_array, b_array, max);
+
 
 	for (cnt = 0 ; cnt < max ; cnt++)
 	{
 		r_array[cnt] = cnt;
 	}
 
-	test_quad(z_array, r_array, max, "forward order");
+	test_quad(a_array, r_array, max, "forward order");
 
-	test_quick(z_array, r_array, max, "forward order");
+	test_quick(b_array, r_array, max, "forward order");
 
-	printf("\n");
+	validate(a_array, b_array, max);
+
 
 	for (cnt = 0 ; cnt < max ; cnt++)
 	{
 		r_array[cnt] = max - cnt;
 	}
 
-	test_quad(z_array, r_array, max, "reverse order");
+	test_quad(a_array, r_array, max, "reverse order");
 
-	test_quick(z_array, r_array, max, "reverse order");
+	test_quick(b_array, r_array, max, "reverse order");
 
-	printf("\n");
+	validate(a_array, b_array, max);
+
 
 	srand(rnd);
 
@@ -911,13 +1160,15 @@ int main(int argc, char **argv)
 		r_array[cnt] = rand();
 	}
 
-	test_quad(z_array, r_array, max, "random tail");
+	test_quad(a_array, r_array, max, "random tail");
 
-	test_quick(z_array, r_array, max, "random tail");
+	test_quick(b_array, r_array, max, "random tail");
 
-	printf("\n");
+	validate(a_array, b_array, max);
 
-	free(z_array);
+
+	free(a_array);
+	free(b_array);
 	free(r_array);
 
 	return 0;
