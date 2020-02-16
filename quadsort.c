@@ -1001,7 +1001,7 @@ void test_quad(int *z_array, int *r_array, int max, char *desc)
 	{
 		memcpy(z_array, r_array, max * sizeof(int));
 
-		if (sample == 0 && max == 10) printf("\e[1;31m%10d %10d %10d %10d %10d %10d %10d %10d %10d %10d\n", z_array[0], z_array[1], z_array[2], z_array[3], z_array[4], z_array[5], z_array[6], z_array[7], z_array[8], z_array[9]);
+		if (sample == 0 && max == 10) printf("\x1b[1;31m%10d %10d %10d %10d %10d %10d %10d %10d %10d %10d\n", z_array[0], z_array[1], z_array[2], z_array[3], z_array[4], z_array[5], z_array[6], z_array[7], z_array[8], z_array[9]);
 
 		start = utime();
 
@@ -1009,7 +1009,7 @@ void test_quad(int *z_array, int *r_array, int max, char *desc)
 
 		end = utime();
 
-		if (sample == 0 && max == 10) printf("\e[1;32m%10d %10d %10d %10d %10d %10d %10d %10d %10d %10d\n", z_array[0], z_array[1], z_array[2], z_array[3], z_array[4], z_array[5], z_array[6], z_array[7], z_array[8], z_array[9]);
+		if (sample == 0 && max == 10) printf("\x1b[1;32m%10d %10d %10d %10d %10d %10d %10d %10d %10d %10d\n", z_array[0], z_array[1], z_array[2], z_array[3], z_array[4], z_array[5], z_array[6], z_array[7], z_array[8], z_array[9]);
 
 		total = end - start;
 
@@ -1018,7 +1018,7 @@ void test_quad(int *z_array, int *r_array, int max, char *desc)
 			best = total;
 		}
 	}
-	printf("\e[0m         quadsort: sorted %d elements in %f seconds. (%s)\n", max, best / 1000000.0, desc);
+	printf("\x1b[0m         quadsort: sorted %d elements in %f seconds. (%s)\n", max, best / 1000000.0, desc);
 
 	for (cnt = 1 ; cnt < max ; cnt++)
 	{
@@ -1041,7 +1041,7 @@ void test_quick(int *z_array, int *r_array, int max, char *desc)
 	{
 		memcpy(z_array, r_array, max * sizeof(int));
 
-		if (sample == 0 && max == 10) printf("\e[1;31m%10d %10d %10d %10d %10d %10d %10d %10d %10d %10d\n", z_array[0], z_array[1], z_array[2], z_array[3], z_array[4], z_array[5], z_array[6], z_array[7], z_array[8], z_array[9]);
+		if (sample == 0 && max == 10) printf("\x1b[1;31m%10d %10d %10d %10d %10d %10d %10d %10d %10d %10d\n", z_array[0], z_array[1], z_array[2], z_array[3], z_array[4], z_array[5], z_array[6], z_array[7], z_array[8], z_array[9]);
 
 		start = utime();
 
@@ -1049,7 +1049,7 @@ void test_quick(int *z_array, int *r_array, int max, char *desc)
 
 		end = utime();
 
-		if (sample == 0 && max == 10) printf("\e[1;32m%10d %10d %10d %10d %10d %10d %10d %10d %10d %10d\n", z_array[0], z_array[1], z_array[2], z_array[3], z_array[4], z_array[5], z_array[6], z_array[7], z_array[8], z_array[9]);
+		if (sample == 0 && max == 10) printf("\x1b[1;32m%10d %10d %10d %10d %10d %10d %10d %10d %10d %10d\n", z_array[0], z_array[1], z_array[2], z_array[3], z_array[4], z_array[5], z_array[6], z_array[7], z_array[8], z_array[9]);
 
 		total = end - start;
 
@@ -1058,7 +1058,7 @@ void test_quick(int *z_array, int *r_array, int max, char *desc)
 			best = total;
 		}
 	}
-	printf("\e[0m            qsort: sorted %d elements in %f seconds. (%s)\n", max, best / 1000000.0, desc);
+	printf("\x1b[0m            qsort: sorted %d elements in %f seconds. (%s)\n", max, best / 1000000.0, desc);
 
 	for (cnt = 1 ; cnt < max ; cnt++) if (z_array[cnt - 1] > z_array[cnt]) printf("            qsort: not properly sorted at index %d. (%d vs %d\n", cnt, z_array[cnt - 1], z_array[cnt]);
 }
@@ -1096,7 +1096,7 @@ void validate(int *a_array, int *b_array, size_t max)
 	printf("\n");
 }
 
-int main(int argc, char **argv)
+int main()
 {
 	static size_t max = 1000000;
 	size_t cnt, rnd;
