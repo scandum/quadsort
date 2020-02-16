@@ -1,7 +1,7 @@
 Intro
 -----
 
-This document describes a stable non-recursive merge sort named quadsort.
+This document describes a stable non-recursive adaptive merge sort named quadsort.
 
 
 The quad swap
@@ -56,7 +56,8 @@ more likely to be orderly than disorderly this shift in probability will give
 an advantage.
 
 There should also be a slight overall performance increase due to the
-elimination of wasteful swapping. In C this looks as following:
+elimination of wasteful swapping. In C the basic quad swap looks as
+following:
 
     if (val[0] > val[1])
     {
@@ -198,49 +199,51 @@ is in order. Regardless, if a program sorts in intervals it should pick an
 optimal array size to do so.
 
 A suboptimal array size is not disastrous for quadsort and it's outside of
-the scope of the document to provide a solution.
+the scope of this document to provide a solution.
 
 Big O
 -----
 
-The best case performance is O(n) comparisons for sorted data and reverse-sorted data.
-The worst case performance is O(n log n).
-The average case performance is O(n log n).
+| Name | Best | Average | Worst | Stable | memory |
+| ---- | ---- | ------- | ----- | ------ | ------ |
+| quadsort | n | n log n | n log n | yes | n |
 
-The memory overhead is O(n) though in theory it should be possible to write a quadsort
-that is O(1).
+Quadsort makes n comparisons when the data is already sorted or reverse sorted.
 
 Benchmarks
 ----------
-The following benchmark was on WSL gcc version 7.4.0 (Ubuntu 7.4.0-1ubuntu1~18.04.1)
-with minimal background interference. The source code was compiled using gcc -O3 quadsort.c.
-Each test was ran 100 times and only the best run is reported.
+The following benchmark was on WSL gcc version 7.4.0 (Ubuntu 7.4.0-1ubuntu1~18.04.1).
+The source code was compiled using gcc -O3 quadsort.c. Each test was ran 100 times
+and only the best run is reported.
+```
+./a.out 1000000
+         quadsort: sorted 1000000 elements in 0.088565 seconds. (random order)
+            qsort: sorted 1000000 elements in 0.101436 seconds. (random order)
 
-         quadsort: sorted 1000000 elements in 0.074616 seconds. (random order)
-            qsort: sorted 1000000 elements in 0.101402 seconds. (random order)
+         quadsort: sorted 1000000 elements in 0.001778 seconds. (forward order)
+            qsort: sorted 1000000 elements in 0.026986 seconds. (forward order)
 
-         quadsort: sorted 1000000 elements in 0.000912 seconds. (forward order)
-            qsort: sorted 1000000 elements in 0.027091 seconds. (forward order)
-
-         quadsort: sorted 1000000 elements in 0.004904 seconds. (reverse order)
+         quadsort: sorted 1000000 elements in 0.005728 seconds. (reverse order)
             qsort: sorted 1000000 elements in 0.025820 seconds. (reverse order)
 
-         quadsort: sorted 1000000 elements in 0.018378 seconds. (random tail)
-            qsort: sorted 1000000 elements in 0.043725 seconds. (random tail)
-
+         quadsort: sorted 1000000 elements in 0.022706 seconds. (random tail)
+            qsort: sorted 1000000 elements in 0.043501 seconds. (random tail)
+```
 For verification the benchmark was ran once again.
+```
+> ./a.out 1000000
+         quadsort: sorted 1000000 elements in 0.088565 seconds. (random order)
+            qsort: sorted 1000000 elements in 0.101429 seconds. (random order)
 
-         quadsort: sorted 1000000 elements in 0.074633 seconds. (random order)
-            qsort: sorted 1000000 elements in 0.101327 seconds. (random order)
+         quadsort: sorted 1000000 elements in 0.001622 seconds. (forward order)
+            qsort: sorted 1000000 elements in 0.026839 seconds. (forward order)
 
-         quadsort: sorted 1000000 elements in 0.000916 seconds. (forward order)
-            qsort: sorted 1000000 elements in 0.027073 seconds. (forward order)
+         quadsort: sorted 1000000 elements in 0.005705 seconds. (reverse order)
+            qsort: sorted 1000000 elements in 0.025816 seconds. (reverse order)
 
-         quadsort: sorted 1000000 elements in 0.004910 seconds. (reverse order)
-            qsort: sorted 1000000 elements in 0.025790 seconds. (reverse order)
-
-         quadsort: sorted 1000000 elements in 0.018381 seconds. (random tail)
-            qsort: sorted 1000000 elements in 0.043778 seconds. (random tail)
+         quadsort: sorted 1000000 elements in 0.022709 seconds. (random tail)
+            qsort: sorted 1000000 elements in 0.043792 seconds. (random tail)
+```
 
 The numbers are similar so they should be valid. In this benchmark quadsort is
 compared against glibc qsort() using the same general purpose interface and without
@@ -248,4 +251,4 @@ any known unfair advantages.
 
 If you want to quickly run an independent benchmark yourself you can do so at this link. 
 
-https://rextester.com/EVV58868
+https://rextester.com/GHHCQ12887
