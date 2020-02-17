@@ -937,7 +937,7 @@ void test_quad(int *z_array, int *r_array, int max, char *desc)
 
 	best = 0;
 
-	for (sample = 0 ; sample < 100 ; sample++)
+	for (sample = 0 ; sample < 1000 ; sample++)
 	{
 		memcpy(z_array, r_array, max * sizeof(int));
 
