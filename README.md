@@ -136,16 +136,17 @@ sort.
 
 This can be visualized as following:
 
-AAAA BBBB CCCC DDDD EEEE FFFF GGGG HHHH IIII JJJJ KKKK LLLL MMMM NNNN OOOO PPPP
+    main memory: AAAA BBBB CCCC DDDD
 
-ABCDABCDABCDABCD    EFGHEFGHEFGHEFGH    IJKLIJKLIJKLIJKL    MNOPMNOPMNOPMNOP
+    swap memory: ABABABAB  CDCDCDCD
 
-ABCDEFGHIJKLMNOPABCDEFGHIJKLMNOPABCDEFGHIJKLMNOPABCDEFGHIJKLMNOP
+    main memory: ABCDABCDABCDABCD
 
-In the first row quadswap has been used to create 16 blocks of 4 sorted
-elements each. In the second row quadsort has been used to create 4 blocks of
-16 sorted elements each. In the last row we're left with 1 block of 64 sorted
-elements. The following is a visualization.
+In the first row quadswap has been used to create 4 blocks of 4 sorted
+elements each. In the second row quadsort has been used to merge the blocks
+into 2 blocks of 8 sorted elements each in swap memory. In the last row the
+blocks are merged back to main memory and we're left with 1 block of 16
+sorted elements. The following is a visualization.
 
 ![quadsort visualization](https://github.com/scandum/quadsort/blob/master/quadsort.gif)
 
@@ -216,25 +217,33 @@ The following benchmark was on WSL gcc version 7.4.0 (Ubuntu 7.4.0-1ubuntu1~18.0
 The source code was compiled using gcc -O3 quadsort.c. Each test was ran 100 times
 and only the best run is reported.
 ```
-./a.out 1000000
-         quadsort: sorted 1000000 elements in 0.088565 seconds. (random order)
-            qsort: sorted 1000000 elements in 0.101436 seconds. (random order)
+         quadsort: sorted 1000000 elements in 0.089768 seconds. (random order)
+            qsort: sorted 1000000 elements in 0.101232 seconds. (random order)
 
-         quadsort: sorted 1000000 elements in 0.001778 seconds. (forward order)
-            qsort: sorted 1000000 elements in 0.026986 seconds. (forward order)
+         quadsort: sorted 1000000 elements in 0.001849 seconds. (forward order)
+            qsort: sorted 1000000 elements in 0.026795 seconds. (forward order)
 
-         quadsort: sorted 1000000 elements in 0.005728 seconds. (reverse order)
-            qsort: sorted 1000000 elements in 0.025820 seconds. (reverse order)
+         quadsort: sorted 1000000 elements in 0.004045 seconds. (reverse order)
+            qsort: sorted 1000000 elements in 0.025790 seconds. (reverse order)
 
-         quadsort: sorted 1000000 elements in 0.022706 seconds. (random tail)
-            qsort: sorted 1000000 elements in 0.043501 seconds. (random tail)
+         quadsort: sorted 1000000 elements in 0.023092 seconds. (random tail)
+            qsort: sorted 1000000 elements in 0.043511 seconds. (random tail)
+
+         quadsort: sorted    1024 elements in 0.013714 seconds. (random range)
+            qsort: sorted    1024 elements in 0.025072 seconds. (random range)
 ```
 In this benchmark quadsort is compared against glibc qsort() using the same general
 purpose interface and without any known unfair advantage.
 
+     random order: array size of 1000000, filled with random numbers.
+    forward order: numbers range from 1 to 1000000.
+    reverse order: numbers range from 1000000 to 1.
+      random tail: numbers range from 1 to 750000, last 250000 numbers are random.
+     random range: array sizes range from 1 to 1024, filled with random numbers.
+
 If you want to quickly run an independent benchmark yourself you can do so at this link. 
 
-https://rextester.com/GHHCQ12887
+https://rextester.com/ACPKO6388
 
 Benchmark: quadsort vs std::sort
 --------------------------------
@@ -242,17 +251,20 @@ The following benchmark was on WSL gcc version 7.4.0 (Ubuntu 7.4.0-1ubuntu1~18.0
 The source code was compiled using g++ -O3 quadsort.cpp. Each test was ran 100 times
 and only the best run is reported.
 ```
-         quadsort: sorted 1000000 elements in 0.074826 seconds. (random order)
-            qsort: sorted 1000000 elements in 0.064741 seconds. (random order)
+         quadsort: sorted 1000000 elements in 0.074344 seconds. (random order)
+            qsort: sorted 1000000 elements in 0.064721 seconds. (random order)
 
-         quadsort: sorted 1000000 elements in 0.000668 seconds. (forward order)
-            qsort: sorted 1000000 elements in 0.015002 seconds. (forward order)
+         quadsort: sorted 1000000 elements in 0.000608 seconds. (forward order)
+            qsort: sorted 1000000 elements in 0.011088 seconds. (forward order)
 
-         quadsort: sorted 1000000 elements in 0.004896 seconds. (reverse order)
-            qsort: sorted 1000000 elements in 0.010465 seconds. (reverse order)
+         quadsort: sorted 1000000 elements in 0.002667 seconds. (reverse order)
+            qsort: sorted 1000000 elements in 0.008543 seconds. (reverse order)
 
-         quadsort: sorted 1000000 elements in 0.018212 seconds. (random tail)
-            qsort: sorted 1000000 elements in 0.029446 seconds. (random tail)
+         quadsort: sorted 1000000 elements in 0.018019 seconds. (random tail)
+            qsort: sorted 1000000 elements in 0.026747 seconds. (random tail)
+
+         quadsort: sorted    1024 elements in 0.006977 seconds. (random range)
+            qsort: sorted    1024 elements in 0.016571 seconds. (random range)
 ```
 In this benchmark quadsort is compared against the c++ std::sort with the probable
 disadvantage that unnecessary casts are not optimized, resulting in a 5-10%
@@ -260,4 +272,4 @@ performance loss for quadsort.
 
 If you want to quickly run an independent benchmark yourself you can do so at this link.
 
-https://rextester.com/OUQFS39968
+https://rextester.com/VJIN98279
