@@ -273,3 +273,5 @@ performance loss for quadsort.
 If you want to quickly run an independent benchmark yourself you can do so at this link.
 
 https://rextester.com/VJIN98279
+
+![quadsort benchmark](https://github.com/scandum/quadsort/blob/master/benchmark.gif)
