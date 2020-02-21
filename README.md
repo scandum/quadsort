@@ -217,20 +217,26 @@ The following benchmark was on WSL gcc version 7.4.0 (Ubuntu 7.4.0-1ubuntu1~18.0
 The source code was compiled using gcc -O3 quadsort.c. Each test was ran 100 times
 and only the best run is reported.
 ```
-         quadsort: sorted 1000000 elements in 0.089768 seconds. (random order)
-            qsort: sorted 1000000 elements in 0.101232 seconds. (random order)
+         quadsort: sorted 1000000 ints in 0.091492 seconds. O(19287679) (random order)
+            qsort: sorted 1000000 ints in 0.102719 seconds. O(18674792) (random order)
 
-         quadsort: sorted 1000000 elements in 0.001849 seconds. (forward order)
-            qsort: sorted 1000000 elements in 0.026795 seconds. (forward order)
+         quadsort: sorted 1000000 ints in 0.001882 seconds. O(  999999) (forward order)
+            qsort: sorted 1000000 ints in 0.026813 seconds. O( 9884992) (forward order)
 
-         quadsort: sorted 1000000 elements in 0.004045 seconds. (reverse order)
-            qsort: sorted 1000000 elements in 0.025790 seconds. (reverse order)
+         quadsort: sorted 1000000 ints in 0.001907 seconds. O(  999999) (uniform order)
+            qsort: sorted 1000000 ints in 0.026840 seconds. O( 9884992) (uniform order)
 
-         quadsort: sorted 1000000 elements in 0.023092 seconds. (random tail)
-            qsort: sorted 1000000 elements in 0.043511 seconds. (random tail)
+         quadsort: sorted 1000000 ints in 0.004256 seconds. O( 1416672) (reverse order)
+            qsort: sorted 1000000 ints in 0.026216 seconds. O(10066432) (reverse order)
 
-         quadsort: sorted    1024 elements in 0.013714 seconds. (random range)
-            qsort: sorted    1024 elements in 0.025072 seconds. (random range)
+         quadsort: sorted 1000000 ints in 0.024379 seconds. O(15371381) (wave order)
+            qsort: sorted 1000000 ints in 0.035232 seconds. O(14656080) (wave order)
+
+         quadsort: sorted 1000000 ints in 0.023598 seconds. O( 6229390) (random tail)
+            qsort: sorted 1000000 ints in 0.043767 seconds. O(11832535) (random tail)
+
+         quadsort: sorted    1024 ints in 0.015332 seconds. O( 4624249) (random range)
+            qsort: sorted    1024 ints in 0.027505 seconds. O( 4217883) (random range)
 ```
 In this benchmark quadsort is compared against glibc qsort() using the same general
 purpose interface and without any known unfair advantage.
@@ -243,7 +249,7 @@ purpose interface and without any known unfair advantage.
 
 If you want to quickly run an independent benchmark yourself you can do so at this link. 
 
-https://rextester.com/ACPKO6388
+https://rextester.com/MBSRF85640
 
 Benchmark: quadsort vs std::sort
 --------------------------------
@@ -251,27 +257,33 @@ The following benchmark was on WSL gcc version 7.4.0 (Ubuntu 7.4.0-1ubuntu1~18.0
 The source code was compiled using g++ -O3 quadsort.cpp. Each test was ran 100 times
 and only the best run is reported.
 ```
-         quadsort: sorted 1000000 elements in 0.074344 seconds. (random order)
-            qsort: sorted 1000000 elements in 0.064721 seconds. (random order)
+         quadsort: sorted 1000000 ints in 0.074098 seconds. O(       0) (random order)
+ std::stable_sort: sorted 1000000 ints in 0.073419 seconds. O(       0) (random order)
 
-         quadsort: sorted 1000000 elements in 0.000608 seconds. (forward order)
-            qsort: sorted 1000000 elements in 0.011088 seconds. (forward order)
+         quadsort: sorted 1000000 ints in 0.000573 seconds. O(       0) (forward order)
+ std::stable_sort: sorted 1000000 ints in 0.008192 seconds. O(       0) (forward order)
 
-         quadsort: sorted 1000000 elements in 0.002667 seconds. (reverse order)
-            qsort: sorted 1000000 elements in 0.008543 seconds. (reverse order)
+         quadsort: sorted 1000000 ints in 0.000576 seconds. O(       0) (uniform order)
+ std::stable_sort: sorted 1000000 ints in 0.008184 seconds. O(       0) (uniform order)
 
-         quadsort: sorted 1000000 elements in 0.018019 seconds. (random tail)
-            qsort: sorted 1000000 elements in 0.026747 seconds. (random tail)
+         quadsort: sorted 1000000 ints in 0.002646 seconds. O(       0) (reverse order)
+ std::stable_sort: sorted 1000000 ints in 0.010356 seconds. O(       0) (reverse order)
 
-         quadsort: sorted    1024 elements in 0.006977 seconds. (random range)
-            qsort: sorted    1024 elements in 0.016571 seconds. (random range)
+         quadsort: sorted 1000000 ints in 0.012009 seconds. O(       0) (wave order)
+ std::stable_sort: sorted 1000000 ints in 0.011692 seconds. O(       0) (wave order)
+
+         quadsort: sorted 1000000 ints in 0.017934 seconds. O(       0) (random tail)
+ std::stable_sort: sorted 1000000 ints in 0.022730 seconds. O(       0) (random tail)
+
+         quadsort: sorted    1024 ints in 0.010768 seconds. O(       0) (random range)
+ std::stable_sort: sorted    1024 ints in 0.016008 seconds. O(       0) (random range)
+
 ```
-In this benchmark quadsort is compared against the c++ std::sort with the probable
-disadvantage that unnecessary casts are not optimized, resulting in a 5-10%
-performance loss for quadsort.
+In this benchmark quadsort is compared against the c++ std::stable_sort without any
+known advantages.
 
 If you want to quickly run an independent benchmark yourself you can do so at this link.
 
-https://rextester.com/VJIN98279
+https://rextester.com/ZGPH68017
 
 ![quadsort benchmark](https://github.com/scandum/quadsort/blob/master/benchmark.gif)
