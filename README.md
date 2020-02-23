@@ -211,8 +211,8 @@ Big O
 
 Quadsort makes n comparisons when the data is already sorted or reverse sorted.
 
-Benchmark: quadsort vs qsort
-----------------------------
+Benchmark: quadsort vs qsort (mergesort)
+----------------------------------------
 The following benchmark was on WSL gcc version 7.4.0 (Ubuntu 7.4.0-1ubuntu1~18.04.1).
 The source code was compiled using gcc -O3 quadsort.c. Each test was ran 100 times
 and only the best run is reported.
@@ -242,6 +242,7 @@ In this benchmark quadsort is compared against glibc qsort() using the same gene
 purpose interface and without any known unfair advantage.
 
      random order: array size of 1000000, filled with random numbers.
+    uniform order: array size of 1000000, filled with 1s.
     forward order: numbers range from 1 to 1000000.
     reverse order: numbers range from 1000000 to 1.
       random tail: numbers range from 1 to 750000, last 250000 numbers are random.
@@ -251,8 +252,37 @@ If you want to quickly run an independent benchmark yourself you can do so at th
 
 https://rextester.com/MBSRF85640
 
+Benchmark: quadsort vs qsort (quicksort)
+----------------------------------------
+```
+         quadsort: sorted 1000000 ints in   0.118706 seconds. MO:   19288965 (random order)
+            qsort: sorted 1000000 ints in   0.132160 seconds. MO:   20726941 (random order)
+
+         quadsort: sorted 1000000 ints in   0.002410 seconds. MO:     999999 (ascending order)
+            qsort: sorted 1000000 ints in   0.007371 seconds. MO:    3000004 (ascending order)
+
+         quadsort: sorted 1000000 ints in   0.002421 seconds. MO:     999999 (uniform order)
+            qsort: sorted 1000000 ints in   0.002925 seconds. MO:    1000011 (uniform order)
+
+         quadsort: sorted 1000000 ints in   0.009589 seconds. MO:    1416672 (descending order)
+            qsort: sorted 1000000 ints in   0.009593 seconds. MO:    4000015 (descending order)
+
+         quadsort: sorted 1000000 ints in   0.033832 seconds. MO:    6229800 (random tail)
+            qsort: sorted 1000000 ints in   0.072341 seconds. MO:   20462567 (random tail)
+
+         quadsort: sorted 1000000 ints in   0.039360 seconds. MO:   15371381 (wave order)
+            qsort: sorted 1000000 ints in   4.464997 seconds. MO: 1974047339 (wave order)
+
+         quadsort: sorted 1000000 ints in   0.042252 seconds. MO:   15371381 (stable)
+            qsort: sorted 1000000 ints in 308.874466 seconds. MO:  448198422 (unstable)
+
+         quadsort: sorted    1000 ints in   0.015278 seconds. KO:       9305 (random range)
+            qsort: sorted    1000 ints in   0.031470 seconds. KO:      10176 (random range)
+```
+This particular test was performed using the qsort() implementation from Cygwin which uses quicksort under the hood. While it's obvious from this test why quicksort is often preferred above a traditional mergesort, it performs worse than quadsort on all tests, while quicksort introduces a  security issue by making the system potentially vulnerable to denial of service attacks.
+
 Benchmark: quadsort vs std::stable_sort
---------------------------------
+---------------------------------------
 The following benchmark was on WSL gcc version 7.4.0 (Ubuntu 7.4.0-1ubuntu1~18.04.1).
 The source code was compiled using g++ -O3 quadsort.cpp. Each test was ran 100 times
 and only the best run is reported.
