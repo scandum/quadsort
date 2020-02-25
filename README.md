@@ -214,7 +214,7 @@ Quadsort makes n comparisons when the data is already sorted or reverse sorted.
 Visualization
 -------------
 
-In the visualization below three tests are performed. The first test is on a random distribution, the second on a descending distribution, and the third on an ascending distribution with a random tail.
+In the visualization below three tests are performed. The first test is on a random distribution, the second on partially sorted data, the third on a descending distribution, and the fourth on an ascending distribution with a random tail.
 
 The upper half shows the swap memory and the bottom half shows the main memory. Colors are used to differentate between skip, swap, merge, and copy operations.
 
@@ -305,6 +305,7 @@ was ran 100 times and only the best run is reported.
 In this benchmark it becomes clear why quicksort is often preferred above a traditional mergesort,
 it has fewer comparisons for ascending, uniform, and descending order data. However, it performs
 worse than quadsort on all tests. Quicksort also has an extremely poor sorting speed for wave order data.
+The random range test shows quadsort to be on average twice as fast when sorting small arrays.
 
 Benchmark: quadsort vs std::stable_sort
 ---------------------------------------
