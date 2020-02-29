@@ -211,6 +211,10 @@ Big O
 
 Quadsort makes n comparisons when the data is already sorted or reverse sorted.
 
+Cache
+-----
+Because quadsort uses O(n) swap memory its cache utilization is not as ideal as in-place sorts. It however appears that quadsort is always faster than in-place sorts for array sizes that do not exhaust the L1 cache, which can be up to 64KB on modern processors.
+
 Visualization
 -------------
 
