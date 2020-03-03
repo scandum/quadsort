@@ -120,19 +120,21 @@ following:
        }
     }
 
-In the case the array cannot be perfectly divided by 4 the tail, existing
+In the case the array cannot be perfectly divided by 4, the tail, existing
 of 1-3 elements, is sorted using the traditional swap.
 
-quadsort
---------
+The quad swap above is implemented in-place in quadsort.
+
+quad merge
+----------
 
 In the first stage of quadsort the quad swap is used to pre-sort the
 array into sorted 4-element blocks as described above.
 
 The second stage uses an approach similar to the quad swap to detect
-in-order and reverse-order arrangements, but as it's sorting blocks of 4 or
-more elements the final step needs to be handled like the traditional merge
-sort.
+in-order and reverse-order arrangements, but as it's sorting blocks of
+4, 16, 64, or more elements, the final step needs to be handled like
+the traditional merge sort.
 
 This can be visualized as following:
 
@@ -142,8 +144,8 @@ This can be visualized as following:
 
     main memory: ABCDABCDABCDABCD
 
-In the first row quadswap has been used to create 4 blocks of 4 sorted
-elements each. In the second row quadsort has been used to merge the blocks
+In the first row quad swap has been used to create 4 blocks of 4 sorted
+elements each. In the second row quad merge has been used to merge the blocks
 into 2 blocks of 8 sorted elements each in swap memory. In the last row the
 blocks are merged back to main memory and we're left with 1 block of 16
 sorted elements. The following is a visualization.
@@ -151,25 +153,30 @@ sorted elements. The following is a visualization.
 ![quadsort visualization](https://github.com/scandum/quadsort/blob/master/quadsort.gif)
 
 These operations do require doubling the memory overhead for the swap space.
+More on this later.
 
 Skipping
 --------
 
 Another difference is that due to the increased cost of merge operations it
 is beneficial to check whether the 4 blocks are in order or in reverse-order.
+
 In the case of the 4 blocks being in order the merge operation is skipped,
 as this would be pointless. This does however require an extra if check, and
 for randomly sorted data this if check becomes increasingly unlikely to be
 true as the block size increases. Fortunately the frequency of this if check
 is quartered each loop, while the potential benefit is quadrupled each loop.
 
+In the case of the 4 blocks being in reverse order an in-place stable swap
+is performed.
+
 In the case only 2 out of 4 blocks are in order or in reverse-order the
 comparisons in the merge itself are unnecessary and subsequently omitted.
-The data still needs to be swapped but this is a less computational
-intensive procedure.
+The data still needs to be copied to swap memory, but this is a less
+computational intensive procedure.
 
 This allows quadsort to sort in order and reverse-order sequences using
-n + log n comparisons instead of n * log n comparisons.
+n comparisons instead of n * log n comparisons.
 
 Boundary checks
 ---------------
@@ -191,21 +198,26 @@ will always be false because sequence A will be fully merged first.
 Similarly if the last element of sequence A is greater than the last element
 of sequence B we know that the (a < a_max) if check will always be false.
 
-Alignment
----------
+tail merge
+----------
 When sorting an array of 65 elements you end up with a sorted array of 64
 elements and a sorted array of 1 element in the end. Due to the ability to
 skip this will result in no additional swap operation if the entire sequence
 is in order. Regardless, if a program sorts in intervals it should pick an
-optimal array size to do so.
+optimal array size (64, 256, or 1024) to do so.
 
-A suboptimal array size is not disastrous for quadsort and it's outside of
-the scope of this document to provide a solution.
+Another problem is that a sub-optimal array results in wasteful swapping. To
+work around these two problems the quad merge routine is aborted when the
+block size reaches 1/8th of the array size, and the remainder of the array
+is sorted using a tail merge.
+
+The main advantage of the tail merge is that it allows reducing the swap
+space of quadsort to n / 2 without notably impacting performance.
 
 Big O
 -----
 
-| Name | Best | Average | Worst | Stable | memory |
+| Name | Best | Average | Worst | Stable | Memory |
 | ---- | ---- | ------- | ----- | ------ | ------ |
 | quadsort | n | n log n | n log n | yes | n |
 
@@ -213,14 +225,21 @@ Quadsort makes n comparisons when the data is already sorted or reverse sorted.
 
 Cache
 -----
-Because quadsort uses O(n) swap memory its cache utilization is not as ideal as in-place sorts. It however appears that quadsort is always faster than in-place sorts for array sizes that do not exhaust the L1 cache, which can be up to 64KB on modern processors.
+Because quadsort uses n / 2 swap memory its cache utilization is not as ideal as
+in-place sorts. However, in-place sorting of random data results in suboptimal
+swapping. Based on my benchmarks it appears that quadsort is always faster than
+in-place sorts for array sizes that do not exhaust the L1 cache, which can be up
+to 64KB on modern processors.
 
 Visualization
 -------------
 
-In the visualization below three tests are performed. The first test is on a random distribution, the second on partially sorted data, the third on a descending distribution, and the fourth on an ascending distribution with a random tail.
+In the visualization below four tests are performed. The first test is on a random
+distribution, the second on an ascending distribution, the third on a descending
+distribution, and the fourth on an ascending distribution with a random tail.
 
-The upper half shows the swap memory and the bottom half shows the main memory. Colors are used to differentate between skip, swap, merge, and copy operations.
+The upper half shows the swap memory and the bottom half shows the main memory.
+Colors are used to differentate between skip, swap, merge, and copy operations.
 
 ![quadsort benchmark](https://github.com/scandum/quadsort/blob/master/benchmark.gif)
 
@@ -233,44 +252,40 @@ and only the best run is reported.
 MO: lists the number of comparisons that are performed for 1 million items.
 
 ```
-         quadsort: sorted 1000000 i64s in 0.092749 seconds. MO:   19287679 (random order)
-            qsort: sorted 1000000 i64s in 0.105288 seconds. MO:   18674792 (random order)
+         quadsort: sorted 1000000 i32s in 0.092585 seconds. MO:   19287676 (random order)
+            qsort: sorted 1000000 i32s in 0.103579 seconds. MO:   18674792 (random order)
 
-         quadsort: sorted 1000000 i32s in 0.092766 seconds. MO:   19287679 (random order)
-            qsort: sorted 1000000 i32s in 0.103551 seconds. MO:   18674792 (random order)
+         quadsort: sorted 1000000 i32s in 0.001785 seconds. MO:     999999 (ascending order)
+            qsort: sorted 1000000 i32s in 0.026794 seconds. MO:    9884992 (ascending order)
 
-         quadsort: sorted 1000000 i32s in 0.001793 seconds. MO:     999999 (ascending order)
-            qsort: sorted 1000000 i32s in 0.026766 seconds. MO:    9884992 (ascending order)
+         quadsort: sorted 1000000 i32s in 0.001805 seconds. MO:     999999 (uniform order)
+            qsort: sorted 1000000 i32s in 0.026785 seconds. MO:    9884992 (uniform order)
 
-         quadsort: sorted 1000000 i32s in 0.001785 seconds. MO:     999999 (uniform order)
-            qsort: sorted 1000000 i32s in 0.026788 seconds. MO:    9884992 (uniform order)
+         quadsort: sorted 1000000 i32s in 0.004543 seconds. MO:    1416674 (descending order)
+            qsort: sorted 1000000 i32s in 0.026317 seconds. MO:   10066432 (descending order)
 
-         quadsort: sorted 1000000 i32s in 0.004133 seconds. MO:    1416672 (descending order)
-            qsort: sorted 1000000 i32s in 0.026163 seconds. MO:   10066432 (descending order)
-
-         quadsort: sorted 1000000 i32s in 0.023856 seconds. MO:    6229390 (random tail)
+         quadsort: sorted 1000000 i32s in 0.024400 seconds. MO:    6701332 (random tail)
             qsort: sorted 1000000 i32s in 0.043973 seconds. MO:   11832535 (random tail)
 
-         quadsort: sorted 1000000 i32s in 0.024979 seconds. MO:   15371381 (wave order)
-            qsort: sorted 1000000 i32s in 0.035257 seconds. MO:   14656080 (wave order)
+         quadsort: sorted 1000000 i32s in 0.026678 seconds. MO:   15322807 (wave order)
+            qsort: sorted 1000000 i32s in 0.035587 seconds. MO:   14656080 (wave order)
 
-         quadsort: sorted 1000000 i32s in 0.039972 seconds. MO:   15371381 (stable)
-            qsort: sorted 1000000 i32s in 0.045825 seconds. MO:   14656080 (stable)
+         quadsort: sorted 1000000 i32s in 0.040201 seconds. MO:   15322807 (stable)
+            qsort: sorted 1000000 i32s in 0.046046 seconds. MO:   14656080 (stable)
 
-         quadsort: sorted    1000 i32s in 0.013171 seconds. KO:       9281 (random range)
-            qsort: sorted    1000 i32s in 0.024601 seconds. KO:       8719 (random range)
+         quadsort: sorted    1000 i32s in 0.012834 seconds. KO:       9279 (random range)
+            qsort: sorted    1000 i32s in 0.024238 seconds. KO:       8719 (random range)
 ```
-
 In the benchmark above quadsort is compared against glibc qsort() using the same general
-purpose interface and without any known unfair advantage.
+purpose interface and without any known unfair advantage, like inlining.
 ```
      random order: 635, 202,  47, 229, etc
   ascending order: 1, 2, 3, 4, etc
     uniform order: 1, 1, 1, 1, etc
  descending order: 999, 998, 997, 996, etc
-       wave order: 100, 1, 102, 2, 103, etc
-  stable/unstable: checks whether the sort is stable or unstable
-     random range: time to sort 1000 random order arrays with an average size of 500 items
+       wave order: 100, 1, 102, 2, 103, 3, etc
+  stable/unstable: 100, 1, 102, 1, 103, 1, etc
+     random range: time to sort 1000 arrays ranging from size 0 to 999 containing random data
 ```
 
 Benchmark: quadsort vs qsort (quicksort)
@@ -279,64 +294,78 @@ This particular test was performed using the qsort() implementation from Cygwin 
 quicksort under the hood. The source code was compiled using gcc -O3 quadsort.c. Each test
 was ran 100 times and only the best run is reported.
 ```
-         quadsort: sorted 1000000 i64s in 0.131264 seconds. MO:   19288965 (random order)
-            qsort: sorted 1000000 i64s in 0.140029 seconds. MO:   20726941 (random order)
+         quadsort: sorted 1000000 i32s in 0.116897 seconds. MO:   19288966 (random order)
+            qsort: sorted 1000000 i32s in 0.130684 seconds. MO:   20726941 (random order)
 
-         quadsort: sorted 1000000 i32s in 0.117994 seconds. MO:   19288965 (random order)
-            qsort: sorted 1000000 i32s in 0.131188 seconds. MO:   20726941 (random order)
+         quadsort: sorted 1000000 i32s in 0.002040 seconds. MO:     999999 (ascending order)
+            qsort: sorted 1000000 i32s in 0.007183 seconds. MO:    3000004 (ascending order)
 
-         quadsort: sorted 1000000 i32s in 0.002190 seconds. MO:     999999 (ascending order)
-            qsort: sorted 1000000 i32s in 0.007315 seconds. MO:    3000004 (ascending order)
+         quadsort: sorted 1000000 i32s in 0.002034 seconds. MO:     999999 (uniform order)
+            qsort: sorted 1000000 i32s in 0.002799 seconds. MO:    1000011 (uniform order)
 
-         quadsort: sorted 1000000 i32s in 0.002163 seconds. MO:     999999 (uniform order)
-            qsort: sorted 1000000 i32s in 0.002812 seconds. MO:    1000011 (uniform order)
+         quadsort: sorted 1000000 i32s in 0.007490 seconds. MO:    1416674 (descending order)
+            qsort: sorted 1000000 i32s in 0.009457 seconds. MO:    4000015 (descending order)
 
-         quadsort: sorted 1000000 i32s in 0.008784 seconds. MO:    1416672 (descending order)
-            qsort: sorted 1000000 i32s in 0.009605 seconds. MO:    4000015 (descending order)
+         quadsort: sorted 1000000 i32s in 0.031719 seconds. MO:    6704940 (random tail)
+            qsort: sorted 1000000 i32s in 0.071398 seconds. MO:   20462567 (random tail)
 
-         quadsort: sorted 1000000 i32s in 0.033240 seconds. MO:    6229800 (random tail)
-            qsort: sorted 1000000 i32s in 0.071783 seconds. MO:   20462567 (random tail)
+         quadsort: sorted 1000000 i32s in 0.037423 seconds. MO:   15322807 (wave order)
+            qsort: sorted 1000000 i32s in 4.445371 seconds. MO: 1974047339 (wave order)
 
-         quadsort: sorted 1000000 i32s in 0.038756 seconds. MO:   15371381 (wave order)
-            qsort: sorted 1000000 i32s in 4.437985 seconds. MO: 1974047339 (wave order)
+         quadsort: sorted 1000000 i32s in 0.065062 seconds. MO:   15322807 (stable)
+            qsort: sorted 1000000 i32s in 0.044099 seconds. MO:   10333679 (unstable)
 
-         quadsort: sorted 1000000 i32s in 0.066367 seconds. MO:   15371381 (stable)
-            qsort: sorted 1000000 i32s in 0.043977 seconds. MO:   10333679 (unstable)
-
-         quadsort: sorted    1000 i32s in 0.015422 seconds. KO:       9281 (random range)
-            qsort: sorted    1000 i32s in 0.031298 seconds. KO:      10276 (random range)
+         quadsort: sorted    1000 i32s in 0.015201 seconds. KO:       9279 (random range)
+            qsort: sorted    1000 i32s in 0.031053 seconds. KO:      10276 (random range)
 ```
 In this benchmark it becomes clear why quicksort is often preferred above a traditional mergesort,
 it has fewer comparisons for ascending, uniform, and descending order data. However, it performs
 worse than quadsort on all tests. Quicksort also has an extremely poor sorting speed for wave order data.
-The random range test shows quadsort to be on average twice as fast when sorting small arrays.
+The random range test shows quadsort to be more than twice as fast when sorting small arrays.
 
-Benchmark: quadsort vs std::stable_sort
----------------------------------------
+Benchmark: quadsort vs std::stable_sort vs timsort vs pdqsort
+-------------------------------------------------------------
 The following benchmark was on WSL gcc version 7.4.0 (Ubuntu 7.4.0-1ubuntu1~18.04.1).
 The source code was compiled using g++ -O3 quadsort.cpp. Each test was ran 100 times
 and only the best run is reported.
 ```
-         quadsort: sorted 1000000 i32s in 0.070503 seconds. (random order)
- std::stable_sort: sorted 1000000 i32s in 0.073255 seconds. (random order)
+         quadsort: sorted 1000000 i32s in 0.071171 seconds. MO:     0 (random order)
+       stablesort: sorted 1000000 i32s in 0.073330 seconds. MO:     0 (random order)
+          timsort: sorted 1000000 i32s in 0.092308 seconds. MO:     0 (random order)
+          pdqsort: sorted 1000000 i32s in 0.030098 seconds. MO:     0 (random order)
 
-         quadsort: sorted 1000000 i32s in 0.000581 seconds. (ascending order)
- std::stable_sort: sorted 1000000 i32s in 0.008159 seconds. (ascending order)
+         quadsort: sorted 1000000 i32s in 0.000589 seconds. MO:     0 (ascending order)
+       stablesort: sorted 1000000 i32s in 0.008172 seconds. MO:     0 (ascending order)
+          timsort: sorted 1000000 i32s in 0.000327 seconds. MO:     0 (ascending order)
+          pdqsort: sorted 1000000 i32s in 0.000861 seconds. MO:     0 (ascending order)
 
-         quadsort: sorted 1000000 i32s in 0.000585 seconds. (uniform order)
- std::stable_sort: sorted 1000000 i32s in 0.008150 seconds. (uniform order)
+         quadsort: sorted 1000000 i32s in 0.000572 seconds. MO:     0 (uniform order)
+       stablesort: sorted 1000000 i32s in 0.008226 seconds. MO:     0 (uniform order)
+          timsort: sorted 1000000 i32s in 0.000329 seconds. MO:     0 (uniform order)
+          pdqsort: sorted 1000000 i32s in 0.001131 seconds. MO:     0 (uniform order)
 
-         quadsort: sorted 1000000 i32s in 0.002650 seconds. (descending order)
- std::stable_sort: sorted 1000000 i32s in 0.010440 seconds. (descending order)
+         quadsort: sorted 1000000 i32s in 0.003017 seconds. MO:     0 (descending order)
+       stablesort: sorted 1000000 i32s in 0.010406 seconds. MO:     0 (descending order)
+          timsort: sorted 1000000 i32s in 0.000642 seconds. MO:     0 (descending order)
+          pdqsort: sorted 1000000 i32s in 0.001887 seconds. MO:     0 (descending order)
 
-         quadsort: sorted 1000000 i32s in 0.017025 seconds. (random tail)
- std::stable_sort: sorted 1000000 i32s in 0.022681 seconds. (random tail)
+         quadsort: sorted 1000000 i32s in 0.017393 seconds. MO:     0 (random tail)
+       stablesort: sorted 1000000 i32s in 0.022720 seconds. MO:     0 (random tail)
+          timsort: sorted 1000000 i32s in 0.021455 seconds. MO:     0 (random tail)
+          pdqsort: sorted 1000000 i32s in 0.021377 seconds. MO:     0 (random tail)
 
-         quadsort: sorted 1000000 i32s in 0.010131 seconds. (wave order)
- std::stable_sort: sorted 1000000 i32s in 0.011656 seconds. (wave order)
+         quadsort: sorted 1000000 i32s in 0.010760 seconds. MO:     0 (wave order)
+       stablesort: sorted 1000000 i32s in 0.011703 seconds. MO:     0 (wave order)
+          timsort: sorted 1000000 i32s in 0.011647 seconds. MO:     0 (wave order)
+          pdqsort: sorted 1000000 i32s in 0.024731 seconds. MO:     0 (wave order)
 
-         quadsort: sorted    1000 i32s in 0.009064 seconds. (random range)
- std::stable_sort: sorted    1000 i32s in 0.015343 seconds. (random range)
+         quadsort: sorted    1000 i32s in 0.005658 seconds. KO:     0 (random range)
+       stablesort: sorted    1000 i32s in 0.013356 seconds. KO:     0 (random range)
+          timsort: sorted    1000 i32s in 0.015386 seconds. KO:     0 (random range)
+          pdqsort: sorted    1000 i32s in 0.010392 seconds. KO:     0 (random range)
 ```
-In this benchmark quadsort is compared against the c++ std::stable_sort without any
-known advantages.
+In this benchmark quadsort is compared without any known advantages. It should be noted
+that pdqsort is not a stable sort.
+
+One important thing to note is that quadsort is three times faster than Timsort and two
+times faster than pdqsort for small arrays containing random data.
