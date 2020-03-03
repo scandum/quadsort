@@ -18,7 +18,7 @@
 */
 
 /*
-	quadsort 1.1.2.2
+	quadsort 1.1.2.3
 */
 
 #include <stdlib.h>
@@ -31,7 +31,9 @@
 typedef int CMPFUNC (const void *a, const void *b);
 typedef void SRTFUNC(void *array, size_t nmemb, size_t size, CMPFUNC *cmp);
 
-void quad_sort32(int *array, int *swap, size_t nmemb, size_t block, CMPFUNC *cmp);
+// 32 bit handling
+
+void tail_merge32(int *array, int *swap, size_t nmemb, size_t block, CMPFUNC *cmp);
 
 void quad_swap32(int *array, int *swap, size_t nmemb, CMPFUNC *cmp)
 {
@@ -367,20 +369,506 @@ void quad_swap32(int *array, int *swap, size_t nmemb, CMPFUNC *cmp)
 		}
 	}
 
-	switch (nmemb - offset)
+	if (nmemb - offset <= 4)
 	{
-		case 0:
-		case 1:
-		case 2:
-		case 3:
-		case 4:
-			return;
-		default:
-			quad_sort32(pta, swap, nmemb - offset, 4, cmp);
+		return;
+	}
+	tail_merge32(pta, swap, nmemb - offset, 4, cmp);
+}
+
+
+void quad_merge32(int *array, int *swap, size_t nmemb, size_t block, CMPFUNC *cmp)
+{
+	size_t offset;
+	register int *pta, *pts, *c, *c_max, *d, *d_max;
+
+	while (block * 8 < nmemb)
+	{
+		offset = 0;
+
+		while (offset + block < nmemb)
+		{
+			pta = array;
+			pta += offset;
+
+			c_max = pta + block;
+
+			if (cmp(c_max - 1, c_max) <= 0)
+			{
+				if (offset + block * 3 < nmemb)
+				{
+					c_max = pta + block * 3;
+
+					if (cmp(c_max - 1, c_max) <= 0)
+					{
+						c_max = pta + block * 2;
+
+						if (cmp(c_max - 1, c_max) <= 0)
+						{
+							offset += block * 4;
+							continue;
+						}
+						pts = swap;
+
+						c = pta;
+
+						while (c < c_max - 8)
+						{
+							*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
+							*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
+						}
+						while (c < c_max)
+							*pts++ = *c++;
+
+						c = c_max;
+						c_max = offset + block * 4 <= nmemb ? c + block * 2 : array + nmemb;
+
+						while (c < c_max - 8)
+						{
+							*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
+							*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
+						}
+						while (c < c_max)
+							*pts++ = *c++;
+
+						goto step3;
+					}
+					pts = swap;
+
+					c = pta;
+					c_max = pta + block * 2;
+
+					while (c < c_max)
+						*pts++ = *c++;
+
+					goto step2;
+				}
+				else if (offset + block * 2 < nmemb)
+				{
+					c_max = pta + block * 2;
+
+					if (cmp(c_max - 1, c_max) <= 0)
+					{
+						offset += block * 4;
+						continue;
+					}
+					pts = swap;
+
+					c = pta;
+
+					while (c < c_max - 8)
+					{
+						*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
+						*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
+					}
+					while (c < c_max)
+						*pts++ = *c++;
+
+					goto step2;
+				}
+				else
+				{
+					offset += block * 4;
+					continue;
+				}
+			}
+
+			// step1:
+
+			pts = swap;
+
+			c = pta;
+
+			d = c_max;
+			d_max = offset + block * 2 <= nmemb ? d + block : array + nmemb;
+
+			if (cmp(c_max - 1, d_max - 1) <= 0)
+			{
+				while (c < c_max)
+				{
+					while (cmp(c, d) > 0)
+					{
+						*pts++ = *d++;
+					}
+					*pts++ = *c++;
+				}
+				while (d < d_max)
+					*pts++ = *d++;
+			}
+			else if (cmp(c, d_max - 1) > 0)
+			{
+				if (offset + block * 4 <= nmemb)
+				{
+					int *e, *f, tmp;
+
+					e = pta + block * 2;
+					f = e + block;
+
+					if (cmp(e, f + block - 1) > 0)
+					{
+						if (cmp(d, f + block - 1) > 0)
+						{
+							while (c < c_max)
+							{
+								tmp = *c;
+								*c++ = *f;
+								*f++ = tmp;
+							}
+
+							while (d < d_max)
+							{
+								tmp = *d;
+								*d++ = *e;
+								*e++ = tmp;
+							}
+
+							offset += block * 4;
+							continue;
+						}
+					}
+				}
+
+				while (d < d_max - 8)
+				{
+					*pts++ = *d++; *pts++ = *d++; *pts++ = *d++; *pts++ = *d++;
+					*pts++ = *d++; *pts++ = *d++; *pts++ = *d++; *pts++ = *d++;
+				}
+				while (d < d_max)
+					*pts++ = *d++;
+
+				while (c < c_max - 8)
+				{
+					*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
+					*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
+				}
+				while (c < c_max)
+					*pts++ = *c++;
+			}
+			else
+			{
+				while (d < d_max)
+				{
+					while (cmp(c, d) <= 0)
+					{
+						*pts++ = *c++;
+					}
+					*pts++ = *d++;
+				}
+
+				while (c < c_max)
+					*pts++ = *c++;
+			}
+
+			step2:
+
+			if (offset + block * 2 < nmemb)
+			{
+				c = pta + block * 2;
+
+				if (offset + block * 3 < nmemb)
+				{
+					c_max = c + block;
+					d = c_max;
+					d_max = offset + block * 4 <= nmemb ? d + block : array + nmemb;
+
+					if (cmp(c_max - 1, d_max - 1) <= 0)
+					{
+						while (c < c_max)
+						{
+							while (cmp(c, d) > 0)
+							{
+								*pts++ = *d++;
+							}
+							*pts++ = *c++;
+						}
+
+						while (d < d_max)
+							*pts++ = *d++;
+					}
+					else if (cmp(c, d_max - 1) > 0)
+					{
+						while (d < d_max - 8)
+						{
+							*pts++ = *d++; *pts++ = *d++; *pts++ = *d++; *pts++ = *d++;
+							*pts++ = *d++; *pts++ = *d++; *pts++ = *d++; *pts++ = *d++;
+						}
+						while (d < d_max)
+							*pts++ = *d++;
+
+						while (c < c_max - 8)
+						{
+							*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
+							*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
+						}
+						while (c < c_max)
+							*pts++ = *c++;
+					}
+					else
+					{
+						while (d < d_max)
+						{
+							while (cmp(c, d) <= 0)
+							{
+								*pts++ = *c++;
+							}
+							*pts++ = *d++;
+						}
+
+						while (c < c_max)
+							*pts++ = *c++;
+					}
+				}
+				else
+				{
+					d = c;
+					d_max = array + nmemb;
+
+					pts = swap;
+					c = pts;
+					c_max = c + block * 2;
+
+					goto tailstep;
+				}
+			}
+
+			step3:
+
+			pts = swap;
+
+			c = pts;
+
+			if (offset + block * 2 < nmemb)
+			{
+				c_max = c + block * 2;
+
+				d = c_max;
+				d_max = offset + block * 4 <= nmemb ? d + block * 2 : pts + nmemb - offset;
+
+				tailstep:
+
+				if (cmp(c_max - 1, d_max - 1) <= 0)
+				{
+					while (c < c_max)
+					{
+						while (cmp(c, d) > 0)
+						{
+							*pta++ = *d++;
+						}
+						*pta++ = *c++;
+					}
+
+					while (d < d_max)
+						*pta++ = *d++;
+				}
+				else if (cmp(c, d_max - 1) > 0)
+				{
+					while (d < d_max - 16)
+					{
+						*pta++ = *d++; *pta++ = *d++; *pta++ = *d++; *pta++ = *d++;
+						*pta++ = *d++; *pta++ = *d++; *pta++ = *d++; *pta++ = *d++;
+						*pta++ = *d++; *pta++ = *d++; *pta++ = *d++; *pta++ = *d++;
+						*pta++ = *d++; *pta++ = *d++; *pta++ = *d++; *pta++ = *d++;
+					}
+					while (d < d_max)
+						*pta++ = *d++;
+
+					while (c < c_max - 16)
+					{
+						*pta++ = *c++; *pta++ = *c++; *pta++ = *c++; *pta++ = *c++;
+						*pta++ = *c++; *pta++ = *c++; *pta++ = *c++; *pta++ = *c++;
+						*pta++ = *c++; *pta++ = *c++; *pta++ = *c++; *pta++ = *c++;
+						*pta++ = *c++; *pta++ = *c++; *pta++ = *c++; *pta++ = *c++;
+					}
+					while (c < c_max)
+						*pta++ = *c++;
+				}
+				else
+				{
+					while (d < d_max)
+					{
+						while (cmp(d, c) > 0)
+						{
+							*pta++ = *c++;
+						}
+						*pta++ = *d++;
+					}
+
+					while (c < c_max)
+						*pta++ = *c++;
+				}
+			}
+			else
+			{
+				d_max = pts + nmemb - offset;
+
+				while (c < d_max - 8)
+				{
+					*pta++ = *c++; *pta++ = *c++; *pta++ = *c++; *pta++ = *c++;
+					*pta++ = *c++; *pta++ = *c++; *pta++ = *c++; *pta++ = *c++;
+				}
+				while (c < d_max)
+					*pta++ = *c++;
+			}
+			offset += block * 4;
+		}
+		block *= 4;
+	}
+	tail_merge32(array, swap, nmemb, block, cmp);
+}
+
+
+void tail_merge32(int *array, int *swap, size_t nmemb, size_t block, CMPFUNC *cmp)
+{
+	size_t offset;
+	register int *pta, *pts, *c, *c_max, *d, *d_max, *e, tmp;
+
+	pts = swap;
+
+	while (block < nmemb)
+	{
+		for (offset = 0 ; offset + block < nmemb ; offset += block * 2)
+		{
+			pta = array + offset;
+
+			c_max = pta + block;
+
+			if (cmp(c_max - 1, c_max) <= 0)
+			{
+				continue;
+			}
+
+			d_max = (offset + block * 2 <= nmemb ? pta + block * 2 : array + nmemb);
+
+			if (cmp(pta, pta + block) <= 0)
+			{
+				c_max = offset + block * 2 <= nmemb ? pts + block : pts + nmemb - (offset + block);
+
+				c = c_max - 1;
+				d = d_max - 1;
+
+				while (c >= pts + 8)
+				{
+					*c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--;
+				}
+
+				while (c >= pts)
+				{
+					*c-- = *d--;
+				}
+
+				c = c_max - 1;
+				d = pta + block - 1;
+				e = d_max - 1;
+
+				while (c >= pts)
+				{
+					while(cmp(d, c) > 0)
+					{
+						*e-- = *d--;
+					}
+					*e-- = *c--;
+				}
+			}
+			else
+			{
+				if (cmp(pta, d_max - 1) > 0)
+				{
+					if (offset + block * 2 <= nmemb)
+					{
+						c = pta;
+						d = pta + block;
+
+						while (d < d_max - 4)
+						{
+							tmp = *c; *c++ = *d; *d++ = tmp; tmp = *c; *c++ = *d; *d++ = tmp; tmp = *c; *c++ = *d; *d++ = tmp; tmp = *c; *c++ = *d; *d++ = tmp; 
+						}
+
+						while (d < d_max)
+						{
+							tmp = *c; *c++ = *d; *d++ = tmp;
+						}
+						continue;
+					}
+
+					c_max = offset + block * 2 <= nmemb ? pts + block : pts + nmemb - (offset + block);
+
+					c = c_max - 1;
+					d = d_max - 1;
+
+					while (c >= pts + 8)
+					{
+						*c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--;
+					}
+
+					while (c >= pts)
+					{
+						*c-- = *d--;
+					}
+	
+					c = c_max - 1;
+					d = pta + block - 1;
+					e = d_max - 1;
+
+					while (d >= pta + 8)
+					{
+						*e-- = *d--; *e-- = *d--; *e-- = *d--; *e-- = *d--; *e-- = *d--; *e-- = *d--; *e-- = *d--; *e-- = *d--;
+					}
+					while (d >= pta)
+					{
+						*e-- = *d--;
+					}
+
+					while (c >= pts + 8)
+					{
+						*e-- = *c--; *e-- = *c--; *e-- = *c--; *e-- = *c--; *e-- = *c--; *e-- = *c--; *e-- = *c--; *e-- = *c--;
+					}
+
+					while (c >= pts)
+					{
+						*e-- = *c--;
+					}
+					continue;
+				}
+				c_max = offset + block * 2 <= nmemb ? pts + block : pts + nmemb - (offset + block);
+
+				c = c_max - 1;
+				d = d_max - 1;
+
+				while (c >= pts + 8)
+				{
+					*c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--;
+				}
+
+				while (c >= pts)
+				{
+					*c-- = *d--;
+				}
+
+				c = c_max - 1;
+				d = pta + block - 1;
+				e = d_max - 1;
+
+				while (d >= pta)
+				{
+					while (cmp(d, c) <= 0)
+					{
+						*e-- = *c--;
+					}
+					*e-- = *d--;
+				}
+				while (c >= pts)
+				{
+					*e-- = *c--;
+				}
+			}
+		}
+		block *= 2;
 	}
 }
 
-void quad_sort64(long long *array, long long *swap, size_t nmemb, size_t block, CMPFUNC *cmp);
+// 64 bit handling
+
+void tail_merge64(long long *array, long long *swap, size_t nmemb, size_t block, CMPFUNC *cmp);
 
 void quad_swap64(long long *array, long long *swap, size_t nmemb, CMPFUNC *cmp)
 {
@@ -716,363 +1204,20 @@ void quad_swap64(long long *array, long long *swap, size_t nmemb, CMPFUNC *cmp)
 		}
 	}
 
-	switch (nmemb - offset)
+	if (nmemb - offset <= 4)
 	{
-		case 0:
-		case 1:
-		case 2:
-		case 3:
-		case 4:
-			return;
-		default:
-			quad_sort64(pta, swap, nmemb - offset, 4, cmp);
+		return;
 	}
+	tail_merge64(pta, swap, nmemb - offset, 4, cmp);
 }
 
-void quad_sort32(int *array, int *swap, size_t nmemb, size_t block, CMPFUNC *cmp)
-{
-	size_t offset;
-	register int *pta, *pts, *c, *c_max, *d, *d_max;
 
-	while (block < nmemb)
-	{
-		offset = 0;
-
-		while (offset + block < nmemb)
-		{
-			pta = array;
-			pta += offset;
-
-			c_max = pta + block;
-
-			if (cmp(c_max - 1, c_max) <= 0)
-			{
-				if (offset + block * 3 < nmemb)
-				{
-					c_max = pta + block * 3;
-
-					if (cmp(c_max - 1, c_max) <= 0)
-					{
-						c_max = pta + block * 2;
-
-						if (cmp(c_max - 1, c_max) <= 0)
-						{
-							offset += block * 4;
-							continue;
-						}
-						pts = swap;
-
-						c = pta;
-
-						while (c < c_max - 8)
-						{
-							*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
-							*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
-						}
-						while (c < c_max)
-							*pts++ = *c++;
-
-						c = c_max;
-						c_max = offset + block * 4 <= nmemb ? c + block * 2 : array + nmemb;
-
-						while (c < c_max - 8)
-						{
-							*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
-							*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
-						}
-						while (c < c_max)
-							*pts++ = *c++;
-
-						goto step3;
-					}
-					pts = swap;
-
-					c = pta;
-					c_max = pta + block * 2;
-
-					while (c < c_max)
-						*pts++ = *c++;
-
-					goto step2;
-				}
-				else if (offset + block * 2 < nmemb)
-				{
-					c_max = pta + block * 2;
-
-					if (cmp(c_max - 1, c_max) <= 0)
-					{
-						offset += block * 4;
-						continue;
-					}
-					pts = swap;
-
-					c = pta;
-
-					while (c < c_max - 8)
-					{
-						*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
-						*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
-					}
-					while (c < c_max)
-						*pts++ = *c++;
-
-					goto step2;
-				}
-				else
-				{
-					offset += block * 4;
-					continue;
-				}
-			}
-
-			// step1:
-
-			pts = swap;
-
-			c = pta;
-
-			d = c_max;
-			d_max = offset + block * 2 <= nmemb ? d + block : array + nmemb;
-
-			if (cmp(c_max - 1, d_max - 1) <= 0)
-			{
-				while (c < c_max)
-				{
-					while (cmp(c, d) > 0)
-					{
-						*pts++ = *d++;
-					}
-					*pts++ = *c++;
-				}
-				while (d < d_max)
-					*pts++ = *d++;
-			}
-			else if (cmp(c, d_max - 1) > 0)
-			{
-				if (offset + block * 4 <= nmemb)
-				{
-					int *e, *e_max, *f, *f_max, tmp;
-
-					e = pta + block * 2;
-					e_max = e + block;
-					f = e_max;
-					f_max = f + block;
-
-					if (cmp(e, f_max - 1) > 0)
-					{
-						if (cmp(d, f_max - 1) > 0)
-						{
-							while (c < c_max)
-							{
-								tmp = *c;
-								*c++ = *f;
-								*f++ = tmp;
-							}
-							while (d < d_max)
-							{
-								tmp = *d;
-								*d++ = *e;
-								*e++ = tmp;
-							}
-							offset += block * 4;
-							continue;
-						}
-					}
-				}
-
-				while (d < d_max - 8)
-				{
-					*pts++ = *d++; *pts++ = *d++; *pts++ = *d++; *pts++ = *d++;
-					*pts++ = *d++; *pts++ = *d++; *pts++ = *d++; *pts++ = *d++;
-				}
-				while (d < d_max)
-					*pts++ = *d++;
-
-				while (c < c_max - 8)
-				{
-					*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
-					*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
-				}
-				while (c < c_max)
-					*pts++ = *c++;
-			}
-			else
-			{
-				while (d < d_max)
-				{
-					while (cmp(c, d) <= 0)
-					{
-						*pts++ = *c++;
-					}
-					*pts++ = *d++;
-				}
-
-				while (c < c_max)
-					*pts++ = *c++;
-			}
-
-			step2:
-
-			if (offset + block * 2 < nmemb)
-			{
-				c = pta + block * 2;
-
-				if (offset + block * 3 < nmemb)
-				{
-					c_max = c + block;
-					d = c_max;
-					d_max = offset + block * 4 <= nmemb ? d + block : array + nmemb;
-
-					if (cmp(c_max - 1, d_max - 1) <= 0)
-					{
-						while (c < c_max)
-						{
-							while (cmp(c, d) > 0)
-							{
-								*pts++ = *d++;
-							}
-							*pts++ = *c++;
-						}
-
-						while (d < d_max)
-							*pts++ = *d++;
-					}
-					else if (cmp(c, d_max - 1) > 0)
-					{
-						while (d < d_max - 8)
-						{
-							*pts++ = *d++; *pts++ = *d++; *pts++ = *d++; *pts++ = *d++;
-							*pts++ = *d++; *pts++ = *d++; *pts++ = *d++; *pts++ = *d++;
-						}
-						while (d < d_max)
-							*pts++ = *d++;
-
-						while (c < c_max - 8)
-						{
-							*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
-							*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
-						}
-						while (c < c_max)
-							*pts++ = *c++;
-					}
-					else
-					{
-						while (d < d_max)
-						{
-							while (cmp(c, d) <= 0)
-							{
-								*pts++ = *c++;
-							}
-							*pts++ = *d++;
-						}
-
-						while (c < c_max)
-							*pts++ = *c++;
-					}
-				}
-				else
-				{
-					d = c;
-					d_max = array + nmemb;
-
-					pts = swap;
-					c = pts;
-					c_max = c + block * 2;
-
-					goto quickstep;
-				}
-			}
-
-			step3:
-
-			pts = swap;
-
-			c = pts;
-
-			if (offset + block * 2 < nmemb)
-			{
-				c_max = c + block * 2;
-
-				d = c_max;
-				d_max = offset + block * 4 <= nmemb ? d + block * 2 : pts + nmemb - offset;
-
-				quickstep:
-
-				if (cmp(c_max - 1, d_max - 1) <= 0)
-				{
-					while (c < c_max)
-					{
-						while (cmp(c, d) > 0)
-						{
-							*pta++ = *d++;
-						}
-						*pta++ = *c++;
-					}
-
-					while (d < d_max)
-						*pta++ = *d++;
-				}
-				else if (cmp(c, d_max - 1) > 0)
-				{
-					while (d < d_max - 16)
-					{
-						*pta++ = *d++; *pta++ = *d++; *pta++ = *d++; *pta++ = *d++;
-						*pta++ = *d++; *pta++ = *d++; *pta++ = *d++; *pta++ = *d++;
-						*pta++ = *d++; *pta++ = *d++; *pta++ = *d++; *pta++ = *d++;
-						*pta++ = *d++; *pta++ = *d++; *pta++ = *d++; *pta++ = *d++;
-					}
-					while (d < d_max)
-						*pta++ = *d++;
-
-					while (c < c_max - 16)
-					{
-						*pta++ = *c++; *pta++ = *c++; *pta++ = *c++; *pta++ = *c++;
-						*pta++ = *c++; *pta++ = *c++; *pta++ = *c++; *pta++ = *c++;
-						*pta++ = *c++; *pta++ = *c++; *pta++ = *c++; *pta++ = *c++;
-						*pta++ = *c++; *pta++ = *c++; *pta++ = *c++; *pta++ = *c++;
-					}
-					while (c < c_max)
-						*pta++ = *c++;
-				}
-				else
-				{
-					while (d < d_max)
-					{
-						while (cmp(d, c) > 0)
-						{
-							*pta++ = *c++;
-						}
-						*pta++ = *d++;
-					}
-
-					while (c < c_max)
-						*pta++ = *c++;
-				}
-			}
-			else
-			{
-				d_max = pts + nmemb - offset;
-
-				while (c < d_max - 8)
-				{
-					*pta++ = *c++; *pta++ = *c++; *pta++ = *c++; *pta++ = *c++;
-					*pta++ = *c++; *pta++ = *c++; *pta++ = *c++; *pta++ = *c++;
-				}
-				while (c < d_max)
-					*pta++ = *c++;
-			}
-			offset += block * 4;
-		}
-		block *= 4;
-	}
-}
-
-void quad_sort64(long long *array, long long *swap, size_t nmemb, size_t block, CMPFUNC *cmp)
+void quad_merge64(long long *array, long long *swap, size_t nmemb, size_t block, CMPFUNC *cmp)
 {
 	size_t offset;
 	register long long *pta, *pts, *c, *c_max, *d, *d_max;
 
-	while (block < nmemb)
+	while (block * 8 < nmemb)
 	{
 		offset = 0;
 
@@ -1189,16 +1334,14 @@ void quad_sort64(long long *array, long long *swap, size_t nmemb, size_t block, 
 			{
 				if (offset + block * 4 <= nmemb)
 				{
-					long long *e, *e_max, *f, *f_max, tmp;
+					long long *e, *f, tmp;
 
 					e = pta + block * 2;
-					e_max = e + block;
-					f = e_max;
-					f_max = f + block;
+					f = e + block;
 
-					if (cmp(e, f_max - 1) > 0)
+					if (cmp(e, f + block - 1) > 0)
 					{
-						if (cmp(d, f_max - 1) > 0)
+						if (cmp(d, f + block - 1) > 0)
 						{
 							while (c < c_max)
 							{
@@ -1206,12 +1349,14 @@ void quad_sort64(long long *array, long long *swap, size_t nmemb, size_t block, 
 								*c++ = *f;
 								*f++ = tmp;
 							}
+
 							while (d < d_max)
 							{
 								tmp = *d;
 								*d++ = *e;
 								*e++ = tmp;
 							}
+
 							offset += block * 4;
 							continue;
 						}
@@ -1317,7 +1462,7 @@ void quad_sort64(long long *array, long long *swap, size_t nmemb, size_t block, 
 					c = pts;
 					c_max = c + block * 2;
 
-					goto quickstep;
+					goto tailstep;
 				}
 			}
 
@@ -1334,7 +1479,7 @@ void quad_sort64(long long *array, long long *swap, size_t nmemb, size_t block, 
 				d = c_max;
 				d_max = offset + block * 4 <= nmemb ? d + block * 2 : pts + nmemb - offset;
 
-				quickstep:
+				tailstep:
 
 				if (cmp(c_max - 1, d_max - 1) <= 0)
 				{
@@ -1403,13 +1548,165 @@ void quad_sort64(long long *array, long long *swap, size_t nmemb, size_t block, 
 		}
 		block *= 4;
 	}
+	tail_merge64(array, swap, nmemb, block, cmp);
 }
+
+
+void tail_merge64(long long *array, long long *swap, size_t nmemb, size_t block, CMPFUNC *cmp)
+{
+	size_t offset;
+	register long long *pta, *pts, *c, *c_max, *d, *d_max, *e, tmp;
+
+	pts = swap;
+
+	while (block < nmemb)
+	{
+		for (offset = 0 ; offset + block < nmemb ; offset += block * 2)
+		{
+			pta = array + offset;
+
+			c_max = pta + block;
+
+			if (cmp(c_max - 1, c_max) <= 0)
+			{
+				continue;
+			}
+
+			d_max = (offset + block * 2 <= nmemb ? pta + block * 2 : array + nmemb);
+
+			if (cmp(pta, pta + block) <= 0)
+			{
+				c_max = offset + block * 2 <= nmemb ? pts + block : pts + nmemb - (offset + block);
+
+				c = c_max - 1;
+				d = d_max - 1;
+
+				while (c >= pts + 8)
+				{
+					*c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--;
+				}
+
+				while (c >= pts)
+				{
+					*c-- = *d--;
+				}
+
+				c = c_max - 1;
+				d = pta + block - 1;
+				e = d_max - 1;
+
+				while (c >= pts)
+				{
+					while(cmp(d, c) > 0)
+					{
+						*e-- = *d--;
+					}
+					*e-- = *c--;
+				}
+			}
+			else
+			{
+				if (cmp(pta, d_max - 1) > 0)
+				{
+					if (offset + block * 2 <= nmemb)
+					{
+						c = pta;
+						d = pta + block;
+
+						while (d < d_max - 4)
+						{
+							tmp = *c; *c++ = *d; *d++ = tmp; tmp = *c; *c++ = *d; *d++ = tmp; tmp = *c; *c++ = *d; *d++ = tmp; tmp = *c; *c++ = *d; *d++ = tmp; 
+						}
+
+						while (d < d_max)
+						{
+							tmp = *c; *c++ = *d; *d++ = tmp;
+						}
+						continue;
+					}
+
+					c_max = offset + block * 2 <= nmemb ? pts + block : pts + nmemb - (offset + block);
+
+					c = c_max - 1;
+					d = d_max - 1;
+
+					while (c >= pts + 8)
+					{
+						*c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--;
+					}
+
+					while (c >= pts)
+					{
+						*c-- = *d--;
+					}
+	
+					c = c_max - 1;
+					d = pta + block - 1;
+					e = d_max - 1;
+
+					while (d >= pta + 8)
+					{
+						*e-- = *d--; *e-- = *d--; *e-- = *d--; *e-- = *d--; *e-- = *d--; *e-- = *d--; *e-- = *d--; *e-- = *d--;
+					}
+					while (d >= pta)
+					{
+						*e-- = *d--;
+					}
+
+					while (c >= pts + 8)
+					{
+						*e-- = *c--; *e-- = *c--; *e-- = *c--; *e-- = *c--; *e-- = *c--; *e-- = *c--; *e-- = *c--; *e-- = *c--;
+					}
+
+					while (c >= pts)
+					{
+						*e-- = *c--;
+					}
+					continue;
+				}
+				c_max = offset + block * 2 <= nmemb ? pts + block : pts + nmemb - (offset + block);
+
+				c = c_max - 1;
+				d = d_max - 1;
+
+				while (c >= pts + 8)
+				{
+					*c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--;
+				}
+
+				while (c >= pts)
+				{
+					*c-- = *d--;
+				}
+
+				c = c_max - 1;
+				d = pta + block - 1;
+				e = d_max - 1;
+
+				while (d >= pta)
+				{
+					while (cmp(d, c) <= 0)
+					{
+						*e-- = *c--;
+					}
+					*e-- = *d--;
+				}
+				while (c >= pts)
+				{
+					*e-- = *c--;
+				}
+			}
+		}
+		block *= 2;
+	}
+}
+
 
 void quadsort(void *array, size_t nmemb, size_t size, CMPFUNC *cmp)
 {
 	void *swap;
 
-	swap = malloc(nmemb * size);
+	swap = malloc(16 * size + nmemb * size / 2);
 
 	if (swap == NULL)
 	{
@@ -1421,16 +1718,16 @@ void quadsort(void *array, size_t nmemb, size_t size, CMPFUNC *cmp)
 	if (size == sizeof(int))
 	{
 		quad_swap32(array, swap, nmemb, cmp);
-		quad_sort32(array, swap, nmemb, 16, cmp);
+		quad_merge32(array, swap, nmemb, 16, cmp);
 	}
 	else if (size == sizeof(long long))
 	{
 		quad_swap64(array, swap, nmemb, cmp);
-		quad_sort64(array, swap, nmemb, 16, cmp);
+		quad_merge64(array, swap, nmemb, 16, cmp);
 	}
 	else
 	{
-		assert(size == 4 || size == 8);
+		assert(size == sizeof(int) || size == sizeof(long long));
 	}
 
 	free(swap);
@@ -1439,7 +1736,7 @@ void quadsort(void *array, size_t nmemb, size_t size, CMPFUNC *cmp)
 // benchmarking utilities
 
 
-// Must prevent inlining so the benchmark is fair.
+// Must prevent inlining so the benchmark against qsort() is fair.
 // Remove __attribute__ ((noinline)) and counter++ for full throttle.
 
 long long counter;
@@ -1504,11 +1801,11 @@ int generate_rand()
 void test_sort(void *array, void *unsorted, void *valid, int minimum, int maximum, int samples, int repetitions, SRTFUNC *srt, const char *name, const char *desc, size_t size, CMPFUNC *cmp)
 {
 	long long start, end, total, best;
-	size_t rep, sam, max;
+	int rep, sam, max;
 	long long *ptla = array;
 	int *pta = array, *ptv = valid, cnt;
 
-	best = 0;
+	best = max = 0;
 
 	for (sam = 0 ; sam <= samples ; sam++)
 	{
@@ -1650,39 +1947,6 @@ int main(int argc, char **argv)
 
 	rnd = 1;
 
-	// 64 bit
-
-	la_array = malloc(max * sizeof(long long));
-	lr_array = malloc(max * sizeof(long long));
-	lv_array = malloc(max * sizeof(long long));
-
-	if (la_array == NULL || lr_array == NULL || lv_array == NULL)
-	{
-		printf("main(%d,%d,%d): malloc: %s\n", max, samples, repetitions, strerror(errno));
-
-		return 0;
-	}
-
-	// random 
-
-	seed_rand(rnd);
-
-	for (cnt = 0 ; cnt < max ; cnt++)
-	{
-		lr_array[cnt] = max != 1000 ? rand() : generate_rand();
-	}
-
-	memcpy(lv_array, lr_array, max * sizeof(long long));
-	quadsort(lv_array, max, sizeof(long long), cmp_long);
-
-	test_sort(la_array, lr_array, lv_array, max, max, samples, repetitions, quadsort,        "quadsort",       "random order", sizeof(long long), cmp_long);
-	test_sort(la_array, lr_array, lv_array, max, max, samples, repetitions, qsort,           "qsort",          "random order", sizeof(long long), cmp_long);
-
-	printf("\n");
-
-	free(la_array);
-	free(lr_array);
-	free(lv_array);
 
 	// 32 bit
 
@@ -1784,7 +2048,7 @@ int main(int argc, char **argv)
 
 	printf("\n");
 
-	// wave ?
+	// wave
 
 	for (cnt = 0 ; cnt < max ; cnt++)
 	{
@@ -1811,10 +2075,10 @@ int main(int argc, char **argv)
 
 	printf("\n");
 
+	// nmemb from 1 to 1000 with random data.
+
 	if (max >= 1000)
 	{
-		// random range
-
 		seed_rand(rnd);
 
 		for (cnt = 0 ; cnt < 1000 ; cnt++)
@@ -1825,12 +2089,49 @@ int main(int argc, char **argv)
 		memcpy(v_array, r_array, 1000 * sizeof(int));
 		quadsort(v_array, 1000, sizeof(int), cmp_int);
 
-		test_sort(a_array, r_array, v_array, 0, 1000, 1, 1001, quadsort,        "quadsort",        "random range", sizeof(int), cmp_int);
-		test_sort(a_array, r_array, v_array, 0, 1000, 1, 1001, qsort,           "qsort",           "random range", sizeof(int), cmp_int);
-
-		free(a_array);
-		free(r_array);
-		free(v_array);
+		test_sort(a_array, r_array, v_array, 0, 1000, 100, 1001, quadsort,        "quadsort",        "random range", sizeof(int), cmp_int);
+		test_sort(a_array, r_array, v_array, 0, 1000, 100, 1001, qsort,           "qsort",           "random range", sizeof(int), cmp_int);
 	}
+
+	free(a_array);
+	free(r_array);
+	free(v_array);
+
+	printf("\n");
+
+	// 64 bit
+
+	la_array = malloc(max * sizeof(long long));
+	lr_array = malloc(max * sizeof(long long));
+	lv_array = malloc(max * sizeof(long long));
+
+	if (la_array == NULL || lr_array == NULL || lv_array == NULL)
+	{
+		printf("main(%d,%d,%d): malloc: %s\n", max, samples, repetitions, strerror(errno));
+
+		return 0;
+	}
+
+	// random 
+
+	seed_rand(rnd);
+
+	for (cnt = 0 ; cnt < max ; cnt++)
+	{
+		lr_array[cnt] = max != 1000 ? rand() : generate_rand();
+	}
+
+	memcpy(lv_array, lr_array, max * sizeof(long long));
+	quadsort(lv_array, max, sizeof(long long), cmp_long);
+
+	test_sort(la_array, lr_array, lv_array, max, max, samples, repetitions, quadsort,        "quadsort",       "random order", sizeof(long long), cmp_long);
+	test_sort(la_array, lr_array, lv_array, max, max, samples, repetitions, qsort,           "qsort",          "random order", sizeof(long long), cmp_long);
+
+	printf("\n");
+
+	free(la_array);
+	free(lr_array);
+	free(lv_array);
+
 	return 0;
 }
