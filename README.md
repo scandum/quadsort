@@ -19,33 +19,36 @@ following.
         val[1] = tmp[0];
     }
 
-Instead the quad swap sorts four variables using four temporary variables.
+Instead the quad swap sorts four variables using four swap variables.
 During the first stage the four variables are partially sorted in the four
-temporary variables, in the second stage they are fully sorted back to the
+swap variables, in the second stage they are fully sorted back to the
 original four variables.
 ```
-            [A]       [S] ╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴                  [A]🠆
-               ＼   ／   ＼                   ＼             ／
-                 (?)        ╴                    ╴         ╴
-               ／   ＼        ＼                   ＼   ／
-            [A]       [S]╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴        (?)╴╴╴╴╴╴╴[A]🠆
-                         ＼        ＼         ＼   ／
-                           (?)🠆      (?)🠆      ╴
-                         ／        ／         ／   ＼
-            [A]       [S]╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴        (?)╴╴╴╴╴╴╴[A]🠆
-               ＼   ／        ／                   ／   ＼
-                 (?)        ╴                    ╴         ╴
-               ／   ＼   ／                   ／             ＼
-            [A]       [S]╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴                  [A]🠆
+            ╭─╮             ╭─╮                ╭─╮     ╭─╮
+            │A├─╮         ╭─┤S├───────┬────────┤?├─╮ ╭─┤F│
+            ╰─╯ │   ╭─╮   │ ╰─╯       │        ╰┬╯ │ │ ╰─╯
+                ├───┤?├───┤ ╭─╮       │      ╭──╯  ╰─┤
+            ╭─╮ │   ╰─╯   ╰─┤S├───────│─────────╮    │ ╭─╮
+            │A├─╯           ╰┬╯       │      │  │    ╰─┤F│
+            ╰─╯             ╭┴╮ ╭─╮  ╭┴╮ ╭─╮ │  │      ╰─╯
+                            │?├─┤F│  │?├─┤F│ │  │
+                            ╰┬╯ ╰─╯  ╰┬╯ ╰─╯ │  │
+            ╭─╮             ╭┴╮       │      │  │      ╭─╮
+            │A├─╮         ╭─┤S├───────│──────╯  │    ╭─┤F│
+            ╰─╯ │   ╭─╮   │ ╰─╯       │         │    │ ╰─╯
+                ├───┤?├───┤           │         │  ╭─┤
+            ╭─╮ │   ╰─╯   │ ╭─╮       │        ╭┴╮ │ │ ╭─╮
+            │A├─╯         ╰─┤S├───────┴────────┤?├─╯ ╰─┤F│
+            ╰─╯             ╰─╯                ╰─╯     ╰─╯
 ```
 
 
 This process is visualized in the diagram above.
 
 After the first round of sorting a single if check determines if the four
-temporary variables are sorted in order, if that's the case the swap
-finishes up immediately. Next it checks if the temporary variables
-are sorted in reverse-order, if that's the case the swap finishes up
+swap variables are sorted in order, if that's the case the swap
+finishes up immediately. Next it checks if the swap variables
+are sorted in reverse-order, if that's the case the sort finishes up
 immediately. If both checks fail the final arrangement is known and
 two checks remain to determine the final order.
 
