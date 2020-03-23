@@ -55,9 +55,8 @@ are rarely comparing truly random data, so in any instance where data is
 more likely to be orderly than disorderly this shift in probability will give
 an advantage.
 
-There should also be a slight overall performance increase due to the
-elimination of wasteful swapping. In C the basic quad swap looks as
-following:
+There is also an overall performance increase due to the elimination of
+wasteful swapping. In C the basic quad swap looks as following:
 
     if (val[0] > val[1])
     {
@@ -231,6 +230,11 @@ swapping. Based on my benchmarks it appears that quadsort is always faster than
 in-place sorts for array sizes that do not exhaust the L1 cache, which can be up
 to 64KB on modern processors.
 
+Wolfsort
+--------
+wolfsort is a hybrid quadsort which addresses cache handling for medium and large
+arrays. It's still under development but shows promising results.
+
 Visualization
 -------------
 
@@ -323,49 +327,74 @@ it has fewer comparisons for ascending, uniform, and descending order data. Howe
 worse than quadsort on all tests. Quicksort also has an extremely poor sorting speed for wave order data.
 The random range test shows quadsort to be more than twice as fast when sorting small arrays.
 
-Benchmark: quadsort vs std::stable_sort vs timsort vs pdqsort
--------------------------------------------------------------
+Benchmark: quadsort vs std::stable_sort vs timsort vs pdqsort vs wolfsort
+-------------------------------------------------------------------------
 The following benchmark was on WSL gcc version 7.4.0 (Ubuntu 7.4.0-1ubuntu1~18.04.1).
 The source code was compiled using g++ -O3 quadsort.cpp. Each test was ran 100 times
 and only the best run is reported.
 ```
-         quadsort: sorted 1000000 i32s in 0.071171 seconds. MO:     0 (random order)
-       stablesort: sorted 1000000 i32s in 0.073330 seconds. MO:     0 (random order)
-          timsort: sorted 1000000 i32s in 0.092308 seconds. MO:     0 (random order)
-          pdqsort: sorted 1000000 i32s in 0.030098 seconds. MO:     0 (random order)
+         quadsort: sorted 1000000 i32s in 0.071135 seconds.  (random order)
+       stablesort: sorted 1000000 i32s in 0.072644 seconds.  (random order)
+          timsort: sorted 1000000 i32s in 0.087601 seconds.  (random order)
+          pdqsort: sorted 1000000 i32s in 0.030005 seconds.  (random order)
+         wolfsort: sorted 1000000 i32s in 0.021071 seconds.  (random order)
 
-         quadsort: sorted 1000000 i32s in 0.000589 seconds. MO:     0 (ascending order)
-       stablesort: sorted 1000000 i32s in 0.008172 seconds. MO:     0 (ascending order)
-          timsort: sorted 1000000 i32s in 0.000327 seconds. MO:     0 (ascending order)
-          pdqsort: sorted 1000000 i32s in 0.000861 seconds. MO:     0 (ascending order)
+         quadsort: sorted 1000000 i32s in 0.000493 seconds.  (ascending)
+       stablesort: sorted 1000000 i32s in 0.010274 seconds.  (ascending)
+          timsort: sorted 1000000 i32s in 0.000334 seconds.  (ascending)
+          pdqsort: sorted 1000000 i32s in 0.000864 seconds.  (ascending)
+         wolfsort: sorted 1000000 i32s in 0.000523 seconds.  (ascending)
 
-         quadsort: sorted 1000000 i32s in 0.000572 seconds. MO:     0 (uniform order)
-       stablesort: sorted 1000000 i32s in 0.008226 seconds. MO:     0 (uniform order)
-          timsort: sorted 1000000 i32s in 0.000329 seconds. MO:     0 (uniform order)
-          pdqsort: sorted 1000000 i32s in 0.001131 seconds. MO:     0 (uniform order)
+         quadsort: sorted 1000000 i32s in 0.009052 seconds.  (ascending saw)
+       stablesort: sorted 1000000 i32s in 0.017162 seconds.  (ascending saw)
+          timsort: sorted 1000000 i32s in 0.008472 seconds.  (ascending saw)
+          pdqsort: sorted 1000000 i32s in 0.052092 seconds.  (ascending saw)
+         wolfsort: sorted 1000000 i32s in 0.015734 seconds.  (ascending saw)
 
-         quadsort: sorted 1000000 i32s in 0.003017 seconds. MO:     0 (descending order)
-       stablesort: sorted 1000000 i32s in 0.010406 seconds. MO:     0 (descending order)
-          timsort: sorted 1000000 i32s in 0.000642 seconds. MO:     0 (descending order)
-          pdqsort: sorted 1000000 i32s in 0.001887 seconds. MO:     0 (descending order)
+         quadsort: sorted 1000000 i32s in 0.039240 seconds.  (generic order)
+       stablesort: sorted 1000000 i32s in 0.041762 seconds.  (generic order)
+          timsort: sorted 1000000 i32s in 0.054422 seconds.  (generic order)
+          pdqsort: sorted 1000000 i32s in 0.007902 seconds.  (generic order)
+         wolfsort: sorted 1000000 i32s in 0.039278 seconds.  (generic order)
 
-         quadsort: sorted 1000000 i32s in 0.017393 seconds. MO:     0 (random tail)
-       stablesort: sorted 1000000 i32s in 0.022720 seconds. MO:     0 (random tail)
-          timsort: sorted 1000000 i32s in 0.021455 seconds. MO:     0 (random tail)
-          pdqsort: sorted 1000000 i32s in 0.021377 seconds. MO:     0 (random tail)
+         quadsort: sorted 1000000 i32s in 0.000559 seconds.  (descending order)
+       stablesort: sorted 1000000 i32s in 0.010405 seconds.  (descending order)
+          timsort: sorted 1000000 i32s in 0.000750 seconds.  (descending order)
+          pdqsort: sorted 1000000 i32s in 0.001885 seconds.  (descending order)
+         wolfsort: sorted 1000000 i32s in 0.000578 seconds.  (descending order)
 
-         quadsort: sorted 1000000 i32s in 0.010760 seconds. MO:     0 (wave order)
-       stablesort: sorted 1000000 i32s in 0.011703 seconds. MO:     0 (wave order)
-          timsort: sorted 1000000 i32s in 0.011647 seconds. MO:     0 (wave order)
-          pdqsort: sorted 1000000 i32s in 0.024731 seconds. MO:     0 (wave order)
+         quadsort: sorted 1000000 i32s in 0.006794 seconds.  (descending saw)
+       stablesort: sorted 1000000 i32s in 0.014028 seconds.  (descending saw)
+          timsort: sorted 1000000 i32s in 0.006202 seconds.  (descending saw)
+          pdqsort: sorted 1000000 i32s in 0.016589 seconds.  (descending saw)
+         wolfsort: sorted 1000000 i32s in 0.006839 seconds.  (descending saw)
 
-         quadsort: sorted    1000 i32s in 0.005658 seconds. KO:     0 (random range)
-       stablesort: sorted    1000 i32s in 0.013356 seconds. KO:     0 (random range)
-          timsort: sorted    1000 i32s in 0.015386 seconds. KO:     0 (random range)
-          pdqsort: sorted    1000 i32s in 0.010392 seconds. KO:     0 (random range)
+         quadsort: sorted 1000000 i32s in 0.018863 seconds.  (random tail)
+       stablesort: sorted 1000000 i32s in 0.026095 seconds.  (random tail)
+          timsort: sorted 1000000 i32s in 0.022851 seconds.  (random tail)
+          pdqsort: sorted 1000000 i32s in 0.028845 seconds.  (random tail)
+         wolfsort: sorted 1000000 i32s in 0.011080 seconds.  (random tail)
+
+         quadsort: sorted 1000000 i32s in 0.037896 seconds.  (random half)
+       stablesort: sorted 1000000 i32s in 0.043151 seconds.  (random half)
+          timsort: sorted 1000000 i32s in 0.046088 seconds.  (random half)
+          pdqsort: sorted 1000000 i32s in 0.029575 seconds.  (random half)
+         wolfsort: sorted 1000000 i32s in 0.015783 seconds.  (random half)
+
+         quadsort: sorted 1000000 i32s in 0.010013 seconds.  (wave order)
+       stablesort: sorted 1000000 i32s in 0.013475 seconds.  (wave order)
+          timsort: sorted 1000000 i32s in 0.009149 seconds.  (wave order)
+          pdqsort: sorted 1000000 i32s in 0.024758 seconds.  (wave order)
+         wolfsort: sorted 1000000 i32s in 0.010016 seconds.  (wave order)
+
+         quadsort: sorted    1023 i32s in 0.005159 seconds. (random 1-1023)
+       stablesort: sorted    1023 i32s in 0.012832 seconds. (random 1-1023)
+          timsort: sorted    1023 i32s in 0.014249 seconds. (random 1-1023)
+          pdqsort: sorted    1023 i32s in 0.010355 seconds. (random 1-1023)
+         wolfsort: sorted    1023 i32s in 0.005377 seconds. (random 1-1023)
 ```
 In this benchmark quadsort is compared without any known advantages. It should be noted
-that pdqsort is not a stable sort.
+that pdqsort is not a stable sort which is the  reason it's faster on generic order data.
 
-One important thing to note is that quadsort is three times faster than Timsort and two
+The final random range test shows quadsort to be aproximately three times faster than Timsort and two
 times faster than pdqsort for small arrays containing random data.
