@@ -18,8 +18,11 @@
 */
 
 /*
-	quadsort 1.1.2.3
+	quadsort 1.1.2.4
 */
+
+#ifndef QUADSORT_H
+#define QUADSORT_H
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -28,88 +31,701 @@
 #include <assert.h>
 #include <errno.h>
 
+//#define cmp(a,b) (*(a) > *(b))
+
 typedef int CMPFUNC (const void *a, const void *b);
-typedef void SRTFUNC(void *array, size_t nmemb, size_t size, CMPFUNC *cmp);
 
 // 32 bit handling
 
+void tail_swap32(int *array, size_t nmemb, CMPFUNC *cmp)
+{
+	int tmp, pts[8];
+	register int *pta = array;
+	register unsigned char i, mid, cnt, max;
+
+	max = (unsigned char) nmemb;
+
+	switch (max)
+	{
+		case 0:
+		case 1:
+			return;
+
+		case 2:
+			if (cmp(&pta[0], &pta[1]) > 0)
+			{
+				tmp = pta[0]; pta[0] = pta[1]; pta[1] = tmp;
+			}
+			return;
+
+		case 3:
+			if (cmp(&pta[0], &pta[1]) > 0)
+			{
+				if (cmp(&pta[1], &pta[2]) > 0)
+				{
+					tmp = pta[0]; pta[0] = pta[2]; pta[2] = tmp;
+				}
+				else if (cmp(&pta[0], &pta[2]) > 0)
+				{
+					tmp = pta[0]; pta[0] = pta[1]; pta[1] = pta[2]; pta[2] = tmp;
+				}
+				else
+				{
+					tmp = pta[0]; pta[0] = pta[1]; pta[1] = tmp;
+				}
+			}
+			else if (cmp(&pta[1], &pta[2]) > 0)
+			{
+				if (cmp(&pta[0], &pta[2]) > 0)
+				{
+					tmp = pta[0]; pta[0] = pta[2]; pta[2] = pta[1]; pta[1] = tmp;
+				}
+				else
+				{
+					tmp = pta[1]; pta[1] = pta[2]; pta[2] = tmp;
+				}
+			}
+			return;
+
+		case 4:
+			if (cmp(&pta[0], &pta[1]) > 0)
+			{
+				tmp = pta[0]; pta[0] = pta[1]; pta[1] = tmp;
+			}
+
+			if (cmp(&pta[2], &pta[3]) > 0)
+			{
+				tmp = pta[2]; pta[2] = pta[3]; pta[3] = tmp;
+			}
+
+			if (cmp(&pta[1], &pta[2]) > 0)
+			{
+				if (cmp(&pta[0], &pta[2]) <= 0)
+				{
+					if (cmp(&pta[1], &pta[3]) <= 0)
+					{
+						tmp = pta[1]; pta[1] = pta[2]; pta[2] = tmp;
+					}
+					else
+					{
+						tmp = pta[1]; pta[1] = pta[2]; pta[2] = pta[3]; pta[3] = tmp;
+					}
+				}
+				else if (cmp(&pta[0], &pta[3]) > 0)
+				{
+					tmp = pta[0]; pta[0] = pta[2]; pta[2] = tmp; tmp = pta[1]; pta[1] = pta[3]; pta[3] = tmp;
+				}
+				else if (cmp(&pta[1], &pta[3]) <= 0)
+				{
+					tmp = pta[0]; pta[0] = pta[2]; pta[2] = pta[1]; pta[1] = tmp;
+				}
+				else
+				{
+					tmp = pta[0]; pta[0] = pta[2]; pta[2] = pta[3]; pta[3] = pta[1]; pta[1] = tmp;
+				}
+			}
+			return;
+
+		case 5:
+		case 6:
+		case 7:
+		case 8:
+			if (cmp(&pta[0], &pta[1]) > 0)
+			{
+				pts[0] = pta[1]; pts[1] = pta[0];
+			}
+			else
+			{
+				pts[0] = pta[0]; pts[1] = pta[1];
+			}
+
+			if (cmp(&pta[2], &pta[3]) > 0)
+			{
+				pts[2] = pta[3]; pts[3] = pta[2];
+			}
+			else
+			{
+				pts[2] = pta[2]; pts[3] = pta[3];
+			}
+
+			if (cmp(&pts[1], &pts[2]) > 0)
+			{
+				if (cmp(&pts[0], &pts[2]) <= 0)
+				{
+					if (cmp(&pts[1], &pts[3]) <= 0)
+					{
+						tmp = pts[1]; pts[1] = pts[2]; pts[2] = tmp;
+					}
+					else
+					{
+						tmp = pts[1]; pts[1] = pts[2]; pts[2] = pts[3]; pts[3] = tmp;
+					}
+				}
+				else if (cmp(&pts[0], &pts[3]) > 0)
+				{
+					tmp = pts[0]; pts[0] = pts[2]; pts[2] = tmp; tmp = pts[1]; pts[1] = pts[3]; pts[3] = tmp;
+				}
+				else if (cmp(&pts[1], &pts[3]) <= 0)
+				{
+					tmp = pts[0]; pts[0] = pts[2]; pts[2] = pts[1]; pts[1] = tmp;
+				}
+				else
+				{
+					tmp = pts[0]; pts[0] = pts[2]; pts[2] = pts[3]; pts[3] = pts[1]; pts[1] = tmp;
+				}
+			}
+
+			switch (max)
+			{
+				case 5:
+
+					break;
+				case 6:
+					if (cmp(&pta[4], &pta[5]) > 0)
+					{
+						tmp = pta[4]; pta[4] = pta[5]; pta[5] = tmp;
+					}
+					break;
+
+				case 7:
+					if (cmp(&pta[4], &pta[5]) > 0)
+					{
+						if (cmp(&pta[5], &pta[6]) > 0)
+						{
+							tmp = pta[4]; pta[4] = pta[6]; pta[6] = tmp;
+						}
+						else if (cmp(&pta[4], &pta[6]) > 0)
+						{
+							tmp = pta[4]; pta[4] = pta[5]; pta[5] = pta[6]; pta[6] = tmp;
+						}
+						else
+						{
+							tmp = pta[4]; pta[4] = pta[5]; pta[5] = tmp;
+						}
+					}
+					else if (cmp(&pta[5], &pta[6]) > 0)
+					{
+						if (cmp(&pta[4], &pta[6]) > 0)
+						{
+							tmp = pta[4]; pta[4] = pta[6]; pta[6] = pta[5]; pta[5] = tmp;
+						}
+						else
+						{
+							tmp = pta[5]; pta[5] = pta[6]; pta[6] = tmp;
+						}
+					}
+					break;
+
+				case 8:
+					if (cmp(&pta[4], &pta[5]) > 0)
+					{
+						tmp = pta[4]; pta[4] = pta[5]; pta[5] = tmp;
+					}
+
+					if (cmp(&pta[6], &pta[7]) > 0)
+					{
+						tmp = pta[6]; pta[6] = pta[7]; pta[7] = tmp;
+					}
+
+					if (cmp(&pta[5], &pta[6]) > 0)
+					{
+						if (cmp(&pta[4], &pta[6]) <= 0)
+						{
+							if (cmp(&pta[5], &pta[7]) <= 0)
+							{
+								tmp = pta[5]; pta[5] = pta[6]; pta[6] = tmp;
+							}
+							else
+							{
+								tmp = pta[5]; pta[5] = pta[6]; pta[6] = pta[7]; pta[7] = tmp;
+							}
+						}
+						else if (cmp(&pta[4], &pta[7]) > 0)
+						{
+							tmp = pta[4]; pta[4] = pta[6]; pta[6] = tmp; tmp = pta[5]; pta[5] = pta[7]; pta[7] = tmp;
+						}
+						else if (cmp(&pta[5], &pta[7]) <= 0)
+						{
+							tmp = pta[4]; pta[4] = pta[6]; pta[6] = pta[5]; pta[5] = tmp;
+						}
+						else
+						{
+							tmp = pta[4]; pta[4] = pta[6]; pta[6] = pta[7]; pta[7] = pta[5]; pta[5] = tmp;
+						}
+					}
+					break;
+			}
+
+			cnt = i = 0;
+			mid = 4;
+
+			pta[cnt++] = cmp(&pts[i], &pta[mid]) > 0 ? pta[mid++] : pts[i++];
+
+			while (i < 4 && mid < max)
+			{
+				if (cmp(&pts[i], &pta[mid]) > 0)
+				{
+					pta[cnt++] = pta[mid++];
+				}
+				else
+				{
+					pta[cnt++] = pts[i++];
+				}
+			}
+			while (i < 4)
+			{
+				pta[cnt++] = pts[i++];
+			}
+			return;
+	}
+
+	// 9-15
+
+	if (cmp(&pta[0], &pta[1]) > 0)
+	{
+		tmp = pta[0]; pta[0] = pta[1]; pta[1] = tmp;
+	}
+
+	if (cmp(&pta[2], &pta[3]) > 0)
+	{
+		tmp = pta[2]; pta[2] = pta[3]; pta[3] = tmp;
+	}
+
+	if (cmp(&pta[1], &pta[2]) > 0)
+	{
+		if (cmp(&pta[0], &pta[2]) <= 0)
+		{
+			if (cmp(&pta[1], &pta[3]) <= 0)
+			{
+				tmp = pta[1]; pta[1] = pta[2]; pta[2] = tmp;
+			}
+			else
+			{
+				tmp = pta[1]; pta[1] = pta[2]; pta[2] = pta[3]; pta[3] = tmp;
+			}
+		}
+		else if (cmp(&pta[0], &pta[3]) > 0)
+		{
+			tmp = pta[0]; pta[0] = pta[2]; pta[2] = tmp; tmp = pta[1]; pta[1] = pta[3]; pta[3] = tmp;
+		}
+		else if (cmp(&pta[1], &pta[3]) <= 0)
+		{
+			tmp = pta[0]; pta[0] = pta[2]; pta[2] = pta[1]; pta[1] = tmp;
+		}
+		else
+		{
+			tmp = pta[0]; pta[0] = pta[2]; pta[2] = pta[3]; pta[3] = pta[1]; pta[1] = tmp;
+		}
+	}
+
+	if (cmp(&pta[4], &pta[5]) > 0)
+	{
+		tmp = pta[4]; pta[4] = pta[5]; pta[5] = tmp;
+	}
+
+	if (cmp(&pta[6], &pta[7]) > 0)
+	{
+		tmp = pta[6]; pta[6] = pta[7]; pta[7] = tmp;
+	}
+
+	if (cmp(&pta[5], &pta[6]) > 0)
+	{
+		if (cmp(&pta[4], &pta[6]) <= 0)
+		{
+			if (cmp(&pta[5], &pta[7]) <= 0)
+			{
+				tmp = pta[5]; pta[5] = pta[6]; pta[6] = tmp;
+			}
+			else
+			{
+				tmp = pta[5]; pta[5] = pta[6]; pta[6] = pta[7]; pta[7] = tmp;
+			}
+		}
+		else if (cmp(&pta[4], &pta[7]) > 0)
+		{
+			tmp = pta[4]; pta[4] = pta[6]; pta[6] = tmp; tmp = pta[5]; pta[5] = pta[7]; pta[7] = tmp;
+		}
+		else if (cmp(&pta[5], &pta[7]) <= 0)
+		{
+			tmp = pta[4]; pta[4] = pta[6]; pta[6] = pta[5]; pta[5] = tmp;
+		}
+		else
+		{
+			tmp = pta[4]; pta[4] = pta[6]; pta[6] = pta[7]; pta[7] = pta[5]; pta[5] = tmp;
+		}
+	}
+
+
+	pta += 8;
+
+	switch (max)
+	{
+		case 9:
+			break;
+
+		case 10:
+			if (cmp(&pta[0], &pta[1]) > 0)
+			{
+				tmp = pta[0]; pta[0] = pta[1]; pta[1] = tmp;
+			}
+			break;
+
+		case 11:
+			if (cmp(&pta[0], &pta[1]) > 0)
+			{
+				if (cmp(&pta[1], &pta[2]) > 0)
+				{
+					tmp = pta[0]; pta[0] = pta[2]; pta[2] = tmp;
+				}
+				else if (cmp(&pta[0], &pta[2]) > 0)
+				{
+					tmp = pta[0]; pta[0] = pta[1]; pta[1] = pta[2]; pta[2] = tmp;
+				}
+				else
+				{
+					tmp = pta[0]; pta[0] = pta[1]; pta[1] = tmp;
+				}
+			}
+			else if (cmp(&pta[1], &pta[2]) > 0)
+			{
+				if (cmp(&pta[0], &pta[2]) > 0)
+				{
+					tmp = pta[0]; pta[0] = pta[2]; pta[2] = pta[1]; pta[1] = tmp;
+				}
+				else
+				{
+					tmp = pta[1]; pta[1] = pta[2]; pta[2] = tmp;
+				}
+			}
+			break;
+
+		default:
+			if (cmp(&pta[0], &pta[1]) > 0)
+			{
+				tmp = pta[0]; pta[0] = pta[1]; pta[1] = tmp;
+			}
+
+			if (cmp(&pta[2], &pta[3]) > 0)
+			{
+				tmp = pta[2]; pta[2] = pta[3]; pta[3] = tmp;
+			}
+
+			if (cmp(&pta[1], &pta[2]) > 0)
+			{
+				if (cmp(&pta[0], &pta[2]) <= 0)
+				{
+					if (cmp(&pta[1], &pta[3]) <= 0)
+					{
+						tmp = pta[1]; pta[1] = pta[2]; pta[2] = tmp;
+					}
+					else
+					{
+						tmp = pta[1]; pta[1] = pta[2]; pta[2] = pta[3]; pta[3] = tmp;
+					}
+				}
+				else if (cmp(&pta[0], &pta[3]) > 0)
+				{
+					tmp = pta[0]; pta[0] = pta[2]; pta[2] = tmp; tmp = pta[1]; pta[1] = pta[3]; pta[3] = tmp;
+				}
+				else if (cmp(&pta[1], &pta[3]) <= 0)
+				{
+					tmp = pta[0]; pta[0] = pta[2]; pta[2] = pta[1]; pta[1] = tmp;
+				}
+				else
+				{
+					tmp = pta[0]; pta[0] = pta[2]; pta[2] = pta[3]; pta[3] = pta[1]; pta[1] = tmp;
+				}
+			}
+
+			for (cnt = 4 ; cnt + 8 < max ; cnt++)
+			{
+				if (cmp(&pta[cnt - 1], &pta[cnt]) > 0)
+				{
+					tmp = pta[cnt];
+
+					if (cmp(&pta[0], &pta[cnt]) > 0)
+					{
+						for (mid = cnt ; mid > 0 ; mid--)
+						{
+							pta[mid] = pta[mid-1];
+						}
+						pta[0] = tmp;
+					}
+					else
+					{
+						pta[cnt] = pta[cnt - 1];
+
+						i = cnt - 2;
+
+						while (cmp(&pta[i], &tmp) > 0)
+						{
+							pta[i + 1] = pta[i];
+							i--;
+						}
+						pta[++i] = tmp;
+					}
+				}
+			}
+	}
+	pta -= 8;
+
+	if (cmp(&pta[3], &pta[4]) <= 0)
+	{
+		if (cmp(&pta[7], &pta[8]) <= 0)
+		{
+			return;
+		}
+		for (i = 0 ; i < 8 ; i++)
+		{
+			pts[i] = pta[i];
+		}
+	}
+	else if (cmp(&pta[0], &pta[7]) > 0)
+	{
+		pts[0] = pta[4];
+		pts[1] = pta[5];
+		pts[2] = pta[6];
+		pts[3] = pta[7];
+
+		pts[4] = pta[0];
+		pts[5] = pta[1];
+		pts[6] = pta[2];
+		pts[7] = pta[3];
+	}
+	else
+	{
+		cnt = 0;
+		i = 0;
+		mid = 4;
+
+		pts[cnt++] = cmp(&pta[i], &pta[mid]) > 0 ? pta[mid++] : pta[i++];
+		pts[cnt++] = cmp(&pta[i], &pta[mid]) > 0 ? pta[mid++] : pta[i++];
+		pts[cnt++] = cmp(&pta[i], &pta[mid]) > 0 ? pta[mid++] : pta[i++];
+		pts[cnt++] = cmp(&pta[i], &pta[mid]) > 0 ? pta[mid++] : pta[i++];
+		pts[cnt++] = cmp(&pta[i], &pta[mid]) > 0 ? pta[mid++] : pta[i++];
+
+		while (i < 4 && mid < 8)
+		{
+			if (cmp(&pta[i], &pta[mid]) > 0)
+			{
+				pts[cnt++] = pta[mid++];
+			}
+			else
+			{
+				pts[cnt++] = pta[i++];
+			}
+		}
+		while (i < 4)
+		{
+			pts[cnt++] = pta[i++];
+		}
+		while (mid < 8)
+		{
+			pts[cnt++] = pta[mid++];
+		}
+	}
+
+	cnt = 0;
+	i = 0;
+	mid = 8;
+
+	pta[cnt++] = cmp(&pts[i], &pta[mid]) > 0 ? pta[mid++] : pts[i++];
+
+	while (i < 8 && mid < max)
+	{
+		if (cmp(&pts[i], &pta[mid]) > 0)
+		{
+			pta[cnt++] = pta[mid++];
+		}
+		else
+		{
+			pta[cnt++] = pts[i++];
+		}
+	}
+	while (i < 8)
+	{
+		pta[cnt++] = pts[i++];
+	}
+}
+
 void tail_merge32(int *array, int *swap, size_t nmemb, size_t block, CMPFUNC *cmp);
 
-void quad_swap32(int *array, int *swap, size_t nmemb, CMPFUNC *cmp)
+size_t quad_swap32(int *array, int *swap, size_t nmemb, CMPFUNC *cmp)
 {
 	size_t offset;
-	register int *pta, *pts, *ptt, tmp;
+	register int *pta, *pts, *ptt, *pte, tmp;
 
 	pta = array;
+	pte = pta + nmemb - 4;
 
-	for (offset = 0 ; offset + 4 <= nmemb ; offset += 4)
+	offset = 0;
+
+	while (pta <= pte)
 	{
 		if (cmp(&pta[0], &pta[1]) > 0)
 		{
-			tmp = pta[0];
-			pta[0] = pta[1];
-			pta[1] = tmp;
+			if (cmp(&pta[2], &pta[3]) > 0)
+			{
+				if (cmp(&pta[1], &pta[2]) > 0)
+				{
+					pts = pta;
+					pta += 4;
+					goto swapper;
+				}
+				tmp = pta[2]; pta[2] = pta[3]; pta[3] = tmp;
+			}
+			tmp = pta[0]; pta[0] = pta[1]; pta[1] = tmp;
 		}
-
-		if (cmp(&pta[2], &pta[3]) > 0)
+		else if (cmp(&pta[2], &pta[3]) > 0)
 		{
-			tmp = pta[2];
-			pta[2] = pta[3];
-			pta[3] = tmp;
+			tmp = pta[2]; pta[2] = pta[3]; pta[3] = tmp;
 		}
 
 		if (cmp(&pta[1], &pta[2]) > 0)
 		{
-			if (cmp(&pta[0], &pta[3]) > 0)
-			{
-				tmp = pta[0];
-				pta[0] = pta[2];
-				pta[2] = tmp;
-
-				tmp = pta[1];
-				pta[1] = pta[3];
-				pta[3] = tmp;
-
-			}
-			else if (cmp(&pta[0], &pta[2]) <= 0)
+			if (cmp(&pta[0], &pta[2]) <= 0)
 			{
 				if (cmp(&pta[1], &pta[3]) <= 0)
 				{
-					tmp = pta[1];
-					pta[1] = pta[2];
-					pta[2] = tmp;
+					tmp = pta[1]; pta[1] = pta[2]; pta[2] = tmp;
 				}
 				else
 				{
-					tmp = pta[1];
-					pta[1] = pta[2];
-					pta[2] = pta[3];
-					pta[3] = tmp;
+					tmp = pta[1]; pta[1] = pta[2]; pta[2] = pta[3]; pta[3] = tmp;
 				}
+			}
+			else if (cmp(&pta[0], &pta[3]) > 0)
+			{
+				tmp = pta[0]; pta[0] = pta[2]; pta[2] = tmp; tmp = pta[1]; pta[1] = pta[3]; pta[3] = tmp;
+			}
+			else if (cmp(&pta[1], &pta[3]) <= 0)
+			{
+				tmp = pta[0]; pta[0] = pta[2]; pta[2] = pta[1]; pta[1] = tmp;
 			}
 			else
 			{
-				if (cmp(&pta[1], &pta[3]) <= 0)
-				{
-					tmp = pta[0];
-					pta[0] = pta[2];
-					pta[2] = pta[1];
-					pta[1] = tmp;
-				}
-				else
-				{
-					tmp = pta[0];
-					pta[0] = pta[2];
-					pta[2] = pta[3];
-					pta[3] = pta[1];
-					pta[1] = tmp;
-				}
+				tmp = pta[0]; pta[0] = pta[2]; pta[2] = pta[3]; pta[3] = pta[1]; pta[1] = tmp;
 			}
 		}
 		pta += 4;
+
+		continue;
+
+		swapper:
+
+		if (pta <= pte)
+		{
+			if (cmp(&pta[0], &pta[1]) > 0)
+			{
+				if (cmp(&pta[2], &pta[3]) > 0)
+				{
+					if (cmp(&pta[1], &pta[2]) > 0)
+					{
+						if (cmp(&pta[-1], &pta[0]) > 0)
+						{
+							pta += 4;
+
+							goto swapper;
+						}
+					}
+					tmp = pta[2]; pta[2] = pta[3]; pta[3] = tmp;
+				}
+				tmp = pta[0]; pta[0] = pta[1]; pta[1] = tmp;
+			}
+			else if (cmp(&pta[2], &pta[3]) > 0)
+			{
+				tmp = pta[2]; pta[2] = pta[3]; pta[3] = tmp;
+			}
+
+			if (cmp(&pta[1], &pta[2]) > 0)
+			{
+				if (cmp(&pta[0], &pta[2]) <= 0)
+				{
+					if (cmp(&pta[1], &pta[3]) <= 0)
+					{
+						tmp = pta[1]; pta[1] = pta[2]; pta[2] = tmp;
+					}
+					else
+					{
+						tmp = pta[1]; pta[1] = pta[2]; pta[2] = pta[3]; pta[3] = tmp;
+					}
+				}
+				else if (cmp(&pta[0], &pta[3]) > 0)
+				{
+					tmp = pta[0]; pta[0] = pta[2]; pta[2] = tmp;
+					tmp = pta[1]; pta[1] = pta[3]; pta[3] = tmp;
+
+				}
+				else if (cmp(&pta[1], &pta[3]) <= 0)
+				{
+					tmp = pta[0]; pta[0] = pta[2]; pta[2] = pta[1]; pta[1] = tmp;
+				}
+				else
+				{
+					tmp = pta[0]; pta[0] = pta[2]; pta[2] = pta[3]; pta[3] = pta[1]; pta[1] = tmp;
+				}
+			}
+
+			if (pts == array)
+			{
+				offset = (pta - pts) / 16 * 16;
+			}
+			ptt = pta - 1;
+			pta += 4;
+		}
+		else
+		{
+			if (pts == array)
+			{
+				switch (nmemb % 4)
+				{
+					case 3:
+						if (cmp(&pta[2], &pta[3]) <= 0)
+						{
+							offset = (pta - pts) / 16 * 16;
+							break;
+						}
+					case 2:
+						if (cmp(&pta[1], &pta[2]) <= 0)
+						{
+							offset = (pta - pts) / 16 * 16;
+							break;
+						}
+					case 1:
+						if (cmp(&pta[0], &pta[1]) <= 0)
+						{
+							offset = (pta - pts) / 16 * 16;
+							break;
+						}
+					case 0:
+						goto swapped;
+				}
+			}
+			ptt = pta - 1;
+		}
+
+		while (pts < ptt)
+		{
+			tmp = *pts;
+			*pts++ = *ptt;
+			*ptt-- = tmp;
+		}
+		continue;
+
+		swapped:
+
+		ptt = pts + nmemb - 1;
+
+		while (pts < ptt)
+		{
+			tmp = *pts;
+			*pts++ = *ptt;
+			*ptt-- = tmp;
+		}
+		return 1;
 	}
 
-	switch (nmemb - offset)
+	switch (nmemb % 4)
 	{
 		case 0:
 		case 1:
@@ -117,38 +733,42 @@ void quad_swap32(int *array, int *swap, size_t nmemb, CMPFUNC *cmp)
 		case 2:
 			if (cmp(&pta[0], &pta[1]) > 0)
 			{
-				tmp = pta[0];
-				pta[0] = pta[1];
-				pta[1] = tmp;
+				tmp = pta[0]; pta[0] = pta[1]; pta[1] = tmp;
 			}
 			break;
 		case 3:
 			if (cmp(&pta[0], &pta[1]) > 0)
 			{
-				tmp = pta[0];
-				pta[0] = pta[1];
-				pta[1] = tmp;
+				if (cmp(&pta[1], &pta[2]) > 0)
+				{
+					tmp = pta[0]; pta[0] = pta[2]; pta[2] = tmp;
+				}
+				else if (cmp(&pta[0], &pta[2]) > 0)
+				{
+					tmp = pta[0]; pta[0] = pta[1]; pta[1] = pta[2]; pta[2] = tmp;
+				}
+				else
+				{
+					tmp = pta[0]; pta[0] = pta[1]; pta[1] = tmp;
+				}
 			}
-			if (cmp(&pta[1], &pta[2]) > 0)
+			else if (cmp(&pta[1], &pta[2]) > 0)
 			{
-				tmp = pta[1];
-				pta[1] = pta[2];
-				pta[2] = tmp;
-			}
-			if (cmp(&pta[0], &pta[1]) > 0)
-			{
-				tmp = pta[0];
-				pta[0] = pta[1];
-				pta[1] = tmp;
+				if (cmp(&pta[0], &pta[2]) > 0)
+				{
+					tmp = pta[0]; pta[0] = pta[2]; pta[2] = pta[1]; pta[1] = tmp;
+				}
+				else
+				{
+					tmp = pta[1]; pta[1] = pta[2]; pta[2] = tmp;
+				}
 			}
 			break;
-		default:
-			assert(nmemb - offset > 3);
 	}
 
-	pta = array;
+	pta = pte = array + offset;
 
-	for (offset = 0 ; offset + 16 <= nmemb ; offset += 16)
+	for (tmp = (nmemb - offset) / 16 ; tmp > 0 ; --tmp, pte += 16)
 	{
 		if (cmp(&pta[3], &pta[4]) <= 0)
 		{
@@ -190,11 +810,11 @@ void quad_swap32(int *array, int *swap, size_t nmemb, CMPFUNC *cmp)
 			*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
 			*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
 
-			while (pta < array + offset + 4)
+			while (pta < pte + 4)
 			{
 				*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
 			}
-			while (ptt < array + offset + 8)
+			while (ptt < pte + 8)
 			{
 				*pts++ = *ptt++;
 			}
@@ -202,34 +822,6 @@ void quad_swap32(int *array, int *swap, size_t nmemb, CMPFUNC *cmp)
 		}
 		else if (cmp(&pta[0], &pta[7]) > 0)
 		{
-			if (cmp(&pta[8], &pta[15]) > 0)
-			{
-				if (cmp(&pta[4], &pta[11]) > 0)
-				{
-					tmp = pta[0]; pta[0] = pta[12]; pta[12] = tmp;
-					tmp = pta[1]; pta[1] = pta[13];	pta[13] = tmp;
-					tmp = pta[2]; pta[2] = pta[14]; pta[14] = tmp;
-					tmp = pta[3]; pta[3] = pta[15]; pta[15] = tmp;
-					tmp = pta[4]; pta[4] = pta[8]; pta[8] = tmp;
-					tmp = pta[5]; pta[5] = pta[9]; pta[9] = tmp;
-					tmp = pta[6]; pta[6] = pta[10]; pta[10] = tmp;
-					tmp = pta[7]; pta[7] = pta[11]; pta[11] = tmp;
-
-					pta += 16;
-
-					continue;
-				}
-				ptt = pta + 4;
-				*pts++ = *ptt++; *pts++ = *ptt++; *pts++ = *ptt++; *pts++ = *ptt++;
-				*pts++ = *pta++; *pts++ = *pta++; *pts++ = *pta++; *pts++ = *pta++;
-				pta = ptt;
-
-				ptt = pta + 4;
-				*pts++ = *ptt++; *pts++ = *ptt++; *pts++ = *ptt++; *pts++ = *ptt++;
-				*pts++ = *pta++; *pts++ = *pta++; *pts++ = *pta++; *pts++ = *pta++;
-
-				goto step3;
-			}
 			ptt = pta + 4;
 			*pts++ = *ptt++; *pts++ = *ptt++; *pts++ = *ptt++; *pts++ = *ptt++;
 			*pts++ = *pta++; *pts++ = *pta++; *pts++ = *pta++; *pts++ = *pta++;
@@ -245,15 +837,83 @@ void quad_swap32(int *array, int *swap, size_t nmemb, CMPFUNC *cmp)
 			*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
 			*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
 
-			while (ptt < array + offset + 8)
+			while (ptt < pte + 8)
 			{
 				*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
 			}
-			while (pta < array + offset + 4)
+
+			while (pta < pte + 4)
 			{
 				*pts++ = *pta++;
 			}
+
 			pta = ptt;
+		}
+
+		if (cmp(&pta[3], &pta[4]) <= 0)
+		{
+			ptt = pta;
+			pts = swap;
+			pta = pte;
+
+			if (cmp(&pts[7], &ptt[0]) <= 0)
+			{
+				*pta++ = *pts++; *pta++ = *pts++; *pta++ = *pts++; *pta++ = *pts++;
+				*pta++ = *pts++; *pta++ = *pts++; *pta++ = *pts++; *pta++ = *pts++;
+
+				pta += 8;
+			}
+			else if (cmp(&pts[7], &ptt[7]) <= 0)
+			{
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+
+				while (pts < swap + 8)
+				{
+					*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+				}
+
+				pta = pte + 16;
+			}
+			else if (cmp(&pts[0], &ptt[7]) > 0)
+			{
+				*pta++ = *ptt++; *pta++ = *ptt++; *pta++ = *ptt++; *pta++ = *ptt++; *pta++ = *ptt++; *pta++ = *ptt++; *pta++ = *ptt++; *pta++ = *ptt++;
+				*pta++ = *pts++; *pta++ = *pts++; *pta++ = *pts++; *pta++ = *pts++; *pta++ = *pts++; *pta++ = *pts++; *pta++ = *pts++; *pta++ = *pts++;
+			}
+			else
+			{
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+
+				while (ptt < pte + 16)
+				{
+					*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+				}
+
+				while (pts < swap + 8)
+				{
+					*pta++ = *pts++;
+				}
+			}
+			continue;
 		}
 
 		step2:
@@ -266,13 +926,13 @@ void quad_swap32(int *array, int *swap, size_t nmemb, CMPFUNC *cmp)
 			*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
 			*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
 			*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
-//			*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
+			*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
 
-			while (pta < array + offset + 12)
+			while (pta < pte + 12)
 			{
 				*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
 			}
-			while (ptt < array + offset + 16)
+			while (pts < swap + 16)
 			{
 				*pts++ = *ptt++;
 			}
@@ -283,8 +943,6 @@ void quad_swap32(int *array, int *swap, size_t nmemb, CMPFUNC *cmp)
 
 			*pts++ = *ptt++; *pts++ = *ptt++; *pts++ = *ptt++; *pts++ = *ptt++;
 			*pts++ = *pta++; *pts++ = *pta++; *pts++ = *pta++; *pts++ = *pta++;
-
-			pta = ptt;
 		}
 		else
 		{
@@ -296,11 +954,11 @@ void quad_swap32(int *array, int *swap, size_t nmemb, CMPFUNC *cmp)
 			*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
 			*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
 
-			while (ptt < array + offset + 16)
+			while (ptt < pte + 16)
 			{
 				*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
 			}
-			while (pta < array + offset + 12)
+			while (pts < swap + 16)
 			{
 				*pts++ = *pta++;
 			}
@@ -308,7 +966,7 @@ void quad_swap32(int *array, int *swap, size_t nmemb, CMPFUNC *cmp)
 
 		step3:
 
-		pta = array + offset;
+		pta = pte;
 		pts = swap;
 
 		if (cmp(&pts[7], &pts[15]) <= 0)
@@ -319,10 +977,12 @@ void quad_swap32(int *array, int *swap, size_t nmemb, CMPFUNC *cmp)
 			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
 			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
 			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+
 			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
 			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
 			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
 			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+
 //			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
 
 			while (pts < swap + 8)
@@ -352,10 +1012,12 @@ void quad_swap32(int *array, int *swap, size_t nmemb, CMPFUNC *cmp)
 			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
 			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
 			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+
 			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
 			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
 			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
 			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+
 			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
 
 			while (ptt < swap + 16)
@@ -369,15 +1031,14 @@ void quad_swap32(int *array, int *swap, size_t nmemb, CMPFUNC *cmp)
 		}
 	}
 
-	if (nmemb - offset <= 4)
+	if (nmemb % 16 > 4)
 	{
-		return;
+		tail_merge32(pta, swap, nmemb % 16, 4, cmp);
 	}
-	tail_merge32(pta, swap, nmemb - offset, 4, cmp);
+	return 0;
 }
 
-
-void quad_merge32(int *array, int *swap, size_t nmemb, size_t block, CMPFUNC *cmp)
+void quad_merge32(int *array, int *swap, const size_t nmemb, size_t block, CMPFUNC *cmp)
 {
 	size_t offset;
 	register int *pta, *pts, *c, *c_max, *d, *d_max;
@@ -386,64 +1047,17 @@ void quad_merge32(int *array, int *swap, size_t nmemb, size_t block, CMPFUNC *cm
 	{
 		offset = 0;
 
-		while (offset + block < nmemb)
+		while (offset + block * 4 <= nmemb)
 		{
-			pta = array;
-			pta += offset;
+			pta = array + offset;
 
 			c_max = pta + block;
 
 			if (cmp(c_max - 1, c_max) <= 0)
 			{
-				if (offset + block * 3 < nmemb)
-				{
-					c_max = pta + block * 3;
+				c_max = pta + block * 3;
 
-					if (cmp(c_max - 1, c_max) <= 0)
-					{
-						c_max = pta + block * 2;
-
-						if (cmp(c_max - 1, c_max) <= 0)
-						{
-							offset += block * 4;
-							continue;
-						}
-						pts = swap;
-
-						c = pta;
-
-						while (c < c_max - 8)
-						{
-							*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
-							*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
-						}
-						while (c < c_max)
-							*pts++ = *c++;
-
-						c = c_max;
-						c_max = offset + block * 4 <= nmemb ? c + block * 2 : array + nmemb;
-
-						while (c < c_max - 8)
-						{
-							*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
-							*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
-						}
-						while (c < c_max)
-							*pts++ = *c++;
-
-						goto step3;
-					}
-					pts = swap;
-
-					c = pta;
-					c_max = pta + block * 2;
-
-					while (c < c_max)
-						*pts++ = *c++;
-
-					goto step2;
-				}
-				else if (offset + block * 2 < nmemb)
+				if (cmp(c_max - 1, c_max) <= 0)
 				{
 					c_max = pta + block * 2;
 
@@ -464,13 +1078,28 @@ void quad_merge32(int *array, int *swap, size_t nmemb, size_t block, CMPFUNC *cm
 					while (c < c_max)
 						*pts++ = *c++;
 
-					goto step2;
+					c = c_max;
+					c_max = c + block * 2;
+
+					while (c < c_max - 8)
+					{
+						*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
+						*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
+					}
+					while (c < c_max)
+						*pts++ = *c++;
+
+					goto step3;
 				}
-				else
-				{
-					offset += block * 4;
-					continue;
-				}
+				pts = swap;
+
+				c = pta;
+				c_max = pta + block * 2;
+
+				while (c < c_max)
+					*pts++ = *c++;
+
+				goto step2;
 			}
 
 			// step1:
@@ -480,7 +1109,7 @@ void quad_merge32(int *array, int *swap, size_t nmemb, size_t block, CMPFUNC *cm
 			c = pta;
 
 			d = c_max;
-			d_max = offset + block * 2 <= nmemb ? d + block : array + nmemb;
+			d_max = d + block;
 
 			if (cmp(c_max - 1, d_max - 1) <= 0)
 			{
@@ -494,55 +1123,6 @@ void quad_merge32(int *array, int *swap, size_t nmemb, size_t block, CMPFUNC *cm
 				}
 				while (d < d_max)
 					*pts++ = *d++;
-			}
-			else if (cmp(c, d_max - 1) > 0)
-			{
-				if (offset + block * 4 <= nmemb)
-				{
-					int *e, *f, tmp;
-
-					e = pta + block * 2;
-					f = e + block;
-
-					if (cmp(e, f + block - 1) > 0)
-					{
-						if (cmp(d, f + block - 1) > 0)
-						{
-							while (c < c_max)
-							{
-								tmp = *c;
-								*c++ = *f;
-								*f++ = tmp;
-							}
-
-							while (d < d_max)
-							{
-								tmp = *d;
-								*d++ = *e;
-								*e++ = tmp;
-							}
-
-							offset += block * 4;
-							continue;
-						}
-					}
-				}
-
-				while (d < d_max - 8)
-				{
-					*pts++ = *d++; *pts++ = *d++; *pts++ = *d++; *pts++ = *d++;
-					*pts++ = *d++; *pts++ = *d++; *pts++ = *d++; *pts++ = *d++;
-				}
-				while (d < d_max)
-					*pts++ = *d++;
-
-				while (c < c_max - 8)
-				{
-					*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
-					*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
-				}
-				while (c < c_max)
-					*pts++ = *c++;
 			}
 			else
 			{
@@ -561,74 +1141,39 @@ void quad_merge32(int *array, int *swap, size_t nmemb, size_t block, CMPFUNC *cm
 
 			step2:
 
-			if (offset + block * 2 < nmemb)
+			c = pta + block * 2;
+
+			c_max = c + block;
+			d = c_max;
+			d_max = d + block;
+
+			if (cmp(c_max - 1, d_max - 1) <= 0)
 			{
-				c = pta + block * 2;
-
-				if (offset + block * 3 < nmemb)
+				while (c < c_max)
 				{
-					c_max = c + block;
-					d = c_max;
-					d_max = offset + block * 4 <= nmemb ? d + block : array + nmemb;
-
-					if (cmp(c_max - 1, d_max - 1) <= 0)
+					while (cmp(c, d) > 0)
 					{
-						while (c < c_max)
-						{
-							while (cmp(c, d) > 0)
-							{
-								*pts++ = *d++;
-							}
-							*pts++ = *c++;
-						}
-
-						while (d < d_max)
-							*pts++ = *d++;
+						*pts++ = *d++;
 					}
-					else if (cmp(c, d_max - 1) > 0)
-					{
-						while (d < d_max - 8)
-						{
-							*pts++ = *d++; *pts++ = *d++; *pts++ = *d++; *pts++ = *d++;
-							*pts++ = *d++; *pts++ = *d++; *pts++ = *d++; *pts++ = *d++;
-						}
-						while (d < d_max)
-							*pts++ = *d++;
-
-						while (c < c_max - 8)
-						{
-							*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
-							*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
-						}
-						while (c < c_max)
-							*pts++ = *c++;
-					}
-					else
-					{
-						while (d < d_max)
-						{
-							while (cmp(c, d) <= 0)
-							{
-								*pts++ = *c++;
-							}
-							*pts++ = *d++;
-						}
-
-						while (c < c_max)
-							*pts++ = *c++;
-					}
+					*pts++ = *c++;
 				}
-				else
+
+				while (d < d_max)
+					*pts++ = *d++;
+			}
+			else
+			{
+				while (d < d_max)
 				{
-					d = c;
-					d_max = array + nmemb;
-
-					pts = swap;
-					c = pts;
-					c_max = c + block * 2;
-
-					goto tailstep;
+					while (cmp(c, d) <= 0)
+					{
+						*pts++ = *c++;
+					}
+					*pts++ = *d++;
 				}
+
+				while (c < c_max)
+					*pts++ = *c++;
 			}
 
 			step3:
@@ -637,80 +1182,43 @@ void quad_merge32(int *array, int *swap, size_t nmemb, size_t block, CMPFUNC *cm
 
 			c = pts;
 
-			if (offset + block * 2 < nmemb)
+			c_max = c + block * 2;
+
+			d = c_max;
+			d_max = d + block * 2;
+
+			if (cmp(c_max - 1, d_max - 1) <= 0)
 			{
-				c_max = c + block * 2;
-
-				d = c_max;
-				d_max = offset + block * 4 <= nmemb ? d + block * 2 : pts + nmemb - offset;
-
-				tailstep:
-
-				if (cmp(c_max - 1, d_max - 1) <= 0)
+				while (c < c_max)
 				{
-					while (c < c_max)
+					while (cmp(c, d) > 0)
 					{
-						while (cmp(c, d) > 0)
-						{
-							*pta++ = *d++;
-						}
-						*pta++ = *c++;
-					}
-
-					while (d < d_max)
-						*pta++ = *d++;
-				}
-				else if (cmp(c, d_max - 1) > 0)
-				{
-					while (d < d_max - 16)
-					{
-						*pta++ = *d++; *pta++ = *d++; *pta++ = *d++; *pta++ = *d++;
-						*pta++ = *d++; *pta++ = *d++; *pta++ = *d++; *pta++ = *d++;
-						*pta++ = *d++; *pta++ = *d++; *pta++ = *d++; *pta++ = *d++;
-						*pta++ = *d++; *pta++ = *d++; *pta++ = *d++; *pta++ = *d++;
-					}
-					while (d < d_max)
-						*pta++ = *d++;
-
-					while (c < c_max - 16)
-					{
-						*pta++ = *c++; *pta++ = *c++; *pta++ = *c++; *pta++ = *c++;
-						*pta++ = *c++; *pta++ = *c++; *pta++ = *c++; *pta++ = *c++;
-						*pta++ = *c++; *pta++ = *c++; *pta++ = *c++; *pta++ = *c++;
-						*pta++ = *c++; *pta++ = *c++; *pta++ = *c++; *pta++ = *c++;
-					}
-					while (c < c_max)
-						*pta++ = *c++;
-				}
-				else
-				{
-					while (d < d_max)
-					{
-						while (cmp(d, c) > 0)
-						{
-							*pta++ = *c++;
-						}
 						*pta++ = *d++;
 					}
-
-					while (c < c_max)
-						*pta++ = *c++;
+					*pta++ = *c++;
 				}
+
+				while (d < d_max)
+					*pta++ = *d++;
 			}
 			else
 			{
-				d_max = pts + nmemb - offset;
-
-				while (c < d_max - 8)
+				while (d < d_max)
 				{
-					*pta++ = *c++; *pta++ = *c++; *pta++ = *c++; *pta++ = *c++;
-					*pta++ = *c++; *pta++ = *c++; *pta++ = *c++; *pta++ = *c++;
+					while (cmp(d, c) > 0)
+					{
+						*pta++ = *c++;
+					}
+					*pta++ = *d++;
 				}
-				while (c < d_max)
+
+				while (c < c_max)
 					*pta++ = *c++;
 			}
 			offset += block * 4;
 		}
+		tail_merge32(array + offset, swap, nmemb - offset, block, cmp);
+
 		block *= 4;
 	}
 	tail_merge32(array, swap, nmemb, block, cmp);
@@ -720,7 +1228,7 @@ void quad_merge32(int *array, int *swap, size_t nmemb, size_t block, CMPFUNC *cm
 void tail_merge32(int *array, int *swap, size_t nmemb, size_t block, CMPFUNC *cmp)
 {
 	size_t offset;
-	register int *pta, *pts, *c, *c_max, *d, *d_max, *e, tmp;
+	register int *pta, *pts, *c, *c_max, *d, *d_max, *e;
 
 	pts = swap;
 
@@ -737,14 +1245,29 @@ void tail_merge32(int *array, int *swap, size_t nmemb, size_t block, CMPFUNC *cm
 				continue;
 			}
 
-			d_max = (offset + block * 2 <= nmemb ? pta + block * 2 : array + nmemb);
+			if (offset + block * 2 <= nmemb)
+				d_max = pta + block * 2;
+			else
+				d_max = array + nmemb;
 
 			if (cmp(pta, pta + block) <= 0)
 			{
-				c_max = offset + block * 2 <= nmemb ? pts + block : pts + nmemb - (offset + block);
+				if (offset + block * 2 <= nmemb)
+					c_max = pts + block;
+				else
+					c_max = pts + nmemb - (offset + block);
+
+				d = d_max - 1;
+				e = pta + block - 1;
+
+				while (cmp(e, d) <= 0)
+				{
+					d_max--;
+					d--;
+					c_max--;
+				}
 
 				c = c_max - 1;
-				d = d_max - 1;
 
 				while (c >= pts + 8)
 				{
@@ -759,6 +1282,8 @@ void tail_merge32(int *array, int *swap, size_t nmemb, size_t block, CMPFUNC *cm
 				c = c_max - 1;
 				d = pta + block - 1;
 				e = d_max - 1;
+
+				*e-- = *d--;
 
 				while (c >= pts)
 				{
@@ -771,68 +1296,22 @@ void tail_merge32(int *array, int *swap, size_t nmemb, size_t block, CMPFUNC *cm
 			}
 			else
 			{
-				if (cmp(pta, d_max - 1) > 0)
+				if (offset + block * 2 <= nmemb)
+					c_max = pts + block;
+				else
+					c_max = pts + nmemb - (offset + block);
+
+				d = d_max - 1;
+				e = pta + block - 1;
+
+				while (cmp(e, d) <= 0)
 				{
-					if (offset + block * 2 <= nmemb)
-					{
-						c = pta;
-						d = pta + block;
-
-						while (d < d_max - 4)
-						{
-							tmp = *c; *c++ = *d; *d++ = tmp; tmp = *c; *c++ = *d; *d++ = tmp; tmp = *c; *c++ = *d; *d++ = tmp; tmp = *c; *c++ = *d; *d++ = tmp; 
-						}
-
-						while (d < d_max)
-						{
-							tmp = *c; *c++ = *d; *d++ = tmp;
-						}
-						continue;
-					}
-
-					c_max = offset + block * 2 <= nmemb ? pts + block : pts + nmemb - (offset + block);
-
-					c = c_max - 1;
-					d = d_max - 1;
-
-					while (c >= pts + 8)
-					{
-						*c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--;
-					}
-
-					while (c >= pts)
-					{
-						*c-- = *d--;
-					}
-	
-					c = c_max - 1;
-					d = pta + block - 1;
-					e = d_max - 1;
-
-					while (d >= pta + 8)
-					{
-						*e-- = *d--; *e-- = *d--; *e-- = *d--; *e-- = *d--; *e-- = *d--; *e-- = *d--; *e-- = *d--; *e-- = *d--;
-					}
-					while (d >= pta)
-					{
-						*e-- = *d--;
-					}
-
-					while (c >= pts + 8)
-					{
-						*e-- = *c--; *e-- = *c--; *e-- = *c--; *e-- = *c--; *e-- = *c--; *e-- = *c--; *e-- = *c--; *e-- = *c--;
-					}
-
-					while (c >= pts)
-					{
-						*e-- = *c--;
-					}
-					continue;
+					d_max--;
+					d--;
+					c_max--;
 				}
-				c_max = offset + block * 2 <= nmemb ? pts + block : pts + nmemb - (offset + block);
 
 				c = c_max - 1;
-				d = d_max - 1;
 
 				while (c >= pts + 8)
 				{
@@ -847,6 +1326,8 @@ void tail_merge32(int *array, int *swap, size_t nmemb, size_t block, CMPFUNC *cm
 				c = c_max - 1;
 				d = pta + block - 1;
 				e = d_max - 1;
+
+				*e-- = *d--;
 
 				while (d >= pta)
 				{
@@ -868,83 +1349,695 @@ void tail_merge32(int *array, int *swap, size_t nmemb, size_t block, CMPFUNC *cm
 
 // 64 bit handling
 
-void tail_merge64(long long *array, long long *swap, size_t nmemb, size_t block, CMPFUNC *cmp);
+void tail_swap64(long long *array, size_t nmemb, CMPFUNC *cmp)
+{
+	long long tmp, pts[8];
+	register long long *pta = array;
+	register unsigned char i, mid, cnt, max;
 
-void quad_swap64(long long *array, long long *swap, size_t nmemb, CMPFUNC *cmp)
+	max = (unsigned char) nmemb;
+
+	switch (max)
+	{
+		case 0:
+		case 1:
+			return;
+
+		case 2:
+			if (cmp(&pta[0], &pta[1]) > 0)
+			{
+				tmp = pta[0]; pta[0] = pta[1]; pta[1] = tmp;
+			}
+			return;
+
+		case 3:
+			if (cmp(&pta[0], &pta[1]) > 0)
+			{
+				if (cmp(&pta[1], &pta[2]) > 0)
+				{
+					tmp = pta[0]; pta[0] = pta[2]; pta[2] = tmp;
+				}
+				else if (cmp(&pta[0], &pta[2]) > 0)
+				{
+					tmp = pta[0]; pta[0] = pta[1]; pta[1] = pta[2]; pta[2] = tmp;
+				}
+				else
+				{
+					tmp = pta[0]; pta[0] = pta[1]; pta[1] = tmp;
+				}
+			}
+			else if (cmp(&pta[1], &pta[2]) > 0)
+			{
+				if (cmp(&pta[0], &pta[2]) > 0)
+				{
+					tmp = pta[0]; pta[0] = pta[2]; pta[2] = pta[1]; pta[1] = tmp;
+				}
+				else
+				{
+					tmp = pta[1]; pta[1] = pta[2]; pta[2] = tmp;
+				}
+			}
+			return;
+
+		case 4:
+			if (cmp(&pta[0], &pta[1]) > 0)
+			{
+				tmp = pta[0]; pta[0] = pta[1]; pta[1] = tmp;
+			}
+
+			if (cmp(&pta[2], &pta[3]) > 0)
+			{
+				tmp = pta[2]; pta[2] = pta[3]; pta[3] = tmp;
+			}
+
+			if (cmp(&pta[1], &pta[2]) > 0)
+			{
+				if (cmp(&pta[0], &pta[2]) <= 0)
+				{
+					if (cmp(&pta[1], &pta[3]) <= 0)
+					{
+						tmp = pta[1]; pta[1] = pta[2]; pta[2] = tmp;
+					}
+					else
+					{
+						tmp = pta[1]; pta[1] = pta[2]; pta[2] = pta[3]; pta[3] = tmp;
+					}
+				}
+				else if (cmp(&pta[0], &pta[3]) > 0)
+				{
+					tmp = pta[0]; pta[0] = pta[2]; pta[2] = tmp; tmp = pta[1]; pta[1] = pta[3]; pta[3] = tmp;
+				}
+				else if (cmp(&pta[1], &pta[3]) <= 0)
+				{
+					tmp = pta[0]; pta[0] = pta[2]; pta[2] = pta[1]; pta[1] = tmp;
+				}
+				else
+				{
+					tmp = pta[0]; pta[0] = pta[2]; pta[2] = pta[3]; pta[3] = pta[1]; pta[1] = tmp;
+				}
+			}
+			return;
+
+		case 5:
+		case 6:
+		case 7:
+		case 8:
+			if (cmp(&pta[0], &pta[1]) > 0)
+			{
+				pts[0] = pta[1]; pts[1] = pta[0];
+			}
+			else
+			{
+				pts[0] = pta[0]; pts[1] = pta[1];
+			}
+
+			if (cmp(&pta[2], &pta[3]) > 0)
+			{
+				pts[2] = pta[3]; pts[3] = pta[2];
+			}
+			else
+			{
+				pts[2] = pta[2]; pts[3] = pta[3];
+			}
+
+			if (cmp(&pts[1], &pts[2]) > 0)
+			{
+				if (cmp(&pts[0], &pts[2]) <= 0)
+				{
+					if (cmp(&pts[1], &pts[3]) <= 0)
+					{
+						tmp = pts[1]; pts[1] = pts[2]; pts[2] = tmp;
+					}
+					else
+					{
+						tmp = pts[1]; pts[1] = pts[2]; pts[2] = pts[3]; pts[3] = tmp;
+					}
+				}
+				else if (cmp(&pts[0], &pts[3]) > 0)
+				{
+					tmp = pts[0]; pts[0] = pts[2]; pts[2] = tmp; tmp = pts[1]; pts[1] = pts[3]; pts[3] = tmp;
+				}
+				else if (cmp(&pts[1], &pts[3]) <= 0)
+				{
+					tmp = pts[0]; pts[0] = pts[2]; pts[2] = pts[1]; pts[1] = tmp;
+				}
+				else
+				{
+					tmp = pts[0]; pts[0] = pts[2]; pts[2] = pts[3]; pts[3] = pts[1]; pts[1] = tmp;
+				}
+			}
+
+			switch (max)
+			{
+				case 5:
+
+					break;
+				case 6:
+					if (cmp(&pta[4], &pta[5]) > 0)
+					{
+						tmp = pta[4]; pta[4] = pta[5]; pta[5] = tmp;
+					}
+					break;
+
+				case 7:
+					if (cmp(&pta[4], &pta[5]) > 0)
+					{
+						if (cmp(&pta[5], &pta[6]) > 0)
+						{
+							tmp = pta[4]; pta[4] = pta[6]; pta[6] = tmp;
+						}
+						else if (cmp(&pta[4], &pta[6]) > 0)
+						{
+							tmp = pta[4]; pta[4] = pta[5]; pta[5] = pta[6]; pta[6] = tmp;
+						}
+						else
+						{
+							tmp = pta[4]; pta[4] = pta[5]; pta[5] = tmp;
+						}
+					}
+					else if (cmp(&pta[5], &pta[6]) > 0)
+					{
+						if (cmp(&pta[4], &pta[6]) > 0)
+						{
+							tmp = pta[4]; pta[4] = pta[6]; pta[6] = pta[5]; pta[5] = tmp;
+						}
+						else
+						{
+							tmp = pta[5]; pta[5] = pta[6]; pta[6] = tmp;
+						}
+					}
+					break;
+
+				case 8:
+					if (cmp(&pta[4], &pta[5]) > 0)
+					{
+						tmp = pta[4]; pta[4] = pta[5]; pta[5] = tmp;
+					}
+
+					if (cmp(&pta[6], &pta[7]) > 0)
+					{
+						tmp = pta[6]; pta[6] = pta[7]; pta[7] = tmp;
+					}
+
+					if (cmp(&pta[5], &pta[6]) > 0)
+					{
+						if (cmp(&pta[4], &pta[6]) <= 0)
+						{
+							if (cmp(&pta[5], &pta[7]) <= 0)
+							{
+								tmp = pta[5]; pta[5] = pta[6]; pta[6] = tmp;
+							}
+							else
+							{
+								tmp = pta[5]; pta[5] = pta[6]; pta[6] = pta[7]; pta[7] = tmp;
+							}
+						}
+						else if (cmp(&pta[4], &pta[7]) > 0)
+						{
+							tmp = pta[4]; pta[4] = pta[6]; pta[6] = tmp; tmp = pta[5]; pta[5] = pta[7]; pta[7] = tmp;
+						}
+						else if (cmp(&pta[5], &pta[7]) <= 0)
+						{
+							tmp = pta[4]; pta[4] = pta[6]; pta[6] = pta[5]; pta[5] = tmp;
+						}
+						else
+						{
+							tmp = pta[4]; pta[4] = pta[6]; pta[6] = pta[7]; pta[7] = pta[5]; pta[5] = tmp;
+						}
+					}
+					break;
+			}
+
+			cnt = i = 0;
+			mid = 4;
+
+			pta[cnt++] = cmp(&pts[i], &pta[mid]) > 0 ? pta[mid++] : pts[i++];
+
+			while (i < 4 && mid < max)
+			{
+				if (cmp(&pts[i], &pta[mid]) > 0)
+				{
+					pta[cnt++] = pta[mid++];
+				}
+				else
+				{
+					pta[cnt++] = pts[i++];
+				}
+			}
+			while (i < 4)
+			{
+				pta[cnt++] = pts[i++];
+			}
+			return;
+	}
+
+	// 9-15
+
+	if (cmp(&pta[0], &pta[1]) > 0)
+	{
+		tmp = pta[0]; pta[0] = pta[1]; pta[1] = tmp;
+	}
+
+	if (cmp(&pta[2], &pta[3]) > 0)
+	{
+		tmp = pta[2]; pta[2] = pta[3]; pta[3] = tmp;
+	}
+
+	if (cmp(&pta[1], &pta[2]) > 0)
+	{
+		if (cmp(&pta[0], &pta[2]) <= 0)
+		{
+			if (cmp(&pta[1], &pta[3]) <= 0)
+			{
+				tmp = pta[1]; pta[1] = pta[2]; pta[2] = tmp;
+			}
+			else
+			{
+				tmp = pta[1]; pta[1] = pta[2]; pta[2] = pta[3]; pta[3] = tmp;
+			}
+		}
+		else if (cmp(&pta[0], &pta[3]) > 0)
+		{
+			tmp = pta[0]; pta[0] = pta[2]; pta[2] = tmp; tmp = pta[1]; pta[1] = pta[3]; pta[3] = tmp;
+		}
+		else if (cmp(&pta[1], &pta[3]) <= 0)
+		{
+			tmp = pta[0]; pta[0] = pta[2]; pta[2] = pta[1]; pta[1] = tmp;
+		}
+		else
+		{
+			tmp = pta[0]; pta[0] = pta[2]; pta[2] = pta[3]; pta[3] = pta[1]; pta[1] = tmp;
+		}
+	}
+
+	if (cmp(&pta[4], &pta[5]) > 0)
+	{
+		tmp = pta[4]; pta[4] = pta[5]; pta[5] = tmp;
+	}
+
+	if (cmp(&pta[6], &pta[7]) > 0)
+	{
+		tmp = pta[6]; pta[6] = pta[7]; pta[7] = tmp;
+	}
+
+	if (cmp(&pta[5], &pta[6]) > 0)
+	{
+		if (cmp(&pta[4], &pta[6]) <= 0)
+		{
+			if (cmp(&pta[5], &pta[7]) <= 0)
+			{
+				tmp = pta[5]; pta[5] = pta[6]; pta[6] = tmp;
+			}
+			else
+			{
+				tmp = pta[5]; pta[5] = pta[6]; pta[6] = pta[7]; pta[7] = tmp;
+			}
+		}
+		else if (cmp(&pta[4], &pta[7]) > 0)
+		{
+			tmp = pta[4]; pta[4] = pta[6]; pta[6] = tmp; tmp = pta[5]; pta[5] = pta[7]; pta[7] = tmp;
+		}
+		else if (cmp(&pta[5], &pta[7]) <= 0)
+		{
+			tmp = pta[4]; pta[4] = pta[6]; pta[6] = pta[5]; pta[5] = tmp;
+		}
+		else
+		{
+			tmp = pta[4]; pta[4] = pta[6]; pta[6] = pta[7]; pta[7] = pta[5]; pta[5] = tmp;
+		}
+	}
+
+
+	pta += 8;
+
+	switch (max)
+	{
+		case 9:
+			break;
+
+		case 10:
+			if (cmp(&pta[0], &pta[1]) > 0)
+			{
+				tmp = pta[0]; pta[0] = pta[1]; pta[1] = tmp;
+			}
+			break;
+
+		case 11:
+			if (cmp(&pta[0], &pta[1]) > 0)
+			{
+				if (cmp(&pta[1], &pta[2]) > 0)
+				{
+					tmp = pta[0]; pta[0] = pta[2]; pta[2] = tmp;
+				}
+				else if (cmp(&pta[0], &pta[2]) > 0)
+				{
+					tmp = pta[0]; pta[0] = pta[1]; pta[1] = pta[2]; pta[2] = tmp;
+				}
+				else
+				{
+					tmp = pta[0]; pta[0] = pta[1]; pta[1] = tmp;
+				}
+			}
+			else if (cmp(&pta[1], &pta[2]) > 0)
+			{
+				if (cmp(&pta[0], &pta[2]) > 0)
+				{
+					tmp = pta[0]; pta[0] = pta[2]; pta[2] = pta[1]; pta[1] = tmp;
+				}
+				else
+				{
+					tmp = pta[1]; pta[1] = pta[2]; pta[2] = tmp;
+				}
+			}
+			break;
+
+		default:
+			if (cmp(&pta[0], &pta[1]) > 0)
+			{
+				tmp = pta[0]; pta[0] = pta[1]; pta[1] = tmp;
+			}
+
+			if (cmp(&pta[2], &pta[3]) > 0)
+			{
+				tmp = pta[2]; pta[2] = pta[3]; pta[3] = tmp;
+			}
+
+			if (cmp(&pta[1], &pta[2]) > 0)
+			{
+				if (cmp(&pta[0], &pta[2]) <= 0)
+				{
+					if (cmp(&pta[1], &pta[3]) <= 0)
+					{
+						tmp = pta[1]; pta[1] = pta[2]; pta[2] = tmp;
+					}
+					else
+					{
+						tmp = pta[1]; pta[1] = pta[2]; pta[2] = pta[3]; pta[3] = tmp;
+					}
+				}
+				else if (cmp(&pta[0], &pta[3]) > 0)
+				{
+					tmp = pta[0]; pta[0] = pta[2]; pta[2] = tmp; tmp = pta[1]; pta[1] = pta[3]; pta[3] = tmp;
+				}
+				else if (cmp(&pta[1], &pta[3]) <= 0)
+				{
+					tmp = pta[0]; pta[0] = pta[2]; pta[2] = pta[1]; pta[1] = tmp;
+				}
+				else
+				{
+					tmp = pta[0]; pta[0] = pta[2]; pta[2] = pta[3]; pta[3] = pta[1]; pta[1] = tmp;
+				}
+			}
+
+			for (cnt = 4 ; cnt + 8 < max ; cnt++)
+			{
+				if (cmp(&pta[cnt - 1], &pta[cnt]) > 0)
+				{
+					tmp = pta[cnt];
+
+					if (cmp(&pta[0], &pta[cnt]) > 0)
+					{
+						for (mid = cnt ; mid > 0 ; mid--)
+						{
+							pta[mid] = pta[mid-1];
+						}
+						pta[0] = tmp;
+					}
+					else
+					{
+						pta[cnt] = pta[cnt - 1];
+
+						i = cnt - 2;
+
+						while (cmp(&pta[i], &tmp) > 0)
+						{
+							pta[i + 1] = pta[i];
+							i--;
+						}
+						pta[++i] = tmp;
+					}
+				}
+			}
+	}
+	pta -= 8;
+
+	if (cmp(&pta[3], &pta[4]) <= 0)
+	{
+		if (cmp(&pta[7], &pta[8]) <= 0)
+		{
+			return;
+		}
+		for (i = 0 ; i < 8 ; i++)
+		{
+			pts[i] = pta[i];
+		}
+	}
+	else if (cmp(&pta[0], &pta[7]) > 0)
+	{
+		pts[0] = pta[4];
+		pts[1] = pta[5];
+		pts[2] = pta[6];
+		pts[3] = pta[7];
+
+		pts[4] = pta[0];
+		pts[5] = pta[1];
+		pts[6] = pta[2];
+		pts[7] = pta[3];
+	}
+	else
+	{
+		cnt = 0;
+		i = 0;
+		mid = 4;
+
+		pts[cnt++] = cmp(&pta[i], &pta[mid]) > 0 ? pta[mid++] : pta[i++];
+		pts[cnt++] = cmp(&pta[i], &pta[mid]) > 0 ? pta[mid++] : pta[i++];
+		pts[cnt++] = cmp(&pta[i], &pta[mid]) > 0 ? pta[mid++] : pta[i++];
+		pts[cnt++] = cmp(&pta[i], &pta[mid]) > 0 ? pta[mid++] : pta[i++];
+		pts[cnt++] = cmp(&pta[i], &pta[mid]) > 0 ? pta[mid++] : pta[i++];
+
+		while (i < 4 && mid < 8)
+		{
+			if (cmp(&pta[i], &pta[mid]) > 0)
+			{
+				pts[cnt++] = pta[mid++];
+			}
+			else
+			{
+				pts[cnt++] = pta[i++];
+			}
+		}
+		while (i < 4)
+		{
+			pts[cnt++] = pta[i++];
+		}
+		while (mid < 8)
+		{
+			pts[cnt++] = pta[mid++];
+		}
+	}
+
+	cnt = 0;
+	i = 0;
+	mid = 8;
+
+	pta[cnt++] = cmp(&pts[i], &pta[mid]) > 0 ? pta[mid++] : pts[i++];
+
+	while (i < 8 && mid < max)
+	{
+		if (cmp(&pts[i], &pta[mid]) > 0)
+		{
+			pta[cnt++] = pta[mid++];
+		}
+		else
+		{
+			pta[cnt++] = pts[i++];
+		}
+	}
+	while (i < 8)
+	{
+		pta[cnt++] = pts[i++];
+	}
+}
+
+void tail_merge64(long long *array, long long *swap, const size_t nmemb, size_t block, CMPFUNC *cmp);
+
+size_t quad_swap64(long long *array, long long *swap, size_t nmemb, CMPFUNC *cmp)
 {
 	size_t offset;
-	register long long *pta, *pts, *ptt, tmp;
+	register long long *pta, *pts, *ptt, *pte, tmp;
 
 	pta = array;
+	pte = pta + nmemb - 4;
 
-	for (offset = 0 ; offset + 4 <= nmemb ; offset += 4)
+	offset = 0;
+
+	while (pta <= pte)
 	{
 		if (cmp(&pta[0], &pta[1]) > 0)
 		{
-			tmp = pta[0];
-			pta[0] = pta[1];
-			pta[1] = tmp;
+			if (cmp(&pta[2], &pta[3]) > 0)
+			{
+				if (cmp(&pta[1], &pta[2]) > 0)
+				{
+					pts = pta;
+					pta += 4;
+					goto swapper;
+				}
+				tmp = pta[2]; pta[2] = pta[3]; pta[3] = tmp;
+			}
+			tmp = pta[0]; pta[0] = pta[1]; pta[1] = tmp;
 		}
-
-		if (cmp(&pta[2], &pta[3]) > 0)
+		else if (cmp(&pta[2], &pta[3]) > 0)
 		{
-			tmp = pta[2];
-			pta[2] = pta[3];
-			pta[3] = tmp;
+			tmp = pta[2]; pta[2] = pta[3]; pta[3] = tmp;
 		}
 
 		if (cmp(&pta[1], &pta[2]) > 0)
 		{
-			if (cmp(&pta[0], &pta[3]) > 0)
-			{
-				tmp = pta[0];
-				pta[0] = pta[2];
-				pta[2] = tmp;
-
-				tmp = pta[1];
-				pta[1] = pta[3];
-				pta[3] = tmp;
-
-			}
-			else if (cmp(&pta[0], &pta[2]) <= 0)
+			if (cmp(&pta[0], &pta[2]) <= 0)
 			{
 				if (cmp(&pta[1], &pta[3]) <= 0)
 				{
-					tmp = pta[1];
-					pta[1] = pta[2];
-					pta[2] = tmp;
+					tmp = pta[1]; pta[1] = pta[2]; pta[2] = tmp;
 				}
 				else
 				{
-					tmp = pta[1];
-					pta[1] = pta[2];
-					pta[2] = pta[3];
-					pta[3] = tmp;
+					tmp = pta[1]; pta[1] = pta[2]; pta[2] = pta[3]; pta[3] = tmp;
 				}
+			}
+			else if (cmp(&pta[0], &pta[3]) > 0)
+			{
+				tmp = pta[0]; pta[0] = pta[2]; pta[2] = tmp; tmp = pta[1]; pta[1] = pta[3]; pta[3] = tmp;
+			}
+			else if (cmp(&pta[1], &pta[3]) <= 0)
+			{
+				tmp = pta[0]; pta[0] = pta[2]; pta[2] = pta[1]; pta[1] = tmp;
 			}
 			else
 			{
-				if (cmp(&pta[1], &pta[3]) <= 0)
-				{
-					tmp = pta[0];
-					pta[0] = pta[2];
-					pta[2] = pta[1];
-					pta[1] = tmp;
-				}
-				else
-				{
-					tmp = pta[0];
-					pta[0] = pta[2];
-					pta[2] = pta[3];
-					pta[3] = pta[1];
-					pta[1] = tmp;
-				}
+				tmp = pta[0]; pta[0] = pta[2]; pta[2] = pta[3]; pta[3] = pta[1]; pta[1] = tmp;
 			}
 		}
 		pta += 4;
+
+		continue;
+
+		swapper:
+
+		if (pta <= pte)
+		{
+			if (cmp(&pta[0], &pta[1]) > 0)
+			{
+				if (cmp(&pta[2], &pta[3]) > 0)
+				{
+					if (cmp(&pta[1], &pta[2]) > 0)
+					{
+						if (cmp(&pta[-1], &pta[0]) > 0)
+						{
+							pta += 4;
+
+							goto swapper;
+						}
+					}
+					tmp = pta[2]; pta[2] = pta[3]; pta[3] = tmp;
+				}
+				tmp = pta[0]; pta[0] = pta[1]; pta[1] = tmp;
+			}
+			else if (cmp(&pta[2], &pta[3]) > 0)
+			{
+				tmp = pta[2]; pta[2] = pta[3]; pta[3] = tmp;
+			}
+
+			if (cmp(&pta[1], &pta[2]) > 0)
+			{
+				if (cmp(&pta[0], &pta[2]) <= 0)
+				{
+					if (cmp(&pta[1], &pta[3]) <= 0)
+					{
+						tmp = pta[1]; pta[1] = pta[2]; pta[2] = tmp;
+					}
+					else
+					{
+						tmp = pta[1]; pta[1] = pta[2]; pta[2] = pta[3]; pta[3] = tmp;
+					}
+				}
+				else if (cmp(&pta[0], &pta[3]) > 0)
+				{
+					tmp = pta[0]; pta[0] = pta[2]; pta[2] = tmp;
+					tmp = pta[1]; pta[1] = pta[3]; pta[3] = tmp;
+
+				}
+				else if (cmp(&pta[1], &pta[3]) <= 0)
+				{
+					tmp = pta[0]; pta[0] = pta[2]; pta[2] = pta[1]; pta[1] = tmp;
+				}
+				else
+				{
+					tmp = pta[0]; pta[0] = pta[2]; pta[2] = pta[3]; pta[3] = pta[1]; pta[1] = tmp;
+				}
+			}
+
+			if (pts == array)
+			{
+				offset = (pta - pts) / 16 * 16;
+			}
+			ptt = pta - 1;
+			pta += 4;
+		}
+		else
+		{
+			if (pts == array)
+			{
+				switch (nmemb % 4)
+				{
+					case 3:
+						if (cmp(&pta[2], &pta[3]) <= 0)
+						{
+							offset = (pta - pts) / 16 * 16;
+							break;
+						}
+					case 2:
+						if (cmp(&pta[1], &pta[2]) <= 0)
+						{
+							offset = (pta - pts) / 16 * 16;
+							break;
+						}
+					case 1:
+						if (cmp(&pta[0], &pta[1]) <= 0)
+						{
+							offset = (pta - pts) / 16 * 16;
+							break;
+						}
+					case 0:
+						goto swapped;
+				}
+			}
+			ptt = pta - 1;
+		}
+
+		while (pts < ptt)
+		{
+			tmp = *pts;
+			*pts++ = *ptt;
+			*ptt-- = tmp;
+		}
+		continue;
+
+		swapped:
+
+		ptt = pts + nmemb - 1;
+
+		while (pts < ptt)
+		{
+			tmp = *pts;
+			*pts++ = *ptt;
+			*ptt-- = tmp;
+		}
+		return 1;
 	}
 
-	switch (nmemb - offset)
+	switch (nmemb % 4)
 	{
 		case 0:
 		case 1:
@@ -952,38 +2045,42 @@ void quad_swap64(long long *array, long long *swap, size_t nmemb, CMPFUNC *cmp)
 		case 2:
 			if (cmp(&pta[0], &pta[1]) > 0)
 			{
-				tmp = pta[0];
-				pta[0] = pta[1];
-				pta[1] = tmp;
+				tmp = pta[0]; pta[0] = pta[1]; pta[1] = tmp;
 			}
 			break;
 		case 3:
 			if (cmp(&pta[0], &pta[1]) > 0)
 			{
-				tmp = pta[0];
-				pta[0] = pta[1];
-				pta[1] = tmp;
+				if (cmp(&pta[1], &pta[2]) > 0)
+				{
+					tmp = pta[0]; pta[0] = pta[2]; pta[2] = tmp;
+				}
+				else if (cmp(&pta[0], &pta[2]) > 0)
+				{
+					tmp = pta[0]; pta[0] = pta[1]; pta[1] = pta[2]; pta[2] = tmp;
+				}
+				else
+				{
+					tmp = pta[0]; pta[0] = pta[1]; pta[1] = tmp;
+				}
 			}
-			if (cmp(&pta[1], &pta[2]) > 0)
+			else if (cmp(&pta[1], &pta[2]) > 0)
 			{
-				tmp = pta[1];
-				pta[1] = pta[2];
-				pta[2] = tmp;
-			}
-			if (cmp(&pta[0], &pta[1]) > 0)
-			{
-				tmp = pta[0];
-				pta[0] = pta[1];
-				pta[1] = tmp;
+				if (cmp(&pta[0], &pta[2]) > 0)
+				{
+					tmp = pta[0]; pta[0] = pta[2]; pta[2] = pta[1]; pta[1] = tmp;
+				}
+				else
+				{
+					tmp = pta[1]; pta[1] = pta[2]; pta[2] = tmp;
+				}
 			}
 			break;
-		default:
-			assert(nmemb - offset > 3);
 	}
 
-	pta = array;
+	pta = pte = array + offset;
 
-	for (offset = 0 ; offset + 16 <= nmemb ; offset += 16)
+	for (tmp = (nmemb - offset) / 16 ; tmp > 0 ; --tmp, pte += 16)
 	{
 		if (cmp(&pta[3], &pta[4]) <= 0)
 		{
@@ -1025,11 +2122,11 @@ void quad_swap64(long long *array, long long *swap, size_t nmemb, CMPFUNC *cmp)
 			*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
 			*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
 
-			while (pta < array + offset + 4)
+			while (pta < pte + 4)
 			{
 				*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
 			}
-			while (ptt < array + offset + 8)
+			while (ptt < pte + 8)
 			{
 				*pts++ = *ptt++;
 			}
@@ -1037,34 +2134,6 @@ void quad_swap64(long long *array, long long *swap, size_t nmemb, CMPFUNC *cmp)
 		}
 		else if (cmp(&pta[0], &pta[7]) > 0)
 		{
-			if (cmp(&pta[8], &pta[15]) > 0)
-			{
-				if (cmp(&pta[4], &pta[11]) > 0)
-				{
-					tmp = pta[0]; pta[0] = pta[12]; pta[12] = tmp;
-					tmp = pta[1]; pta[1] = pta[13];	pta[13] = tmp;
-					tmp = pta[2]; pta[2] = pta[14]; pta[14] = tmp;
-					tmp = pta[3]; pta[3] = pta[15]; pta[15] = tmp;
-					tmp = pta[4]; pta[4] = pta[8]; pta[8] = tmp;
-					tmp = pta[5]; pta[5] = pta[9]; pta[9] = tmp;
-					tmp = pta[6]; pta[6] = pta[10]; pta[10] = tmp;
-					tmp = pta[7]; pta[7] = pta[11]; pta[11] = tmp;
-
-					pta += 16;
-
-					continue;
-				}
-				ptt = pta + 4;
-				*pts++ = *ptt++; *pts++ = *ptt++; *pts++ = *ptt++; *pts++ = *ptt++;
-				*pts++ = *pta++; *pts++ = *pta++; *pts++ = *pta++; *pts++ = *pta++;
-				pta = ptt;
-
-				ptt = pta + 4;
-				*pts++ = *ptt++; *pts++ = *ptt++; *pts++ = *ptt++; *pts++ = *ptt++;
-				*pts++ = *pta++; *pts++ = *pta++; *pts++ = *pta++; *pts++ = *pta++;
-
-				goto step3;
-			}
 			ptt = pta + 4;
 			*pts++ = *ptt++; *pts++ = *ptt++; *pts++ = *ptt++; *pts++ = *ptt++;
 			*pts++ = *pta++; *pts++ = *pta++; *pts++ = *pta++; *pts++ = *pta++;
@@ -1080,15 +2149,83 @@ void quad_swap64(long long *array, long long *swap, size_t nmemb, CMPFUNC *cmp)
 			*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
 			*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
 
-			while (ptt < array + offset + 8)
+			while (ptt < pte + 8)
 			{
 				*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
 			}
-			while (pta < array + offset + 4)
+
+			while (pta < pte + 4)
 			{
 				*pts++ = *pta++;
 			}
+
 			pta = ptt;
+		}
+
+		if (cmp(&pta[3], &pta[4]) <= 0)
+		{
+			ptt = pta;
+			pts = swap;
+			pta = pte;
+
+			if (cmp(&pts[7], &ptt[0]) <= 0)
+			{
+				*pta++ = *pts++; *pta++ = *pts++; *pta++ = *pts++; *pta++ = *pts++;
+				*pta++ = *pts++; *pta++ = *pts++; *pta++ = *pts++; *pta++ = *pts++;
+
+				pta += 8;
+			}
+			else if (cmp(&pts[7], &ptt[7]) <= 0)
+			{
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+
+				while (pts < swap + 8)
+				{
+					*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+				}
+
+				pta = pte + 16;
+			}
+			else if (cmp(&pts[0], &ptt[7]) > 0)
+			{
+				*pta++ = *ptt++; *pta++ = *ptt++; *pta++ = *ptt++; *pta++ = *ptt++; *pta++ = *ptt++; *pta++ = *ptt++; *pta++ = *ptt++; *pta++ = *ptt++;
+				*pta++ = *pts++; *pta++ = *pts++; *pta++ = *pts++; *pta++ = *pts++; *pta++ = *pts++; *pta++ = *pts++; *pta++ = *pts++; *pta++ = *pts++;
+			}
+			else
+			{
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+
+				while (ptt < pte + 16)
+				{
+					*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+				}
+
+				while (pts < swap + 8)
+				{
+					*pta++ = *pts++;
+				}
+			}
+			continue;
 		}
 
 		step2:
@@ -1101,13 +2238,13 @@ void quad_swap64(long long *array, long long *swap, size_t nmemb, CMPFUNC *cmp)
 			*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
 			*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
 			*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
-//			*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
+			*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
 
-			while (pta < array + offset + 12)
+			while (pta < pte + 12)
 			{
 				*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
 			}
-			while (ptt < array + offset + 16)
+			while (pts < swap + 16)
 			{
 				*pts++ = *ptt++;
 			}
@@ -1118,8 +2255,6 @@ void quad_swap64(long long *array, long long *swap, size_t nmemb, CMPFUNC *cmp)
 
 			*pts++ = *ptt++; *pts++ = *ptt++; *pts++ = *ptt++; *pts++ = *ptt++;
 			*pts++ = *pta++; *pts++ = *pta++; *pts++ = *pta++; *pts++ = *pta++;
-
-			pta = ptt;
 		}
 		else
 		{
@@ -1131,11 +2266,11 @@ void quad_swap64(long long *array, long long *swap, size_t nmemb, CMPFUNC *cmp)
 			*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
 			*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
 
-			while (ptt < array + offset + 16)
+			while (ptt < pte + 16)
 			{
 				*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
 			}
-			while (pta < array + offset + 12)
+			while (pts < swap + 16)
 			{
 				*pts++ = *pta++;
 			}
@@ -1143,7 +2278,7 @@ void quad_swap64(long long *array, long long *swap, size_t nmemb, CMPFUNC *cmp)
 
 		step3:
 
-		pta = array + offset;
+		pta = pte;
 		pts = swap;
 
 		if (cmp(&pts[7], &pts[15]) <= 0)
@@ -1154,10 +2289,12 @@ void quad_swap64(long long *array, long long *swap, size_t nmemb, CMPFUNC *cmp)
 			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
 			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
 			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+
 			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
 			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
 			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
 			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+
 //			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
 
 			while (pts < swap + 8)
@@ -1187,10 +2324,12 @@ void quad_swap64(long long *array, long long *swap, size_t nmemb, CMPFUNC *cmp)
 			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
 			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
 			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+
 			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
 			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
 			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
 			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+
 			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
 
 			while (ptt < swap + 16)
@@ -1204,15 +2343,14 @@ void quad_swap64(long long *array, long long *swap, size_t nmemb, CMPFUNC *cmp)
 		}
 	}
 
-	if (nmemb - offset <= 4)
+	if (nmemb % 16 > 4)
 	{
-		return;
+		tail_merge64(pta, swap, nmemb % 16, 4, cmp);
 	}
-	tail_merge64(pta, swap, nmemb - offset, 4, cmp);
+	return 0;
 }
 
-
-void quad_merge64(long long *array, long long *swap, size_t nmemb, size_t block, CMPFUNC *cmp)
+void quad_merge64(long long *array, long long *swap, const size_t nmemb, size_t block, CMPFUNC *cmp)
 {
 	size_t offset;
 	register long long *pta, *pts, *c, *c_max, *d, *d_max;
@@ -1221,64 +2359,17 @@ void quad_merge64(long long *array, long long *swap, size_t nmemb, size_t block,
 	{
 		offset = 0;
 
-		while (offset + block < nmemb)
+		while (offset + block * 4 <= nmemb)
 		{
-			pta = array;
-			pta += offset;
+			pta = array + offset;
 
 			c_max = pta + block;
 
 			if (cmp(c_max - 1, c_max) <= 0)
 			{
-				if (offset + block * 3 < nmemb)
-				{
-					c_max = pta + block * 3;
+				c_max = pta + block * 3;
 
-					if (cmp(c_max - 1, c_max) <= 0)
-					{
-						c_max = pta + block * 2;
-
-						if (cmp(c_max - 1, c_max) <= 0)
-						{
-							offset += block * 4;
-							continue;
-						}
-						pts = swap;
-
-						c = pta;
-
-						while (c < c_max - 8)
-						{
-							*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
-							*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
-						}
-						while (c < c_max)
-							*pts++ = *c++;
-
-						c = c_max;
-						c_max = offset + block * 4 <= nmemb ? c + block * 2 : array + nmemb;
-
-						while (c < c_max - 8)
-						{
-							*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
-							*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
-						}
-						while (c < c_max)
-							*pts++ = *c++;
-
-						goto step3;
-					}
-					pts = swap;
-
-					c = pta;
-					c_max = pta + block * 2;
-
-					while (c < c_max)
-						*pts++ = *c++;
-
-					goto step2;
-				}
-				else if (offset + block * 2 < nmemb)
+				if (cmp(c_max - 1, c_max) <= 0)
 				{
 					c_max = pta + block * 2;
 
@@ -1299,13 +2390,28 @@ void quad_merge64(long long *array, long long *swap, size_t nmemb, size_t block,
 					while (c < c_max)
 						*pts++ = *c++;
 
-					goto step2;
+					c = c_max;
+					c_max = c + block * 2;
+
+					while (c < c_max - 8)
+					{
+						*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
+						*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
+					}
+					while (c < c_max)
+						*pts++ = *c++;
+
+					goto step3;
 				}
-				else
-				{
-					offset += block * 4;
-					continue;
-				}
+				pts = swap;
+
+				c = pta;
+				c_max = pta + block * 2;
+
+				while (c < c_max)
+					*pts++ = *c++;
+
+				goto step2;
 			}
 
 			// step1:
@@ -1315,7 +2421,7 @@ void quad_merge64(long long *array, long long *swap, size_t nmemb, size_t block,
 			c = pta;
 
 			d = c_max;
-			d_max = offset + block * 2 <= nmemb ? d + block : array + nmemb;
+			d_max = d + block;
 
 			if (cmp(c_max - 1, d_max - 1) <= 0)
 			{
@@ -1329,55 +2435,6 @@ void quad_merge64(long long *array, long long *swap, size_t nmemb, size_t block,
 				}
 				while (d < d_max)
 					*pts++ = *d++;
-			}
-			else if (cmp(c, d_max - 1) > 0)
-			{
-				if (offset + block * 4 <= nmemb)
-				{
-					long long *e, *f, tmp;
-
-					e = pta + block * 2;
-					f = e + block;
-
-					if (cmp(e, f + block - 1) > 0)
-					{
-						if (cmp(d, f + block - 1) > 0)
-						{
-							while (c < c_max)
-							{
-								tmp = *c;
-								*c++ = *f;
-								*f++ = tmp;
-							}
-
-							while (d < d_max)
-							{
-								tmp = *d;
-								*d++ = *e;
-								*e++ = tmp;
-							}
-
-							offset += block * 4;
-							continue;
-						}
-					}
-				}
-
-				while (d < d_max - 8)
-				{
-					*pts++ = *d++; *pts++ = *d++; *pts++ = *d++; *pts++ = *d++;
-					*pts++ = *d++; *pts++ = *d++; *pts++ = *d++; *pts++ = *d++;
-				}
-				while (d < d_max)
-					*pts++ = *d++;
-
-				while (c < c_max - 8)
-				{
-					*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
-					*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
-				}
-				while (c < c_max)
-					*pts++ = *c++;
 			}
 			else
 			{
@@ -1396,74 +2453,39 @@ void quad_merge64(long long *array, long long *swap, size_t nmemb, size_t block,
 
 			step2:
 
-			if (offset + block * 2 < nmemb)
+			c = pta + block * 2;
+
+			c_max = c + block;
+			d = c_max;
+			d_max = d + block;
+
+			if (cmp(c_max - 1, d_max - 1) <= 0)
 			{
-				c = pta + block * 2;
-
-				if (offset + block * 3 < nmemb)
+				while (c < c_max)
 				{
-					c_max = c + block;
-					d = c_max;
-					d_max = offset + block * 4 <= nmemb ? d + block : array + nmemb;
-
-					if (cmp(c_max - 1, d_max - 1) <= 0)
+					while (cmp(c, d) > 0)
 					{
-						while (c < c_max)
-						{
-							while (cmp(c, d) > 0)
-							{
-								*pts++ = *d++;
-							}
-							*pts++ = *c++;
-						}
-
-						while (d < d_max)
-							*pts++ = *d++;
+						*pts++ = *d++;
 					}
-					else if (cmp(c, d_max - 1) > 0)
-					{
-						while (d < d_max - 8)
-						{
-							*pts++ = *d++; *pts++ = *d++; *pts++ = *d++; *pts++ = *d++;
-							*pts++ = *d++; *pts++ = *d++; *pts++ = *d++; *pts++ = *d++;
-						}
-						while (d < d_max)
-							*pts++ = *d++;
-
-						while (c < c_max - 8)
-						{
-							*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
-							*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
-						}
-						while (c < c_max)
-							*pts++ = *c++;
-					}
-					else
-					{
-						while (d < d_max)
-						{
-							while (cmp(c, d) <= 0)
-							{
-								*pts++ = *c++;
-							}
-							*pts++ = *d++;
-						}
-
-						while (c < c_max)
-							*pts++ = *c++;
-					}
+					*pts++ = *c++;
 				}
-				else
+
+				while (d < d_max)
+					*pts++ = *d++;
+			}
+			else
+			{
+				while (d < d_max)
 				{
-					d = c;
-					d_max = array + nmemb;
-
-					pts = swap;
-					c = pts;
-					c_max = c + block * 2;
-
-					goto tailstep;
+					while (cmp(c, d) <= 0)
+					{
+						*pts++ = *c++;
+					}
+					*pts++ = *d++;
 				}
+
+				while (c < c_max)
+					*pts++ = *c++;
 			}
 
 			step3:
@@ -1472,90 +2494,52 @@ void quad_merge64(long long *array, long long *swap, size_t nmemb, size_t block,
 
 			c = pts;
 
-			if (offset + block * 2 < nmemb)
+			c_max = c + block * 2;
+
+			d = c_max;
+			d_max = d + block * 2;
+
+			if (cmp(c_max - 1, d_max - 1) <= 0)
 			{
-				c_max = c + block * 2;
-
-				d = c_max;
-				d_max = offset + block * 4 <= nmemb ? d + block * 2 : pts + nmemb - offset;
-
-				tailstep:
-
-				if (cmp(c_max - 1, d_max - 1) <= 0)
+				while (c < c_max)
 				{
-					while (c < c_max)
+					while (cmp(c, d) > 0)
 					{
-						while (cmp(c, d) > 0)
-						{
-							*pta++ = *d++;
-						}
-						*pta++ = *c++;
-					}
-
-					while (d < d_max)
-						*pta++ = *d++;
-				}
-				else if (cmp(c, d_max - 1) > 0)
-				{
-					while (d < d_max - 16)
-					{
-						*pta++ = *d++; *pta++ = *d++; *pta++ = *d++; *pta++ = *d++;
-						*pta++ = *d++; *pta++ = *d++; *pta++ = *d++; *pta++ = *d++;
-						*pta++ = *d++; *pta++ = *d++; *pta++ = *d++; *pta++ = *d++;
-						*pta++ = *d++; *pta++ = *d++; *pta++ = *d++; *pta++ = *d++;
-					}
-					while (d < d_max)
-						*pta++ = *d++;
-
-					while (c < c_max - 16)
-					{
-						*pta++ = *c++; *pta++ = *c++; *pta++ = *c++; *pta++ = *c++;
-						*pta++ = *c++; *pta++ = *c++; *pta++ = *c++; *pta++ = *c++;
-						*pta++ = *c++; *pta++ = *c++; *pta++ = *c++; *pta++ = *c++;
-						*pta++ = *c++; *pta++ = *c++; *pta++ = *c++; *pta++ = *c++;
-					}
-					while (c < c_max)
-						*pta++ = *c++;
-				}
-				else
-				{
-					while (d < d_max)
-					{
-						while (cmp(d, c) > 0)
-						{
-							*pta++ = *c++;
-						}
 						*pta++ = *d++;
 					}
-
-					while (c < c_max)
-						*pta++ = *c++;
+					*pta++ = *c++;
 				}
+
+				while (d < d_max)
+					*pta++ = *d++;
 			}
 			else
 			{
-				d_max = pts + nmemb - offset;
-
-				while (c < d_max - 8)
+				while (d < d_max)
 				{
-					*pta++ = *c++; *pta++ = *c++; *pta++ = *c++; *pta++ = *c++;
-					*pta++ = *c++; *pta++ = *c++; *pta++ = *c++; *pta++ = *c++;
+					while (cmp(d, c) > 0)
+					{
+						*pta++ = *c++;
+					}
+					*pta++ = *d++;
 				}
-				while (c < d_max)
+
+				while (c < c_max)
 					*pta++ = *c++;
 			}
 			offset += block * 4;
 		}
+		tail_merge64(array + offset, swap, nmemb - offset, block, cmp);
+
 		block *= 4;
 	}
 	tail_merge64(array, swap, nmemb, block, cmp);
 }
 
-
 void tail_merge64(long long *array, long long *swap, size_t nmemb, size_t block, CMPFUNC *cmp)
 {
 	size_t offset;
-	register long long *pta, *pts, *c, *c_max, *d, *d_max, *e, tmp;
+	register long long *pta, *pts, *c, *c_max, *d, *d_max, *e;
 
 	pts = swap;
 
@@ -1572,14 +2556,29 @@ void tail_merge64(long long *array, long long *swap, size_t nmemb, size_t block,
 				continue;
 			}
 
-			d_max = (offset + block * 2 <= nmemb ? pta + block * 2 : array + nmemb);
+			if (offset + block * 2 <= nmemb)
+				d_max = pta + block * 2;
+			else
+				d_max = array + nmemb;
 
 			if (cmp(pta, pta + block) <= 0)
 			{
-				c_max = offset + block * 2 <= nmemb ? pts + block : pts + nmemb - (offset + block);
+				if (offset + block * 2 <= nmemb)
+					c_max = pts + block;
+				else
+					c_max = pts + nmemb - (offset + block);
+
+				d = d_max - 1;
+				e = pta + block - 1;
+
+				while (cmp(e, d) <= 0)
+				{
+					d_max--;
+					d--;
+					c_max--;
+				}
 
 				c = c_max - 1;
-				d = d_max - 1;
 
 				while (c >= pts + 8)
 				{
@@ -1594,6 +2593,8 @@ void tail_merge64(long long *array, long long *swap, size_t nmemb, size_t block,
 				c = c_max - 1;
 				d = pta + block - 1;
 				e = d_max - 1;
+
+				*e-- = *d--;
 
 				while (c >= pts)
 				{
@@ -1606,68 +2607,22 @@ void tail_merge64(long long *array, long long *swap, size_t nmemb, size_t block,
 			}
 			else
 			{
-				if (cmp(pta, d_max - 1) > 0)
+				if (offset + block * 2 <= nmemb)
+					c_max = pts + block;
+				else
+					c_max = pts + nmemb - (offset + block);
+
+				d = d_max - 1;
+				e = pta + block - 1;
+
+				while (cmp(e, d) <= 0)
 				{
-					if (offset + block * 2 <= nmemb)
-					{
-						c = pta;
-						d = pta + block;
-
-						while (d < d_max - 4)
-						{
-							tmp = *c; *c++ = *d; *d++ = tmp; tmp = *c; *c++ = *d; *d++ = tmp; tmp = *c; *c++ = *d; *d++ = tmp; tmp = *c; *c++ = *d; *d++ = tmp; 
-						}
-
-						while (d < d_max)
-						{
-							tmp = *c; *c++ = *d; *d++ = tmp;
-						}
-						continue;
-					}
-
-					c_max = offset + block * 2 <= nmemb ? pts + block : pts + nmemb - (offset + block);
-
-					c = c_max - 1;
-					d = d_max - 1;
-
-					while (c >= pts + 8)
-					{
-						*c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--;
-					}
-
-					while (c >= pts)
-					{
-						*c-- = *d--;
-					}
-	
-					c = c_max - 1;
-					d = pta + block - 1;
-					e = d_max - 1;
-
-					while (d >= pta + 8)
-					{
-						*e-- = *d--; *e-- = *d--; *e-- = *d--; *e-- = *d--; *e-- = *d--; *e-- = *d--; *e-- = *d--; *e-- = *d--;
-					}
-					while (d >= pta)
-					{
-						*e-- = *d--;
-					}
-
-					while (c >= pts + 8)
-					{
-						*e-- = *c--; *e-- = *c--; *e-- = *c--; *e-- = *c--; *e-- = *c--; *e-- = *c--; *e-- = *c--; *e-- = *c--;
-					}
-
-					while (c >= pts)
-					{
-						*e-- = *c--;
-					}
-					continue;
+					d_max--;
+					d--;
+					c_max--;
 				}
-				c_max = offset + block * 2 <= nmemb ? pts + block : pts + nmemb - (offset + block);
 
 				c = c_max - 1;
-				d = d_max - 1;
 
 				while (c >= pts + 8)
 				{
@@ -1682,6 +2637,8 @@ void tail_merge64(long long *array, long long *swap, size_t nmemb, size_t block,
 				c = c_max - 1;
 				d = pta + block - 1;
 				e = d_max - 1;
+
+				*e-- = *d--;
 
 				while (d >= pta)
 				{
@@ -1701,42 +2658,98 @@ void tail_merge64(long long *array, long long *swap, size_t nmemb, size_t block,
 	}
 }
 
-
-void quadsort(void *array, size_t nmemb, size_t size, CMPFUNC *cmp)
+void quadsort(void *array, size_t nmemb, size_t size, CMPFUNC *cmpf)
 {
-	void *swap;
-
-	swap = malloc(16 * size + nmemb * size / 2);
-
-	if (swap == NULL)
+	if (nmemb < 2)
 	{
-		fprintf(stderr, "quadsort(%p,%zu,%zu,%p): malloc() failed: %s\n", array, nmemb, size, cmp, strerror(errno));
-
 		return;
 	}
 
 	if (size == sizeof(int))
 	{
-		quad_swap32(array, swap, nmemb, cmp);
-		quad_merge32(array, swap, nmemb, 16, cmp);
+		if (nmemb <= 16)
+		{
+			tail_swap32(array, nmemb, cmpf);
+		}
+		else if (nmemb < 128)
+		{
+			int *swap = malloc(8 * size + nmemb * size);
+
+			if (quad_swap32(array, swap, nmemb, cmpf) == 0)
+			{
+				tail_merge32(array, swap, nmemb, 16, cmpf);
+			}
+			free(swap);
+		}
+		else
+		{
+		
+			int *swap = malloc(nmemb * size / 2);
+
+			if (swap == NULL)
+			{
+				fprintf(stderr, "quadsort(%p,%zu,%zu,%p): malloc() failed: %s\n", array, nmemb, size, cmpf, strerror(errno));
+
+				return;
+			}
+
+			if (quad_swap32(array, swap, nmemb, cmpf) == 0)
+			{
+				quad_merge32(array, swap, nmemb, 16, cmpf);
+			}
+
+			free(swap);
+		}
 	}
 	else if (size == sizeof(long long))
 	{
-		quad_swap64(array, swap, nmemb, cmp);
-		quad_merge64(array, swap, nmemb, 16, cmp);
+		if (nmemb <= 16)
+		{
+			tail_swap64(array, nmemb, cmpf);
+		}
+		else if (nmemb < 128)
+		{
+			long long *swap = malloc(8 * size + nmemb * size / 2);
+
+			if (quad_swap64(array, swap, nmemb, cmpf) == 0)
+			{
+				tail_merge64(array, swap, nmemb, 16, cmpf);
+			}
+			free(swap);
+		}
+		else
+		{
+		
+			long long *swap = malloc(nmemb * size / 2);
+
+			if (swap == NULL)
+			{
+				fprintf(stderr, "quadsort(%p,%zu,%zu,%p): malloc() failed: %s\n", array, nmemb, size, cmpf, strerror(errno));
+
+				return;
+			}
+
+			if (quad_swap64(array, swap, nmemb, cmpf) == 0)
+			{
+				quad_merge64(array, swap, nmemb, 16, cmpf);
+			}
+
+			free(swap);
+		}
 	}
 	else
 	{
 		assert(size == sizeof(int) || size == sizeof(long long));
 	}
-
-	free(swap);
 }
+
+#endif
 
 // benchmarking utilities
 
+typedef void SRTFUNC(void *array, size_t nmemb, size_t size, CMPFUNC *cmp);
 
-// Must prevent inlining so the benchmark against qsort() is fair.
+// Must prevent inlining so the benchmark is fair against qsort().
 // Remove __attribute__ ((noinline)) and counter++ for full throttle.
 
 long long counter;
@@ -1782,12 +2795,14 @@ long long utime()
 	return now_time.tv_sec * 1000000LL + now_time.tv_usec;
 }
 
+unsigned long long randval;
 unsigned short randkey;
 
 void seed_rand(unsigned long long seed)
 {
 	srand(seed);
 
+	randval = 0;
 	randkey = 0;
 }
 
@@ -1801,13 +2816,13 @@ int generate_rand()
 void test_sort(void *array, void *unsorted, void *valid, int minimum, int maximum, int samples, int repetitions, SRTFUNC *srt, const char *name, const char *desc, size_t size, CMPFUNC *cmp)
 {
 	long long start, end, total, best;
-	int rep, sam, max;
+	size_t rep, sam, max;
 	long long *ptla = array;
 	int *pta = array, *ptv = valid, cnt;
 
-	best = max = 0;
+	best = 0;
 
-	for (sam = 0 ; sam <= samples ; sam++)
+	for (sam = 0 ; sam < samples ; sam++)
 	{
 		total = 0;
 
@@ -1826,7 +2841,15 @@ void test_sort(void *array, void *unsorted, void *valid, int minimum, int maximu
 
 			start = utime();
 
-			srt(array, max, size, cmp);
+			switch (*name)
+			{
+				case 'q':
+					if (name[2] == 'a')
+						quadsort(array, max, size, cmp);
+					else
+						qsort(array, max, size, cmp);
+					break;
+			}
 
 			end = utime();
 
@@ -1837,9 +2860,14 @@ void test_sort(void *array, void *unsorted, void *valid, int minimum, int maximu
 
 			total += end - start;
 
-			if (max < maximum)
+			if (minimum < maximum)
 			{
 				max++;
+
+				if (max > maximum)
+				{
+					max = minimum;
+				}
 			}
 
 		}
@@ -1850,6 +2878,11 @@ void test_sort(void *array, void *unsorted, void *valid, int minimum, int maximu
 		}
 	}
 
+	if (repetitions == 0)
+	{
+		return;
+	}
+
 	if (cmp == cmp_stable)
 	{
 		for (cnt = 1 ; cnt < maximum ; cnt++)
@@ -1858,15 +2891,15 @@ void test_sort(void *array, void *unsorted, void *valid, int minimum, int maximu
 			{
 				if (maximum == 1000)
 				{
-					printf("%17s: sorted %7d i%zus in %f seconds. KO: %5lld (un%s)\n", name, maximum, size * 8, best / 1000000.0, counter, desc);
+					printf("%17s: sorted %7d i%ds in %f seconds. KO: %5lld (un%s)\n", name, maximum, (int) size * 8, best / 1000000.0, counter, desc);
 				}
 				else if (maximum == 1000000)
 				{
-					printf("%17s: sorted %7d i%zus in %f seconds. MO: %10lld (un%s)\n", name, maximum, size * 8, best / 1000000.0, counter, desc);
+					printf("%17s: sorted %7d i%ds in %f seconds. MO: %10lld (un%s)\n", name, maximum, (int) size * 8, best / 1000000.0, counter, desc);
 				}
 				else
 				{
-					printf("%17s: sorted %7d i%zus in %f seconds. (un%s)\n", name, maximum, size * 8, best / 1000000.0, desc);
+					printf("%17s: sorted %7d i%ds in %f seconds. (un%s)\n", name, maximum, (int) size * 8, best / 1000000.0, desc);
 				}
 				return;
 			}
@@ -1875,18 +2908,23 @@ void test_sort(void *array, void *unsorted, void *valid, int minimum, int maximu
 
 	if (maximum == 1000)
 	{
-		printf("%17s: sorted %7d i%zus in %f seconds. KO: %5lld (%s)\n", name, maximum, size * 8, best / 1000000.0, counter, desc);
+		printf("%17s: sorted %7d i%ds in %f seconds. KO: %5lld (%s)\n", name, maximum, (int) size * 8, best / 1000000.0, counter, desc);
 	}
 	else if (maximum == 1000000)
 	{
-		printf("%17s: sorted %7d i%zus in %f seconds. MO: %10lld (%s)\n", name, maximum, size * 8, best / 1000000.0, counter, desc);
+		printf("%17s: sorted %7d i%ds in %f seconds. MO: %10lld (%s)\n", name, maximum, (int) size * 8, best / 1000000.0, counter, desc);
 	}
 	else
 	{
-		printf("%17s: sorted %7d i%zus in %f seconds. (%s)\n", name, maximum, size * 8, best / 1000000.0, desc);
+		printf("%17s: sorted %7d i%ds in %f seconds. (%s)\n", name, maximum, (int) size * 8, best / 1000000.0, desc);
 	}
 
-	for (cnt = 1 ; cnt < max ; cnt++)
+	if (minimum != maximum)
+	{
+		return;
+	}
+
+	for (cnt = 1 ; cnt < maximum ; cnt++)
 	{
 		if (size == sizeof(int))
 		{
@@ -1910,7 +2948,7 @@ void test_sort(void *array, void *unsorted, void *valid, int minimum, int maximu
 		}
 	}
 
-	for (cnt = 1 ; cnt < max ; cnt++)
+	for (cnt = 1 ; cnt < maximum ; cnt++)
 	{
 		if (pta[cnt] != ptv[cnt])
 		{
@@ -1920,11 +2958,165 @@ void test_sort(void *array, void *unsorted, void *valid, int minimum, int maximu
 	}
 }
 
+void validate()
+{
+	int seed = time(NULL);
+	int cnt, val, max = 2000000;
+
+	int *a_array, *r_array, *v_array;
+
+	seed_rand(seed);
+
+	a_array = (int *) malloc(max * sizeof(int));
+	r_array = (int *) malloc(max * sizeof(int));
+	v_array = (int *) malloc(max * sizeof(int));
+
+	for (cnt = 0 ; cnt < max ; cnt++)
+	{
+		r_array[cnt] = generate_rand();
+	}
+
+
+	for (cnt = 1 ; cnt < 100 ; cnt++)
+	{
+		memcpy(a_array, r_array, max * sizeof(int));
+		memcpy(v_array, r_array, max * sizeof(int));
+
+		quadsort(a_array, cnt, sizeof(int), cmp_int);
+		qsort(v_array, cnt, sizeof(int), cmp_int);
+
+		for (val = 0 ; val < cnt ; val++)
+		{
+			if (val && v_array[val - 1] > v_array[val])
+			{
+				printf("\e[1;31mvalidate rand: seed %d: size: %d Not properly sorted at index %d.\n", seed, cnt, val);
+				exit(1);
+			}
+
+			if (a_array[val] != v_array[val])
+			{
+				printf("\e[1;31mvalidate rand: seed %d: size: %d Not verified at index %d.\n", seed, cnt, val);
+				exit(1);
+			}
+		}
+	}
+
+	// ascending saw
+
+	for (cnt = 0 ; cnt < 1000 ; cnt++)
+	{
+		r_array[cnt] = rand();
+	}
+
+        quadsort(r_array + max / 4 * 0, max / 4, sizeof(int), cmp_int);
+        quadsort(r_array + max / 4 * 1, max / 4, sizeof(int), cmp_int);
+        quadsort(r_array + max / 4 * 2, max / 4, sizeof(int), cmp_int);
+        quadsort(r_array + max / 4 * 3, max / 4, sizeof(int), cmp_int);
+
+        for (cnt = 1 ; cnt < 1000 ; cnt += 7)
+	{
+		memcpy(a_array, r_array, max * sizeof(int));
+	        memcpy(v_array, r_array, max * sizeof(int));
+
+	        quadsort(a_array, cnt, sizeof(int), cmp_int);
+	        qsort(v_array, cnt, sizeof(int), cmp_int);
+
+		for (val = 0 ; val < cnt ; val++)
+		{
+			if (val && v_array[val - 1] > v_array[val])
+			{
+				printf("\e[1;31mvalidate ascending saw: seed %d: size: %d Not properly sorted at index %d.\n", seed, cnt, val);
+				exit(1);
+			}
+
+			if (a_array[val] != v_array[val])
+			{
+				printf("\e[1;31mvalidate ascending saw: seed %d: size: %d Not verified at index %d.\n", seed, cnt, val);
+				exit(1);
+			}
+		}
+	}
+
+        // descending saw
+
+        for (cnt = 0 ; cnt < 1000 ; cnt++)
+        {
+                r_array[cnt] = (max - cnt - 1) % 100000;
+        }
+
+        for (cnt = 1 ; cnt < 1000 ; cnt += 7)
+	{
+		memcpy(a_array, r_array, max * sizeof(int));
+	        memcpy(v_array, r_array, max * sizeof(int));
+
+	        quadsort(a_array, cnt, sizeof(int), cmp_int);
+	        qsort(v_array, cnt, sizeof(int), cmp_int);
+
+		for (val = 0 ; val < cnt ; val++)
+		{
+			if (val && v_array[val - 1] > v_array[val])
+			{
+				printf("\e[1;31mvalidate descending saw: seed %d: size: %d Not properly sorted at index %d.\n", seed, cnt, val);
+				exit(1);
+			}
+
+			if (a_array[val] != v_array[val])
+			{
+				printf("\e[1;31mvalidate descending saw: seed %d: size: %d Not verified at index %d.\n", seed, cnt, val);
+				exit(1);
+			}
+		}
+	}
+
+	// random tail
+
+	for (cnt = 0 ; cnt < max * 3 / 4 ; cnt++)
+	{
+		r_array[cnt] = cnt;
+	}
+
+	for (cnt = max * 3 / 4 ; cnt < max ; cnt++)
+	{
+		r_array[cnt] = rand();
+	}
+
+        for (cnt = 1 ; cnt < 1000 ; cnt += 7)
+	{
+		memcpy(a_array, r_array, max * sizeof(int));
+	        memcpy(v_array, r_array, max * sizeof(int));
+
+	        quadsort(a_array, cnt, sizeof(int), cmp_int);
+	        qsort(v_array, cnt, sizeof(int), cmp_int);
+
+		for (val = 0 ; val < cnt ; val++)
+		{
+			if (val && v_array[val - 1] > v_array[val])
+			{
+				printf("\e[1;31mvalidate rand tail: seed %d: size: %d Not properly sorted at index %d.\n", seed, cnt, val);
+				exit(1);
+			}
+
+			if (a_array[val] != v_array[val])
+			{
+				printf("\e[1;31mvalidate rand tail: seed %d: size: %d Not verified at index %d.\n", seed, cnt, val);
+				exit(1);
+			}
+		}
+	}
+
+	free(a_array);
+	free(r_array);
+	free(v_array);
+
+	printf("validated\n");
+}
+
+
 int main(int argc, char **argv)
 {
-	int max = 1000;
-	int samples = 100;
-	int repetitions = 10;
+	int max = 100000;
+	int samples = 10;
+	int repetitions = 1;
 
 	size_t cnt, rnd;
 	int *a_array, *r_array, *v_array;
@@ -1945,14 +3137,48 @@ int main(int argc, char **argv)
 		repetitions = atoi(argv[3]);
 	}
 
-	rnd = 1;
+	validate();
 
+	rnd = time(NULL);
+
+	// 64 bit
+
+	la_array = (long long *) malloc(max * sizeof(long long));
+	lr_array = (long long *) malloc(max * sizeof(long long));
+	lv_array = (long long *) malloc(max * sizeof(long long));
+
+	if (la_array == NULL || lr_array == NULL || lv_array == NULL)
+	{
+		printf("main(%d,%d,%d): malloc: %s\n", max, samples, repetitions, strerror(errno));
+
+		return 0;
+	}
+
+	// random 
+
+	seed_rand(rnd);
+
+	for (cnt = 0 ; cnt < max ; cnt++)
+	{
+		lr_array[cnt] = rand();
+//		lr_array[cnt] += (unsigned long long) rand() << 32ULL;
+	}
+
+	memcpy(lv_array, lr_array, max * sizeof(long long));
+	quadsort(lv_array, max, sizeof(long long), cmp_long);
+
+	test_sort(la_array, lr_array, lv_array, max, max, samples, repetitions, quadsort,        "quadsort",       "random order", sizeof(long long), cmp_long);
+	test_sort(la_array, lr_array, lv_array, max, max, samples, repetitions, qsort,           "qsort",        "random order", sizeof(long long), cmp_long);
+
+	printf("\n");
 
 	// 32 bit
 
-	a_array = malloc(max * sizeof(int));
-	r_array = malloc(max * sizeof(int));
-	v_array = malloc(max * sizeof(int));
+	a_array = (int *) malloc(max * sizeof(int));
+	r_array = (int *) malloc(max * sizeof(int));
+	v_array = (int *) malloc(max * sizeof(int));
+
+
 
 	// random
 
@@ -1967,7 +3193,7 @@ int main(int argc, char **argv)
 	quadsort(v_array, max, sizeof(int), cmp_int);
 
 	test_sort(a_array, r_array, v_array, max, max, samples, repetitions, quadsort,        "quadsort",       "random order", sizeof(int), cmp_int);
-	test_sort(a_array, r_array, v_array, max, max, samples, repetitions, qsort,           "qsort",          "random order", sizeof(int), cmp_int);
+	test_sort(a_array, r_array, v_array, max, max, samples, repetitions, qsort,           "qsort",        "random order", sizeof(int), cmp_int);
 
 	printf("\n");
 
@@ -1975,15 +3201,37 @@ int main(int argc, char **argv)
 
 	for (cnt = 0 ; cnt < max ; cnt++)
 	{
-		r_array[cnt] = (int) cnt + 1;
+		r_array[cnt] = cnt;
 	}
 
-	memcpy(v_array, r_array, max * sizeof(int));
+        memcpy(v_array, r_array, max * sizeof(int));
+        memcpy(r_array, v_array, max * sizeof(int));
+
 	quadsort(v_array, max, sizeof(int), cmp_int);
 
-	test_sort(a_array, r_array, v_array, max, max, samples, repetitions, quadsort,        "quadsort",       "ascending order", sizeof(int), cmp_int);
-	test_sort(a_array, r_array, v_array, max, max, samples, repetitions, qsort,           "qsort",          "ascending order", sizeof(int), cmp_int);
+	test_sort(a_array, r_array, v_array, max, max, samples, repetitions, quadsort,        "quadsort",       "ascending", sizeof(int), cmp_int);
+	test_sort(a_array, r_array, v_array, max, max, samples, repetitions, qsort,           "qsort",     "ascending", sizeof(int), cmp_int);
 
+	printf("\n");
+
+	// ascending saw
+
+	for (cnt = 0 ; cnt < max ; cnt++)
+	{
+		r_array[cnt] = max != 1000 ? rand() : generate_rand();
+	}
+
+        memcpy(v_array, r_array, max * sizeof(int));
+        quadsort(v_array + max / 4 * 0, max / 4, sizeof(int), cmp_int);
+        quadsort(v_array + max / 4 * 1, max / 4, sizeof(int), cmp_int);
+        quadsort(v_array + max / 4 * 2, max / 4, sizeof(int), cmp_int);
+        quadsort(v_array + max / 4 * 3, max / 4, sizeof(int), cmp_int);
+        memcpy(r_array, v_array, max * sizeof(int));
+
+	quadsort(v_array, max, sizeof(int), cmp_int);
+
+	test_sort(a_array, r_array, v_array, max, max, samples, repetitions, quadsort,        "quadsort",       "ascending saw", sizeof(int), cmp_int);
+	test_sort(a_array, r_array, v_array, max, max, samples, repetitions, qsort,           "qsort",     "ascending saw", sizeof(int), cmp_int);
 
 	printf("\n");
 
@@ -1991,30 +3239,44 @@ int main(int argc, char **argv)
 
 	for (cnt = 0 ; cnt < max ; cnt++)
 	{
-		r_array[cnt] = 1;
+		r_array[cnt] = max != 1000 ? rand() % 100 : generate_rand() % 100;
 	}
 
 	memcpy(v_array, r_array, max * sizeof(int));
 	quadsort(v_array, max, sizeof(int), cmp_int);
 
-	test_sort(a_array, r_array, v_array, max, max, samples, repetitions, quadsort,        "quadsort",        "uniform order", sizeof(int), cmp_int);
-	test_sort(a_array, r_array, v_array, max, max, samples, repetitions, qsort,           "qsort",           "uniform order", sizeof(int), cmp_int);
+	test_sort(a_array, r_array, v_array, max, max, samples, repetitions, quadsort,        "quadsort",        "generic order", sizeof(int), cmp_int);
+	test_sort(a_array, r_array, v_array, max, max, samples, repetitions, qsort,           "qsort",         "generic order", sizeof(int), cmp_int);
 
 
 	printf("\n");
 
-	// descending
+        // descending
 
-	for (cnt = 0 ; cnt < max ; cnt++)
-	{
-		r_array[cnt] = max - cnt;
-	}
+        for (cnt = 0 ; cnt < max ; cnt++)
+        {
+                r_array[cnt] = (max - cnt);
+        }
 
-	memcpy(v_array, r_array, max * sizeof(int));
-	quadsort(v_array, max, sizeof(int), cmp_int);
+        memcpy(v_array, r_array, max * sizeof(int));
+        quadsort(v_array, max, sizeof(int), cmp_int);
 
 	test_sort(a_array, r_array, v_array, max, max, samples, repetitions, quadsort,        "quadsort",        "descending order", sizeof(int), cmp_int);
-	test_sort(a_array, r_array, v_array, max, max, samples, repetitions, qsort,           "qsort",           "descending order", sizeof(int), cmp_int);
+	test_sort(a_array, r_array, v_array, max, max, samples, repetitions, qsort,           "qsort",         "descending order", sizeof(int), cmp_int);
+
+	printf("\n");
+
+        // descending saw
+
+        for (cnt = 0 ; cnt < max ; cnt++)
+        {
+                r_array[cnt] = (max - cnt - 1) % 10000;
+        }
+
+        memcpy(v_array, r_array, max * sizeof(int));
+        quadsort(v_array, max, sizeof(int), cmp_int);
+	test_sort(a_array, r_array, v_array, max, max, samples, repetitions, quadsort,        "quadsort",        "descending saw", sizeof(int), cmp_int);
+	test_sort(a_array, r_array, v_array, max, max, samples, repetitions, qsort,           "qsort",      "descending saw", sizeof(int), cmp_int);
 
 	printf("\n");
 
@@ -2043,12 +3305,37 @@ int main(int argc, char **argv)
 	quadsort(v_array, max, sizeof(int), cmp_int);
 
 	test_sort(a_array, r_array, v_array, max, max, samples, repetitions, quadsort,        "quadsort",        "random tail", sizeof(int), cmp_int);
-	test_sort(a_array, r_array, v_array, max, max, samples, repetitions, qsort,           "qsort",           "random tail", sizeof(int), cmp_int);
-
+	test_sort(a_array, r_array, v_array, max, max, samples, repetitions, qsort,           "qsort",         "random tail", sizeof(int), cmp_int);
 
 	printf("\n");
 
-	// wave
+	seed_rand(rnd);
+
+	for (cnt = 0 ; cnt < max ; cnt++)
+	{
+		if (max > 1000)
+		{
+			r_array[cnt] = rand();
+		}
+		else
+		{
+			r_array[cnt] = generate_rand();
+		}
+	}
+
+        memcpy(v_array, r_array, max * sizeof(int));
+        quadsort(v_array, max / 2, sizeof(int), cmp_int);
+//      quadsort(v_array + max / 2, max / 2, sizeof(int), cmp_int);
+
+        memcpy(r_array, v_array, max * sizeof(int));
+        quadsort(v_array, max, sizeof(int), cmp_int);
+
+        test_sort(a_array, r_array, v_array, max, max, samples, repetitions, quadsort,        "quadsort",        "random half", sizeof(int), cmp_int);
+        test_sort(a_array, r_array, v_array, max, max, samples, repetitions, qsort,           "qsort",           "random half", sizeof(int), cmp_int);
+
+        printf("\n");
+
+	// wave ?
 
 	for (cnt = 0 ; cnt < max ; cnt++)
 	{
@@ -2066,72 +3353,228 @@ int main(int argc, char **argv)
 	quadsort(v_array, max, sizeof(int), cmp_int);
 
 	test_sort(a_array, r_array, v_array, max, max, samples, repetitions, quadsort,        "quadsort",       "wave order", sizeof(int), cmp_int);
-	test_sort(a_array, r_array, v_array, max, max, samples, repetitions, qsort,           "qsort",          "wave order", sizeof(int), cmp_int);
+	test_sort(a_array, r_array, v_array, max, max, samples, repetitions, qsort,           "qsort",        "wave order", sizeof(int), cmp_int);
 
 	printf("\n");
 
 	test_sort(a_array, r_array, v_array, max, max, samples, repetitions, quadsort,        "quadsort",       "stable", sizeof(int), cmp_stable);
-	test_sort(a_array, r_array, v_array, max, max, samples, repetitions, qsort,           "qsort",          "stable", sizeof(int), cmp_stable);
+	test_sort(a_array, r_array, v_array, max, max, samples, repetitions, qsort,           "qsort",        "stable", sizeof(int), cmp_stable);
 
 	printf("\n");
 
-	// nmemb from 1 to 1000 with random data.
-
-	if (max >= 1000)
+	if (max >= 16)
 	{
+		// random range
+
 		seed_rand(rnd);
 
-		for (cnt = 0 ; cnt < 1000 ; cnt++)
+		for (cnt = 0 ; cnt < 8 ; cnt++)
 		{
 			r_array[cnt] = generate_rand();
 		}
 
-		memcpy(v_array, r_array, 1000 * sizeof(int));
-		quadsort(v_array, 1000, sizeof(int), cmp_int);
+		memcpy(v_array, r_array, 8 * sizeof(int));
+		quadsort(v_array, 8, sizeof(int), cmp_int);
 
-		test_sort(a_array, r_array, v_array, 0, 1000, 100, 1001, quadsort,        "quadsort",        "random range", sizeof(int), cmp_int);
-		test_sort(a_array, r_array, v_array, 0, 1000, 100, 1001, qsort,           "qsort",           "random range", sizeof(int), cmp_int);
+		test_sort(a_array, r_array, v_array, 1, 8, 100, 1000, quadsort,        "quadsort",          "random 1-8", sizeof(int), cmp_int);
+		test_sort(a_array, r_array, v_array, 1, 8, 100, 1000, qsort,           "qsort",        "random 1-8", sizeof(int), cmp_int);
+
+		printf("\n");
+
+		seed_rand(rnd);
+
+		for (cnt = 0 ; cnt < 16 ; cnt++)
+		{
+			r_array[cnt] = generate_rand();
+		}
+
+		memcpy(v_array, r_array, 16 * sizeof(int));
+		quadsort(v_array, 16, sizeof(int), cmp_int);
+
+		test_sort(a_array, r_array, v_array, 9, 15, 100, 1000, quadsort,        "quadsort",          "random 9-15", sizeof(int), cmp_int);
+		test_sort(a_array, r_array, v_array, 9, 15, 100, 1000, qsort,           "qsort",        "random 9-15", sizeof(int), cmp_int);
+
+		printf("\n");
+
+		seed_rand(rnd);
+
+		for (cnt = 0 ; cnt < 16 ; cnt++)
+		{
+			lr_array[cnt] = generate_rand();
+		}
+
+		memcpy(lv_array, lr_array, 16 * sizeof(long long));
+		quadsort(lv_array, 16, sizeof(long long), cmp_long);
+
+		test_sort(la_array, lr_array, lv_array, 1, 15, 100, 1000, quadsort,        "quadsort",          "random 1-15", sizeof(long long), cmp_long);
+		test_sort(la_array, lr_array, lv_array, 1, 15, 100, 1000, qsort,           "qsort",        "random 1-15", sizeof(long long), cmp_long);
+
 	}
-
-	free(a_array);
-	free(r_array);
-	free(v_array);
 
 	printf("\n");
 
-	// 64 bit
-
-	la_array = malloc(max * sizeof(long long));
-	lr_array = malloc(max * sizeof(long long));
-	lv_array = malloc(max * sizeof(long long));
-
-	if (la_array == NULL || lr_array == NULL || lv_array == NULL)
+	if (max >= 64)
 	{
-		printf("main(%d,%d,%d): malloc: %s\n", max, samples, repetitions, strerror(errno));
+		// random range
 
-		return 0;
+		seed_rand(rnd);
+
+		for (cnt = 0 ; cnt < 64 ; cnt++)
+		{
+			r_array[cnt] = generate_rand();
+		}
+
+		memcpy(v_array, r_array, 64 * sizeof(int));
+		quadsort(v_array, 64, sizeof(int), cmp_int);
+
+		test_sort(a_array, r_array, v_array, 16, 63, 100, 1000, quadsort,        "quadsort",        "random 16-63", sizeof(int), cmp_int);
+		test_sort(a_array, r_array, v_array, 16, 63, 100, 1000, qsort,           "qsort",         "random 16-63", sizeof(int), cmp_int);
 	}
 
-	// random 
+	printf("\n");
 
-	seed_rand(rnd);
-
-	for (cnt = 0 ; cnt < max ; cnt++)
+	if (max >= 128)
 	{
-		lr_array[cnt] = max != 1000 ? rand() : generate_rand();
+		// random range
+
+		seed_rand(rnd);
+
+		for (cnt = 0 ; cnt < 128 ; cnt++)
+		{
+			r_array[cnt] = generate_rand();
+		}
+
+		memcpy(v_array, r_array, 128 * sizeof(int));
+		quadsort(v_array, 128, sizeof(int), cmp_int);
+
+		test_sort(a_array, r_array, v_array, 64, 127, 100, 1000, quadsort,        "quadsort",        "random 64-127", sizeof(int), cmp_int);
+		test_sort(a_array, r_array, v_array, 64, 127, 100, 1000, qsort,           "qsort",         "random 64-127", sizeof(int), cmp_int);
 	}
 
-	memcpy(lv_array, lr_array, max * sizeof(long long));
-	quadsort(lv_array, max, sizeof(long long), cmp_long);
+	printf("\n");
 
-	test_sort(la_array, lr_array, lv_array, max, max, samples, repetitions, quadsort,        "quadsort",       "random order", sizeof(long long), cmp_long);
-	test_sort(la_array, lr_array, lv_array, max, max, samples, repetitions, qsort,           "qsort",          "random order", sizeof(long long), cmp_long);
+	if (max >= 256)
+	{
+		// random range
+
+		seed_rand(rnd);
+
+		for (cnt = 0 ; cnt < 256 ; cnt++)
+		{
+			r_array[cnt] = generate_rand();
+		}
+
+		memcpy(v_array, r_array, 256 * sizeof(int));
+		quadsort(v_array, 256, sizeof(int), cmp_int);
+
+		test_sort(a_array, r_array, v_array, 127, 255, 100, 1000, quadsort,        "quadsort",        "random 128-255", sizeof(int), cmp_int);
+		test_sort(a_array, r_array, v_array, 127, 255, 100, 1000, qsort,           "qsort",         "random 128-255", sizeof(int), cmp_int);
+	}
+
+	printf("\n");
+
+	if (max >= 512)
+	{
+		// random range
+
+		seed_rand(rnd);
+
+		for (cnt = 0 ; cnt < 512 ; cnt++)
+		{
+			r_array[cnt] = generate_rand();
+		}
+
+		memcpy(v_array, r_array, 512 * sizeof(int));
+		quadsort(v_array, 512, sizeof(int), cmp_int);
+
+		test_sort(a_array, r_array, v_array, 256, 511, 100, 1000, quadsort,        "quadsort",        "random 256-511", sizeof(int), cmp_int);
+		test_sort(a_array, r_array, v_array, 256, 511, 100, 1000, qsort,           "qsort",         "random 256-511", sizeof(int), cmp_int);
+	}
+
+	printf("\n");
+
+	if (max >= 1024)
+	{
+		// random range
+
+		seed_rand(rnd);
+
+		for (cnt = 0 ; cnt < 1024 ; cnt++)
+		{
+			r_array[cnt] = generate_rand();
+		}
+
+		memcpy(v_array, r_array, 1024 * sizeof(int));
+		quadsort(v_array, 1024, sizeof(int), cmp_int);
+
+		test_sort(a_array, r_array, v_array, 512, 1023, 100, 1000, quadsort,        "quadsort",        "random 512-1023", sizeof(int), cmp_int);
+		test_sort(a_array, r_array, v_array, 512, 1023, 100, 1000, qsort,           "qsort",         "random 512-1023", sizeof(int), cmp_int);
+
+		printf("\n");
+
+		seed_rand(rnd);
+
+		for (cnt = 0 ; cnt < 1024 ; cnt++)
+		{
+			r_array[cnt] = generate_rand();
+		}
+
+		memcpy(v_array, r_array, 1024 * sizeof(int));
+		quadsort(v_array, 1024, sizeof(int), cmp_int);
+
+		test_sort(a_array, r_array, v_array, 1, 1023, 100, 1000, quadsort,        "quadsort",        "random 1-1023", sizeof(int), cmp_int);
+		test_sort(a_array, r_array, v_array, 1, 1023, 100, 1000, qsort,           "qsort",         "random 1-1023", sizeof(int), cmp_int);
+	}
+
+	printf("\n");
+
+	if (max >= 2048)
+	{
+		// random range
+
+		seed_rand(rnd);
+
+		for (cnt = 0 ; cnt < 2048 ; cnt++)
+		{
+			r_array[cnt] = generate_rand();
+		}
+
+		memcpy(v_array, r_array, 2048 * sizeof(int));
+		quadsort(v_array, 2048, sizeof(int), cmp_int);
+
+		test_sort(a_array, r_array, v_array, 1024, 2047, 50, 1024, quadsort,        "quadsort",          "random 1024-2047", sizeof(int), cmp_int);
+		test_sort(a_array, r_array, v_array, 1024, 2047, 50, 1024, qsort,           "qsort",        "random 1024-2047", sizeof(int), cmp_int);
+	}
+
+	printf("\n");
+
+	if (max >= 4096)
+	{
+		// random range
+
+		seed_rand(rnd);
+
+		for (cnt = 0 ; cnt < 4096 ; cnt++)
+		{
+			r_array[cnt] = generate_rand();
+		}
+
+		memcpy(v_array, r_array, 4096 * sizeof(int));
+		quadsort(v_array, 4096, sizeof(int), cmp_int);
+
+		test_sort(a_array, r_array, v_array, 2048, 4095, 20, 2048, quadsort,        "quadsort",          "random 2048-4095", sizeof(int), cmp_int);
+		test_sort(a_array, r_array, v_array, 2048, 4095, 20, 2048, qsort,           "qsort",        "random 2048-4095", sizeof(int), cmp_int);
+	}
 
 	printf("\n");
 
 	free(la_array);
 	free(lr_array);
 	free(lv_array);
+
+	free(a_array);
+	free(r_array);
+	free(v_array);
 
 	return 0;
 }
