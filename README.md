@@ -235,8 +235,7 @@ to 64KB on modern processors.
 
 Wolfsort
 --------
-wolfsort is a hybrid quadsort which addresses cache handling for medium and large
-arrays. It's still under development but shows promising results.
+[wolfsort](https://github.com/scandum/wolfsort) is a hybrid radixsort / quadsort which improves performance on random data. It's mostly a proof of concept that only works on unsigned 32 and 64 bit integers.
 
 Visualization
 -------------
