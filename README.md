@@ -23,7 +23,7 @@ Instead the quad swap sorts four variables using four swap variables.
 During the first stage the four variables are partially sorted in the four
 swap variables, in the second stage they are fully sorted back to the
 original four variables.
-```ruby
+```python
             ╭─╮             ╭─╮                  ╭─╮          ╭─╮
             │A├─╮         ╭─┤S├────────┬─────────┤?├─╮    ╭───┤F│
             ╰─╯ │   ╭─╮   │ ╰─╯        │         ╰┬╯ │   ╭┴╮  ╰─╯
