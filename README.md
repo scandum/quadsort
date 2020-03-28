@@ -11,19 +11,19 @@ At the core of quadsort is the quad swap. Traditionally most sorting
 algorithms have been designed using the binary swap where two variables
 are sorted using a third temporary variable. This typically looks as
 following.
-
+```c
     if (val[0] > val[1])
     {
         tmp[0] = val[0];
         val[0] = val[1];
         val[1] = tmp[0];
     }
-
+```
 Instead the quad swap sorts four variables using four swap variables.
 During the first stage the four variables are partially sorted in the four
 swap variables, in the second stage they are fully sorted back to the
 original four variables.
-```
+```javascript
             ╭─╮             ╭─╮                  ╭─╮          ╭─╮
             │A├─╮         ╭─┤S├────────┬─────────┤?├─╮    ╭───┤F│
             ╰─╯ │   ╭─╮   │ ╰─╯        │         ╰┬╯ │   ╭┴╮  ╰─╯
@@ -60,7 +60,7 @@ an advantage.
 
 There is also an overall performance increase due to the elimination of
 wasteful swapping. In C the basic quad swap looks as following:
-
+```c
     if (val[0] > val[1])
     {
         tmp[0] = val[1];
@@ -121,7 +121,7 @@ wasteful swapping. In C the basic quad swap looks as following:
            val[3] = tmp[1];
        }
     }
-
+```
 In the case the array cannot be perfectly divided by 4, the tail, existing
 of 1-3 elements, is sorted using the traditional swap.
 
@@ -185,13 +185,13 @@ Boundary checks
 
 Another issue with the traditional merge sort is that it performs wasteful
 boundary checks. This looks as following:
-
-    if (a < a_max && b < b_max)
-        if (a < b)
-            [insert a]
+```c
+    while (a <= a_max && b <= b_max)
+        if (a <= b)
+            [insert a++]
         else
-            [insert b]
-
+            [insert b++]
+```
 To optimize this quadsort compares the last element of sequence A against
 the last element of sequence B. If the last element of sequence A is smaller
 than the last element of sequence B we know that the (b < b_max) if check
@@ -199,6 +199,24 @@ will always be false because sequence A will be fully merged first.
 
 Similarly if the last element of sequence A is greater than the last element
 of sequence B we know that the (a < a_max) if check will always be false.
+This looks as following:
+```c
+    if (val[a_max] <= val[b])
+        while (a <= a_max)
+        {
+            while (a > b)
+                [insert b++]
+            [insert a++]
+        }
+    else
+        while (b <= b_max)
+        {
+            while (a <= b)
+                [insert a++]
+            [insert b++]
+        }
+```
+            
 
 tail merge
 ----------
