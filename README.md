@@ -267,108 +267,6 @@ Colors are used to differentate between skip, swap, merge, and copy operations.
 
 ![quadsort benchmark](https://github.com/scandum/quadsort/blob/master/benchmark.gif)
 
-Benchmark: quadsort vs qsort (mergesort)
-----------------------------------------
-The following benchmark was on WSL gcc version 7.4.0 (Ubuntu 7.4.0-1ubuntu1~18.04.1).
-The source code was compiled using gcc -O3 quadsort.c. Each test was ran 100 times
-and only the best run is reported.
-
-MO: lists the number of comparisons that are performed for 1 million items.
-
-```
-         quadsort: sorted 1000000 i32s in 0.092399 seconds. MO:   19305366 (random order)
-            qsort: sorted 1000000 i32s in 0.103581 seconds. MO:   18673007 (random order)
-
-         quadsort: sorted 1000000 i32s in 0.002191 seconds. MO:     999999 (ascending)
-            qsort: sorted 1000000 i32s in 0.026788 seconds. MO:    9884992 (ascending)
-
-         quadsort: sorted 1000000 i32s in 0.013560 seconds. MO:    4008160 (ascending saw)
-            qsort: sorted 1000000 i32s in 0.034882 seconds. MO:   10884985 (ascending saw)
-
-         quadsort: sorted 1000000 i32s in 0.057610 seconds. MO:   19241914 (generic order)
-            qsort: sorted 1000000 i32s in 0.070901 seconds. MO:   18617580 (generic order)
-
-         quadsort: sorted 1000000 i32s in 0.001780 seconds. MO:     999999 (descending order)
-            qsort: sorted 1000000 i32s in 0.026404 seconds. MO:   10066432 (descending order)
-
-         quadsort: sorted 1000000 i32s in 0.015482 seconds. MO:    9519209 (descending saw)
-            qsort: sorted 1000000 i32s in 0.034839 seconds. MO:   13906008 (descending saw)
-
-         quadsort: sorted 1000000 i32s in 0.026516 seconds. MO:    6786305 (random tail)
-            qsort: sorted 1000000 i32s in 0.046344 seconds. MO:   12248243 (random tail)
-
-         quadsort: sorted 1000000 i32s in 0.050595 seconds. MO:   11381790 (random half)
-            qsort: sorted 1000000 i32s in 0.067199 seconds. MO:   14528949 (random half)
-
-         quadsort: sorted 1000000 i32s in 0.024795 seconds. MO:   15328606 (wave order)
-            qsort: sorted 1000000 i32s in 0.035221 seconds. MO:   14656080 (wave order)
-
-         quadsort: sorted 1000000 i32s in 0.024867 seconds. MO:   15328606 (stable)
-            qsort: sorted 1000000 i32s in 0.035251 seconds. MO:   14656080 (stable)
-
-         quadsort: sorted    1023 i32s in 0.013662 seconds.                (random 1-1023)
-            qsort: sorted    1023 i32s in 0.025581 seconds.                (random 1-1023)
-```
-In the benchmark above quadsort is compared against glibc qsort() using the same general
-purpose interface and without any known unfair advantage, like inlining.
-
-```
-     random order: 635, 202,  47, 229, etc
-  ascending order: 1, 2, 3, 4, etc
-    uniform order: 1, 1, 1, 1, etc
- descending order: 999, 998, 997, 996, etc
-       wave order: 100, 1, 102, 2, 103, 3, etc
-  stable/unstable: 100, 1, 102, 1, 103, 1, etc
-     random range: time to sort 1000 arrays ranging from size 0 to 999 containing random data
-```
-
-Benchmark: quadsort vs qsort (quicksort)
-----------------------------------------
-This particular test was performed using the qsort() implementation from Cygwin which uses
-quicksort under the hood. The source code was compiled using gcc -O3 quadsort.c. Each test
-was ran 100 times and only the best run is reported.
-```
-         quadsort: sorted 1000000 i32s in 0.119437 seconds. MO:   19308657 (random order)
-            qsort: sorted 1000000 i32s in 0.133077 seconds. MO:   21083741 (random order)
-
-         quadsort: sorted 1000000 i32s in 0.002071 seconds. MO:     999999 (ascending)
-            qsort: sorted 1000000 i32s in 0.007265 seconds. MO:    3000004 (ascending)
-
-         quadsort: sorted 1000000 i32s in 0.019239 seconds. MO:    4007580 (ascending saw)
-            qsort: sorted 1000000 i32s in 0.071322 seconds. MO:   20665677 (ascending saw)
-
-         quadsort: sorted 1000000 i32s in 0.076605 seconds. MO:   19242642 (generic order)
-            qsort: sorted 1000000 i32s in 0.038389 seconds. MO:    6221917 (generic order)
-
-         quadsort: sorted 1000000 i32s in 0.002305 seconds. MO:     999999 (descending order)
-            qsort: sorted 1000000 i32s in 0.009659 seconds. MO:    4000015 (descending order)
-
-         quadsort: sorted 1000000 i32s in 0.022940 seconds. MO:    9519209 (descending saw)
-            qsort: sorted 1000000 i32s in 0.042135 seconds. MO:   13152042 (descending saw)
-
-         quadsort: sorted 1000000 i32s in 0.034456 seconds. MO:    6787656 (random tail)
-            qsort: sorted 1000000 i32s in 0.098691 seconds. MO:   20584424 (random tail)
-
-         quadsort: sorted 1000000 i32s in 0.066240 seconds. MO:   11383441 (random half)
-            qsort: sorted 1000000 i32s in 0.118086 seconds. MO:   20572142 (random half)
-
-         quadsort: sorted 1000000 i32s in 0.038116 seconds. MO:   15328606 (wave order)
-            qsort: sorted 1000000 i32s in 4.471858 seconds. MO: 1974047339 (wave order)
-
-         quadsort: sorted 1000000 i32s in 0.060989 seconds. MO:   15328606 (stable)
-            qsort: sorted 1000000 i32s in 0.043175 seconds. MO:   10333679 (unstable)
-
-         quadsort: sorted    1023 i32s in 0.016126 seconds.       (random 1-1023)
-            qsort: sorted    1023 i32s in 0.033132 seconds.       (random 1-1023)
-```
-
-In this benchmark it becomes clear why quicksort is often preferred above a traditional mergesort,
-it has fewer comparisons for ascending, uniform, and descending order data. However, it performs
-worse than quadsort on most tests. Quicksort also has an extremely poor sorting speed for wave order data.
-The random range test shows quadsort to be more than twice as fast when sorting small arrays.
-
-Quicksort is faster on the generic and stable tests, but only because it is unstable.
-
 Benchmark: quadsort vs std::stable_sort vs timsort vs pdqsort vs wolfsort
 -------------------------------------------------------------------------
 The following benchmark was on WSL gcc version 7.4.0 (Ubuntu 7.4.0-1ubuntu1~18.04.1).
@@ -479,3 +377,105 @@ that pdqsort is not a stable sort which is the  reason it's faster on generic or
 |   pdqsort |      675 |  i32 | 0.000489 | 0.000531 |             |     random order |
 |  wolfsort |      675 |  i32 | 0.000283 | 0.000308 |             |     random order |
 </details>
+
+Benchmark: quadsort vs qsort (mergesort)
+----------------------------------------
+The following benchmark was on WSL gcc version 7.4.0 (Ubuntu 7.4.0-1ubuntu1~18.04.1).
+The source code was compiled using gcc -O3 quadsort.c. Each test was ran 100 times
+and only the best run is reported.
+
+MO: lists the number of comparisons that are performed for 1 million items.
+
+```
+         quadsort: sorted 1000000 i32s in 0.092399 seconds. MO:   19305366 (random order)
+            qsort: sorted 1000000 i32s in 0.103581 seconds. MO:   18673007 (random order)
+
+         quadsort: sorted 1000000 i32s in 0.002191 seconds. MO:     999999 (ascending)
+            qsort: sorted 1000000 i32s in 0.026788 seconds. MO:    9884992 (ascending)
+
+         quadsort: sorted 1000000 i32s in 0.013560 seconds. MO:    4008160 (ascending saw)
+            qsort: sorted 1000000 i32s in 0.034882 seconds. MO:   10884985 (ascending saw)
+
+         quadsort: sorted 1000000 i32s in 0.057610 seconds. MO:   19241914 (generic order)
+            qsort: sorted 1000000 i32s in 0.070901 seconds. MO:   18617580 (generic order)
+
+         quadsort: sorted 1000000 i32s in 0.001780 seconds. MO:     999999 (descending order)
+            qsort: sorted 1000000 i32s in 0.026404 seconds. MO:   10066432 (descending order)
+
+         quadsort: sorted 1000000 i32s in 0.015482 seconds. MO:    9519209 (descending saw)
+            qsort: sorted 1000000 i32s in 0.034839 seconds. MO:   13906008 (descending saw)
+
+         quadsort: sorted 1000000 i32s in 0.026516 seconds. MO:    6786305 (random tail)
+            qsort: sorted 1000000 i32s in 0.046344 seconds. MO:   12248243 (random tail)
+
+         quadsort: sorted 1000000 i32s in 0.050595 seconds. MO:   11381790 (random half)
+            qsort: sorted 1000000 i32s in 0.067199 seconds. MO:   14528949 (random half)
+
+         quadsort: sorted 1000000 i32s in 0.024795 seconds. MO:   15328606 (wave order)
+            qsort: sorted 1000000 i32s in 0.035221 seconds. MO:   14656080 (wave order)
+
+         quadsort: sorted 1000000 i32s in 0.024867 seconds. MO:   15328606 (stable)
+            qsort: sorted 1000000 i32s in 0.035251 seconds. MO:   14656080 (stable)
+
+         quadsort: sorted    1023 i32s in 0.013662 seconds.                (random 1-1023)
+            qsort: sorted    1023 i32s in 0.025581 seconds.                (random 1-1023)
+```
+In the benchmark above quadsort is compared against glibc qsort() using the same general
+purpose interface and without any known unfair advantage, like inlining.
+
+```
+     random order: 635, 202,  47, 229, etc
+  ascending order: 1, 2, 3, 4, etc
+    uniform order: 1, 1, 1, 1, etc
+ descending order: 999, 998, 997, 996, etc
+       wave order: 100, 1, 102, 2, 103, 3, etc
+  stable/unstable: 100, 1, 102, 1, 103, 1, etc
+     random range: time to sort 1000 arrays ranging from size 0 to 999 containing random data
+```
+
+Benchmark: quadsort vs qsort (quicksort)
+----------------------------------------
+This particular test was performed using the qsort() implementation from Cygwin which uses
+quicksort under the hood. The source code was compiled using gcc -O3 quadsort.c. Each test
+was ran 100 times and only the best run is reported.
+```
+         quadsort: sorted 1000000 i32s in 0.119437 seconds. MO:   19308657 (random order)
+            qsort: sorted 1000000 i32s in 0.133077 seconds. MO:   21083741 (random order)
+
+         quadsort: sorted 1000000 i32s in 0.002071 seconds. MO:     999999 (ascending)
+            qsort: sorted 1000000 i32s in 0.007265 seconds. MO:    3000004 (ascending)
+
+         quadsort: sorted 1000000 i32s in 0.019239 seconds. MO:    4007580 (ascending saw)
+            qsort: sorted 1000000 i32s in 0.071322 seconds. MO:   20665677 (ascending saw)
+
+         quadsort: sorted 1000000 i32s in 0.076605 seconds. MO:   19242642 (generic order)
+            qsort: sorted 1000000 i32s in 0.038389 seconds. MO:    6221917 (generic order)
+
+         quadsort: sorted 1000000 i32s in 0.002305 seconds. MO:     999999 (descending order)
+            qsort: sorted 1000000 i32s in 0.009659 seconds. MO:    4000015 (descending order)
+
+         quadsort: sorted 1000000 i32s in 0.022940 seconds. MO:    9519209 (descending saw)
+            qsort: sorted 1000000 i32s in 0.042135 seconds. MO:   13152042 (descending saw)
+
+         quadsort: sorted 1000000 i32s in 0.034456 seconds. MO:    6787656 (random tail)
+            qsort: sorted 1000000 i32s in 0.098691 seconds. MO:   20584424 (random tail)
+
+         quadsort: sorted 1000000 i32s in 0.066240 seconds. MO:   11383441 (random half)
+            qsort: sorted 1000000 i32s in 0.118086 seconds. MO:   20572142 (random half)
+
+         quadsort: sorted 1000000 i32s in 0.038116 seconds. MO:   15328606 (wave order)
+            qsort: sorted 1000000 i32s in 4.471858 seconds. MO: 1974047339 (wave order)
+
+         quadsort: sorted 1000000 i32s in 0.060989 seconds. MO:   15328606 (stable)
+            qsort: sorted 1000000 i32s in 0.043175 seconds. MO:   10333679 (unstable)
+
+         quadsort: sorted    1023 i32s in 0.016126 seconds.       (random 1-1023)
+            qsort: sorted    1023 i32s in 0.033132 seconds.       (random 1-1023)
+```
+
+In this benchmark it becomes clear why quicksort is often preferred above a traditional mergesort,
+it has fewer comparisons for ascending, uniform, and descending order data. However, it performs
+worse than quadsort on most tests. Quicksort also has an extremely poor sorting speed for wave order data.
+The random range test shows quadsort to be more than twice as fast when sorting small arrays.
+
+Quicksort is faster on the generic and stable tests, but only because it is unstable.
