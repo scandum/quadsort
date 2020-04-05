@@ -333,8 +333,9 @@ and only the best run is reported.
 |   pdqsort |  1000000 |  i32 | 0.024683 | 0.024727 |             |       wave order |
 |  wolfsort |  1000000 |  i32 | 0.009642 | 0.009709 |             |       wave order |
 </details>
-In this benchmark quadsort is compared without any known advantages. It should be noted
-that pdqsort is not a stable sort which is the  reason it's faster on generic order data.
+It should be noted that pdqsort is not a stable sort which is the reason it's faster on generic order data.
+
+The following benchmark was on WSL gcc version 7.4.0 (Ubuntu 7.4.0-1ubuntu1~18.04.1). The source code was compiled using g++ -O3 quadsort.cpp. Each test was ran 100 times and only the best run is reported. It measures the performance on array sizes ranging from 675 to 100,000.
 
 ![Graph](/graph2.png)
 <details><summary><b>quadsort vs std::stable_sort vs timsort vs pdqsort vs wolfsort data table</b></summary>
