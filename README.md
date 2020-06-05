@@ -201,7 +201,7 @@ Similarly if the last element of sequence A is greater than the last element
 of sequence B we know that the (a < a_max) if check will always be false.
 This looks as following:
 ```c
-    if (val[a_max] <= val[b])
+    if (val[a_max] <= val[b_max])
         while (a <= a_max)
         {
             while (a > b)
