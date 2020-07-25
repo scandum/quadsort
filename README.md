@@ -273,6 +273,8 @@ The following benchmark was on WSL gcc version 7.4.0 (Ubuntu 7.4.0-1ubuntu1~18.0
 The source code was compiled using g++ -O3 quadsort.cpp. Each test was ran 100 times
 and only the best run is reported.
 
+The X axis of the bar graph below is the execution time.
+
 ![Graph](/graph1.png)
 
 <details><summary><b>quadsort vs std::stable_sort vs timsort vs pdqsort vs wolfsort data table</b></summary>
@@ -336,6 +338,8 @@ and only the best run is reported.
 It should be noted that pdqsort is not a stable sort which is the reason it's faster on generic order data.
 
 The following benchmark was on WSL gcc version 7.4.0 (Ubuntu 7.4.0-1ubuntu1~18.04.1). The source code was compiled using g++ -O3 quadsort.cpp. Each test was ran 100 times and only the best run is reported. It measures the performance on array sizes ranging from 675 to 100,000.
+
+The X axis of the graph below is the number of elements, the Y axis is the execution time.
 
 ![Graph](/graph2.png)
 <details><summary><b>quadsort vs std::stable_sort vs timsort vs pdqsort vs wolfsort data table</b></summary>
