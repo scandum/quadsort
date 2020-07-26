@@ -263,7 +263,7 @@ distribution, the second on an ascending distribution, the third on a descending
 distribution, and the fourth on an ascending distribution with a random tail.
 
 The upper half shows the swap memory and the bottom half shows the main memory.
-Colors are used to differentate between skip, swap, merge, and copy operations.
+Colors are used to differentiate between skip, swap, merge, and copy operations.
 
 ![quadsort benchmark](https://github.com/scandum/quadsort/blob/master/benchmark.gif)
 
