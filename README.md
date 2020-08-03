@@ -251,9 +251,9 @@ swapping. Based on my benchmarks it appears that quadsort is always faster than
 in-place sorts for array sizes that do not exhaust the L1 cache, which can be up
 to 64KB on modern processors.
 
-Wolfsort
---------
-[wolfsort](https://github.com/scandum/wolfsort) is a hybrid radixsort / quadsort which improves performance on random data. It's mostly a proof of concept that only works on unsigned 32 and 64 bit integers.
+Wolfsort and flowsort
+---------------------
+[wolfsort](https://github.com/scandum/wolfsort) and flowsort are a hybrid radixsort / quadsort with improved performance on random data. They're mostly a proof of concept that only work on unsigned 32 and 64 bit integers.
 
 Visualization
 -------------
@@ -278,7 +278,6 @@ The X axis of the bar graph below is the execution time.
 ![Graph](/graph1.png)
 
 <details><summary><b>quadsort vs std::stable_sort vs timsort vs pdqsort vs wolfsort data table</b></summary>
-
 |      Name |    Items | Type |     Best |  Average | Comparisons |     Distribution |
 | --------- | -------- | ---- | -------- | -------- | ----------- | ---------------- |
 |  quadsort |  1000000 |  i32 | 0.070469 | 0.070635 |             |     random order |
@@ -342,45 +341,65 @@ The following benchmark was on WSL gcc version 7.4.0 (Ubuntu 7.4.0-1ubuntu1~18.0
 The X axis of the graph below is the number of elements, the Y axis is the execution time.
 
 ![Graph](/graph2.png)
-<details><summary><b>quadsort vs std::stable_sort vs timsort vs pdqsort vs wolfsort data table</b></summary>
+<details><summary><b>quadsort vs std::stable_sort vs timsort vs pdqsort vs wolfsort vs flowsort data table</b></summary>
 
 |      Name |    Items | Type |     Best |  Average | Comparisons |     Distribution |
 | --------- | -------- | ---- | -------- | -------- | ----------- | ---------------- |
-|  quadsort |   100000 |  i32 | 0.005800 | 0.005835 |             |     random order |
-|stablesort |   100000 |  i32 | 0.006092 | 0.006122 |             |     random order |
-|   timsort |   100000 |  i32 | 0.007605 | 0.007656 |             |     random order |
-|   pdqsort |   100000 |  i32 | 0.002648 | 0.002670 |             |     random order |
-|  wolfsort |   100000 |  i32 | 0.001148 | 0.001168 |             |     random order |
+|  quadsort |      256 |  i32 | 0.008306 | 0.009226 |             |     random order |
+|stablesort |      256 |  i32 | 0.009325 | 0.022037 |             |     random order |
+|   timsort |      256 |  i32 | 0.015605 | 0.026554 |             |     random order |
+|   pdqsort |      256 |  i32 | 0.010840 | 0.015047 |             |     random order |
+|  wolfsort |      256 |  i32 | 0.008287 | 0.008338 |             |     random order |
+|  flowsort |      256 |  i32 | 0.008332 | 0.009783 |             |     random order |
 |           |          |      |          |          |             |                  |
-|  quadsort |    10000 |  i32 | 0.004568 | 0.004593 |             |     random order |
-|stablesort |    10000 |  i32 | 0.004813 | 0.004923 |             |     random order |
-|   timsort |    10000 |  i32 | 0.006326 | 0.006376 |             |     random order |
-|   pdqsort |    10000 |  i32 | 0.002345 | 0.002373 |             |     random order |
-|  wolfsort |    10000 |  i32 | 0.001256 | 0.001274 |             |     random order |
+|  quadsort |      512 |  i32 | 0.007497 | 0.012202 |             |     random order |
+|stablesort |      512 |  i32 | 0.014719 | 0.023305 |             |     random order |
+|   timsort |      512 |  i32 | 0.014791 | 0.026926 |             |     random order |
+|   pdqsort |      512 |  i32 | 0.010218 | 0.015399 |             |     random order |
+|  wolfsort |      512 |  i32 | 0.005434 | 0.005711 |             |     random order |
+|  flowsort |      512 |  i32 | 0.008525 | 0.008842 |             |     random order |
 |           |          |      |          |          |             |                  |
-|  quadsort |     5000 |  i32 | 0.004076 | 0.004086 |             |     random order |
-|stablesort |     5000 |  i32 | 0.004394 | 0.004420 |             |     random order |
-|   timsort |     5000 |  i32 | 0.005901 | 0.005938 |             |     random order |
-|   pdqsort |     5000 |  i32 | 0.002093 | 0.002107 |             |     random order |
-|  wolfsort |     5000 |  i32 | 0.000968 | 0.001086 |             |     random order |
+|  quadsort |     1024 |  i32 | 0.012224 | 0.013265 |             |     random order |
+|stablesort |     1024 |  i32 | 0.027686 | 0.033828 |             |     random order |
+|   timsort |     1024 |  i32 | 0.033677 | 0.043642 |             |     random order |
+|   pdqsort |     1024 |  i32 | 0.011030 | 0.015985 |             |     random order |
+|  wolfsort |     1024 |  i32 | 0.005497 | 0.007087 |             |     random order |
+|  flowsort |     1024 |  i32 | 0.008267 | 0.009476 |             |     random order |
 |           |          |      |          |          |             |                  |
-|  quadsort |     2500 |  i32 | 0.003196 | 0.003303 |             |     random order |
-|stablesort |     2500 |  i32 | 0.003801 | 0.003942 |             |     random order |
-|   timsort |     2500 |  i32 | 0.005296 | 0.005322 |             |     random order |
-|   pdqsort |     2500 |  i32 | 0.001606 | 0.001661 |             |     random order |
-|  wolfsort |     2500 |  i32 | 0.000509 | 0.000520 |             |     random order |
+|  quadsort |     4096 |  i32 | 0.040918 | 0.041427 |             |     random order |
+|stablesort |     4096 |  i32 | 0.043393 | 0.044039 |             |     random order |
+|   timsort |     4096 |  i32 | 0.059069 | 0.059289 |             |     random order |
+|   pdqsort |     4096 |  i32 | 0.019076 | 0.020721 |             |     random order |
+|  wolfsort |     4096 |  i32 | 0.007710 | 0.009736 |             |     random order |
+|  flowsort |     4096 |  i32 | 0.010430 | 0.012855 |             |     random order |
 |           |          |      |          |          |             |                  |
-|  quadsort |     1250 |  i32 | 0.001767 | 0.001823 |             |     random order |
-|stablesort |     1250 |  i32 | 0.002812 | 0.002887 |             |     random order |
-|   timsort |     1250 |  i32 | 0.003789 | 0.003865 |             |     random order |
-|   pdqsort |     1250 |  i32 | 0.001036 | 0.001325 |             |     random order |
-|  wolfsort |     1250 |  i32 | 0.000534 | 0.000655 |             |     random order |
+|  quadsort |    16384 |  i32 | 0.051287 | 0.051480 |             |     random order |
+|stablesort |    16384 |  i32 | 0.052293 | 0.052393 |             |     random order |
+|   timsort |    16384 |  i32 | 0.068145 | 0.068304 |             |     random order |
+|   pdqsort |    16384 |  i32 | 0.024337 | 0.024414 |             |     random order |
+|  wolfsort |    16384 |  i32 | 0.012334 | 0.012433 |             |     random order |
+|  flowsort |    16384 |  i32 | 0.015112 | 0.015173 |             |     random order |
 |           |          |      |          |          |             |                  |
-|  quadsort |      675 |  i32 | 0.000368 | 0.000592 |             |     random order |
-|stablesort |      675 |  i32 | 0.000974 | 0.001160 |             |     random order |
-|   timsort |      675 |  i32 | 0.000896 | 0.000948 |             |     random order |
-|   pdqsort |      675 |  i32 | 0.000489 | 0.000531 |             |     random order |
-|  wolfsort |      675 |  i32 | 0.000283 | 0.000308 |             |     random order |
+|  quadsort |    65536 |  i32 | 0.058787 | 0.058863 |             |     random order |
+|stablesort |    65536 |  i32 | 0.060166 | 0.060262 |             |     random order |
+|   timsort |    65536 |  i32 | 0.076500 | 0.076612 |             |     random order |
+|   pdqsort |    65536 |  i32 | 0.026368 | 0.026425 |             |     random order |
+|  wolfsort |    65536 |  i32 | 0.013164 | 0.013208 |             |     random order |
+|  flowsort |    65536 |  i32 | 0.015327 | 0.015362 |             |     random order |
+|           |          |      |          |          |             |                  |
+|  quadsort |   262144 |  i32 | 0.066391 | 0.066484 |             |     random order |
+|stablesort |   262144 |  i32 | 0.068144 | 0.068255 |             |     random order |
+|   timsort |   262144 |  i32 | 0.084703 | 0.084835 |             |     random order |
+|   pdqsort |   262144 |  i32 | 0.028397 | 0.028457 |             |     random order |
+|  wolfsort |   262144 |  i32 | 0.013937 | 0.014095 |             |     random order |
+|  flowsort |   262144 |  i32 | 0.016058 | 0.016107 |             |     random order |
+|           |          |      |          |          |             |                  |
+|  quadsort |  1048576 |  i32 | 0.074302 | 0.074495 |             |     random order |
+|stablesort |  1048576 |  i32 | 0.076274 | 0.076419 |             |     random order |
+|   timsort |  1048576 |  i32 | 0.093351 | 0.093517 |             |     random order |
+|   pdqsort |  1048576 |  i32 | 0.030378 | 0.030446 |             |     random order |
+|  wolfsort |  1048576 |  i32 | 0.034210 | 0.034403 |             |     random order |
+|  flowsort |  1048576 |  i32 | 0.017668 | 0.017795 |             |     random order |
 </details>
 
 Benchmark: quadsort vs qsort (mergesort)
