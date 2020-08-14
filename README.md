@@ -273,6 +273,9 @@ The following benchmark was on WSL gcc version 7.4.0 (Ubuntu 7.4.0-1ubuntu1~18.0
 The source code was compiled using g++ -O3 quadsort.cpp. Each test was ran 100 times
 and only the best run is reported.
 
+It should be noted that pdqsort is not a stable sort which is the reason it's much
+faster on generic order data.
+
 The X axis of the bar graph below is the execution time.
 
 ![Graph](/graph1.png)
@@ -334,9 +337,11 @@ The X axis of the bar graph below is the execution time.
 |   pdqsort |  1000000 |  i32 | 0.024683 | 0.024727 |             |       wave order |
 |  wolfsort |  1000000 |  i32 | 0.009642 | 0.009709 |             |       wave order |
 </details>
-It should be noted that pdqsort is not a stable sort which is the reason it's faster on generic order data.
 
-The following benchmark was on WSL gcc version 7.4.0 (Ubuntu 7.4.0-1ubuntu1~18.04.1). The source code was compiled using g++ -O3 quadsort.cpp. Each test was ran 100 times and only the best run is reported. It measures the performance on array sizes ranging from 675 to 100,000.
+The following benchmark was on WSL gcc version 7.4.0 (Ubuntu 7.4.0-1ubuntu1~18.04.1). The
+source code was compiled using g++ -O3 quadsort.cpp. Each test was ran 100 times and only
+the best run is reported. It measures the performance on random data with array sizes
+ranging from 256 to 1,048,576.
 
 The X axis of the graph below is the number of elements, the Y axis is the execution time.
 
