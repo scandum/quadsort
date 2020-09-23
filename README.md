@@ -180,6 +180,13 @@ computational intensive procedure.
 This allows quadsort to sort in order and reverse-order sequences using
 n comparisons instead of n * log n comparisons.
 
+Run detection
+-------------
+While there is no significant benefit to additional in order run detection
+there is a notable benefit to reverse order run detection. Quadsort 1.1.3.1
+implements reverse order run detection in the quad swap routine which obsoletes
+the need for reverse order checks in the quad merge routine.
+
 Boundary checks
 ---------------
 
