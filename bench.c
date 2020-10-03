@@ -95,16 +95,17 @@ long long utime()
 
 void test_sort(void *array, void *unsorted, void *valid, int minimum, int maximum, int samples, int repetitions, SRTFUNC *srt, const char *name, const char *desc, size_t size, CMPFUNC *cmpf)
 {
+	double comps;
 	long long start, end, total, best, average;
 	size_t rep, sam, max;
 	long long *ptla = array, *ptlv = valid;
 	int *pta = array, *ptv = valid, cnt;
 
-	best = average = 0;
+	best = average = comps = start = 0;
 
 	if (maximum == 10 && size == sizeof(int))
 	{
-		memcpy(array, unsorted, max * size);
+		memcpy(array, unsorted, maximum * size);
 
 		printf("\e[1;32m in: \e[1;31m%10d %10d %10d %10d %10d %10d %10d %10d %10d %10d\e[0m\n", pta[0], pta[1], pta[2], pta[3], pta[4], pta[5], pta[6], pta[7], pta[8], pta[9]);
 	}
@@ -154,6 +155,7 @@ void test_sort(void *array, void *unsorted, void *valid, int minimum, int maximu
 
 				total += end - start;
 			}
+			comps += counter;
 
 			if (minimum < maximum)
 			{
@@ -190,6 +192,7 @@ void test_sort(void *array, void *unsorted, void *valid, int minimum, int maximu
 		return;
 	}
 
+	comps /= samples * repetitions;
 	average /= samples;
 
 	if (cmpf == cmp_stable)
@@ -198,18 +201,8 @@ void test_sort(void *array, void *unsorted, void *valid, int minimum, int maximu
 		{
 			if (pta[cnt - 1] > pta[cnt])
 			{
-				if (maximum == 1000)
-				{
-					printf("%17s: sorted %7d i%ds in %f seconds. KO: %5d (un%s)\n", name, maximum, (int) size * 8, best / 1000000.0, counter, desc);
-				}
-				else if (maximum == 1000000)
-				{
-					printf("%17s: sorted %7d i%ds in %f seconds. MO: %10d (un%s)\n", name, maximum, (int) size * 8, best / 1000000.0, counter, desc);
-				}
-				else
-				{
-					printf("%17s: sorted %7d i%ds in %f seconds. (un%s)\n", name, maximum, (int) size * 8, best / 1000000.0, desc);
-				}
+				printf("|%10s | %8d |  i%d | %f | %f | %11.1f | %16s |\n", name, maximum, (int) size * 8, best / 1000000.0, average / 1000000.0, comps, "unstable");
+
 				return;
 			}
 		}
@@ -230,7 +223,7 @@ void test_sort(void *array, void *unsorted, void *valid, int minimum, int maximu
 
 	if (counter)
 	{
-		printf("|%10s | %8d |  i%d | %f | %f | %11u | %16s |\n", name, maximum, (int) size * 8, best / 1000000.0, average / 1000000.0, counter, desc);
+		printf("|%10s | %8d |  i%d | %f | %f | %11.1f | %16s |\n", name, maximum, (int) size * 8, best / 1000000.0, average / 1000000.0, comps, desc);
 	}
 	else
 	{
@@ -242,7 +235,7 @@ void test_sort(void *array, void *unsorted, void *valid, int minimum, int maximu
 		return;
 	}
 
-	for (cnt = 1 ; cnt < max ; cnt++)
+	for (cnt = 1 ; cnt < maximum ; cnt++)
 	{
 		if (size == sizeof(int))
 		{
@@ -262,7 +255,7 @@ void test_sort(void *array, void *unsorted, void *valid, int minimum, int maximu
 		}
 	}
 
-	for (cnt = 1 ; cnt < max ; cnt++)
+	for (cnt = 1 ; cnt < maximum ; cnt++)
 	{
 		if (size == sizeof(int))
 		{
@@ -440,11 +433,11 @@ int validate()
 int main(int argc, char **argv)
 {
 	int max = 100000;
-	int samples = 100;
+	int samples = 10;
 	int repetitions = 1;
 	long long *la_array, *lr_array, *lv_array;
 	int *a_array, *r_array, *v_array;
-	int cnt, rnd, valid;
+	int cnt, rnd;
 
 	if (argc >= 1 && argv[1] && *argv[1])
 	{
@@ -463,14 +456,14 @@ int main(int argc, char **argv)
 
 	if (argc >4 && argv[4] && *argv[4])
 	{
-		rnd = atoi(argv[3]);
+		rnd = atoi(argv[4]);
 	}
 	else
 	{
 		rnd = time(NULL);
 	}
 
-	valid = validate();
+	validate();
 
 	printf("benchmark: array size: %d, sample size: %d, repetitions: %d, seed: %d\n\n", max, samples, repetitions, rnd);
 

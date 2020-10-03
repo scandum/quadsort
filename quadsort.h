@@ -18,7 +18,7 @@
 */
 
 /*
-	quadsort 1.1.3.1
+	quadsort 1.1.3.2
 */
 
 #ifndef QUADSORT_H
@@ -31,6 +31,90 @@
 
 typedef int CMPFUNC (const void *a, const void *b);
 
+#define swap_two(array, swap)  \
+{  \
+	if (cmp(array, array + 1) > 0)  \
+	{  \
+		swap = array[1]; array[1] = array[0]; array[0] = swap;  \
+	}  \
+}
+
+#define swap_three(array, swap)  \
+{  \
+	if (cmp(array, array + 1) > 0)  \
+	{  \
+		if (cmp(array, array + 2) <= 0)  \
+		{  \
+			swap = array[0]; array[0] = array[1]; array[1] = swap;  \
+		}  \
+		else if (cmp(array + 1, array + 2) > 0)  \
+		{  \
+			swap = array[0]; array[0] = array[2]; array[2] = swap;  \
+		}  \
+		else  \
+		{  \
+			swap = array[0]; array[0] = array[1]; array[1] = array[2]; array[2] = swap;  \
+		}  \
+	}  \
+	else if (cmp(array + 1, array + 2) > 0)  \
+	{  \
+		if (cmp(array, array + 2) > 0)  \
+		{  \
+			swap = array[2]; array[2] = array[1]; array[1] = array[0]; array[0] = swap;  \
+		}  \
+		else   \
+		{  \
+			swap = array[2]; array[2] = array[1]; array[1] = swap;  \
+		}  \
+	}  \
+}  \
+
+#define swap_four(array, swap)  \
+{  \
+	if (cmp(array, array + 1) > 0)  \
+	{  \
+		if (cmp(array, array + 2) <= 0)  \
+		{  \
+			swap = array[0]; array[0] = array[1]; array[1] = swap;  \
+		}  \
+		else if (cmp(array + 1, array + 2) > 0)  \
+		{  \
+			swap = array[0]; array[0] = array[2]; array[2] = swap;  \
+		}  \
+		else  \
+		{  \
+			swap = array[0]; array[0] = array[1]; array[1] = array[2]; array[2] = swap;  \
+		}  \
+	}  \
+	else if (cmp(array + 1, array + 2) > 0)  \
+	{  \
+		if (cmp(array, array + 2) > 0)  \
+		{  \
+			swap = array[2]; array[2] = array[1]; array[1] = array[0]; array[0] = swap;  \
+		}  \
+		else   \
+		{  \
+			swap = array[2]; array[2] = array[1]; array[1] = swap;  \
+		}  \
+	}  \
+	if (cmp(array + 1, array + 3) > 0)  \
+	{  \
+		if (cmp(array, array + 3) > 0)  \
+		{  \
+			swap = array[3]; array[3] = array[2]; array[2] = array[1]; array[1] = array[0]; array[0] = swap;  \
+		}  \
+		else  \
+		{  \
+			swap = array[3]; array[3] = array[2]; array[2] = array[1]; array[1] = swap;  \
+		}  \
+	}  \
+	else if (cmp(array + 2, array + 3) > 0)  \
+	{  \
+		swap = array[3]; array[3] = array[2]; array[2] = swap;  \
+	}  \
+}
+
+
 ///////////////////////////////////////////////////////
 // ┌────────────────────────────────────────────────┐//
 // │   ██████┐ ██████┐    ██████┐ ██████┐████████┐  │//
@@ -42,34 +126,37 @@ typedef int CMPFUNC (const void *a, const void *b);
 // └────────────────────────────────────────────────┘//
 ///////////////////////////////////////////////////////
 
-void tail_insert32(int *array, int key, unsigned char nmemb, CMPFUNC *cmp)
+inline void tail_insert32(int *array, int key, unsigned char nmemb, CMPFUNC *cmp)
 {
 	int *pta = array + nmemb - 1;
 
-	if (nmemb > 4 && cmp(pta - 4, &key) > 0)
+	if (cmp(pta, &key) > 0)
 	{
-		array[nmemb--] = *pta--;
-		array[nmemb--] = *pta--;
-		array[nmemb--] = *pta--;
-		array[nmemb--] = *pta--;
-	}
+		if (nmemb > 4 && cmp(pta - 3, &key) > 0)
+		{
+			array[nmemb--] = *pta--;
+			array[nmemb--] = *pta--;
+			array[nmemb--] = *pta--;
+			array[nmemb--] = *pta--;
+		}
 
-	if (nmemb > 2 && cmp(pta - 2, &key) > 0)
-	{
-		array[nmemb--] = *pta--;
-		array[nmemb--] = *pta--;
+		if (nmemb > 2 && cmp(pta - 2, &key) > 0)
+		{
+			array[nmemb--] = *pta--;
+			array[nmemb--] = *pta--;
+		}
+	
+		if (nmemb > 1 && cmp(pta - 1, &key) > 0)
+		{
+			array[nmemb--] = *pta--;
+		}
+	
+		if (nmemb > 0 && cmp(pta, &key) > 0)
+		{
+			array[nmemb--] = *pta--;
+		}
+		array[nmemb] = key;
 	}
-
-	if (nmemb > 1 && cmp(pta - 1, &key) > 0)
-	{
-		array[nmemb--] = *pta--;
-	}
-
-	if (nmemb > 0 && cmp(pta, &key) > 0)
-	{
-		array[nmemb--] = *pta--;
-	}
-	array[nmemb] = key;
 }
 
 void tail_swap32(int *array, unsigned char nmemb, CMPFUNC *cmp)
@@ -78,126 +165,40 @@ void tail_swap32(int *array, unsigned char nmemb, CMPFUNC *cmp)
 	register int *pta = array;
 	register unsigned char i, mid, cnt;
 
-	if (nmemb < 2)
+	switch (nmemb)
 	{
-		return;
+		case 0:
+		case 1:
+			return;
+
+		case 2:
+			swap_two(pta, *pts);
+			return;
+
+		case 3:
+			swap_three(pta, *pts);
+			return;
+
+		case 4:
+			swap_four(pta, *pts);
+			return;
 	}
+	swap_four(pta, *pts);
 
-	if (nmemb < 3)
+	if (nmemb <= 8)
 	{
-		if (cmp(pta, pta + 1) > 0)
+		for (i = 4 ; i < nmemb ; i++)
 		{
-			*pts = pta[1]; pta[1] = pta[0]; pta[0] = *pts;
-		}
-		return;
-	}
-
-	if (nmemb < 4)
-	{
-		if (cmp(pta, pta + 1) > 0)
-		{
-			*pts = pta[1]; pta[1] = pta[0]; pta[0] = *pts;
-		}
-
-		if (cmp(pta + 1, pta + 2) > 0)
-		{
-			*pts = pta[2];
-
-			if (cmp(pta, pta + 2) > 0)
-			{
-				pta[2] = pta[1]; pta[1] = pta[0]; pta[0] = *pts;
-			}
-			else 
-			{
-				pta[2] = pta[1]; pta[1] = *pts;
-			}
-		}
-
-		return;
-	}
-
-	// step 1
-
-	if (cmp(pta, pta + 1) > 0)
-	{
-		*pts = pta[1]; pta[1] = pta[0]; pta[0] = *pts;
-	}
-	
-	if (cmp(pta + 1, pta + 2) > 0)
-	{
-		if (cmp(pta, pta + 2) > 0)
-		{
-			*pts = pta[2]; pta[2] = pta[1]; pta[1] = pta[0]; pta[0] = *pts;
-		}
-		else 
-		{
-			*pts = pta[2]; pta[2] = pta[1]; pta[1] = *pts;
-		}
-	}
-
-	if (cmp(pta + 1, pta + 3) > 0)
-	{
-		if (cmp(pta, pta + 3) > 0)
-		{
-			*pts = pta[3]; pta[3] = pta[2]; pta[2] = pta[1]; pta[1] = pta[0]; pta[0] = *pts;
-		}
-		else
-		{
-			*pts = pta[3]; pta[3] = pta[2]; pta[2] = pta[1]; pta[1] = *pts;
-		}
-	}
-	else if (cmp(pta + 2, pta + 3) > 0)
-	{
-		*pts = pta[3]; pta[3] = pta[2]; pta[2] = *pts;
-	}
-
-	if (nmemb < 9)
-	{
-		for (cnt = 4 ; cnt < nmemb ; cnt++)
-		{
-			tail_insert32(pta, pta[cnt], cnt, cmp);
+			tail_insert32(pta, pta[i], i, cmp);
 		}
 		return;
 	}
 
 	pta += 4;
 
-	if (cmp(pta, pta + 1) > 0)
-	{
-		*pts = pta[1]; pta[1] = pta[0]; pta[0] = *pts;
-	}
-	
-	if (cmp(pta + 1, pta + 2) > 0)
-	{
-		if (cmp(pta, pta + 2) > 0)
-		{
-			*pts = pta[2]; pta[2] = pta[1]; pta[1] = pta[0]; pta[0] = *pts;
-		}
-		else 
-		{
-			*pts = pta[2]; pta[2] = pta[1]; pta[1] = *pts;
-		}
-	}
-
-	if (cmp(pta + 1, pta + 3) > 0)
-	{
-		if (cmp(pta, pta + 3) > 0)
-		{
-			*pts = pta[3]; pta[3] = pta[2]; pta[2] = pta[1]; pta[1] = pta[0]; pta[0] = *pts;
-		}
-		else
-		{
-			*pts = pta[3]; pta[3] = pta[2]; pta[2] = pta[1]; pta[1] = *pts;
-		}
-	}
-	else if (cmp(pta + 2, pta + 3) > 0)
-	{
-		*pts = pta[3]; pta[3] = pta[2]; pta[2] = *pts;
-	}
+	swap_four(pta, *pts);
 
 	pta += 4;
-
-	// step 2
 
 	switch (nmemb)
 	{
@@ -205,76 +206,24 @@ void tail_swap32(int *array, unsigned char nmemb, CMPFUNC *cmp)
 			break;
 
 		case 10:
-			if (cmp(&pta[0], &pta[1]) > 0)
-			{
-				*pts = pta[0]; pta[0] = pta[1]; pta[1] = *pts;
-			}
+			swap_two(pta, *pts);
 			break;
 
 		case 11:
-			if (cmp(pta, pta + 1) > 0)
-			{
-				*pts = pta[1]; pta[1] = pta[0]; pta[0] = *pts;
-			}
-
-			if (cmp(pta + 1, pta + 2) > 0)
-			{
-				*pts = pta[2];
-
-				if (cmp(pta, pta + 2) > 0)
-				{
-					pta[2] = pta[1]; pta[1] = pta[0]; pta[0] = *pts;
-				}
-				else 
-				{
-					pta[2] = pta[1]; pta[1] = *pts;
-				}
-			}
+			swap_three(pta, *pts);
 			break;
 
 		default:
-			if (cmp(pta, pta + 1) > 0)
-			{
-				*pts = pta[1]; pta[1] = pta[0]; pta[0] = *pts;
-			}
-	
-			if (cmp(pta + 1, pta + 2) > 0)
-			{
-				if (cmp(pta, pta + 2) > 0)
-				{
-					*pts = pta[2]; pta[2] = pta[1]; pta[1] = pta[0]; pta[0] = *pts;
-				}
-				else 
-				{
-					*pts = pta[2]; pta[2] = pta[1]; pta[1] = *pts;
-				}
-			}
+			swap_four(pta, *pts);
 
-			if (cmp(pta + 1, pta + 3) > 0)
+			for (i = 4 ; i + 8 < nmemb ; i++)
 			{
-				if (cmp(pta, pta + 3) > 0)
-				{
-					*pts = pta[3]; pta[3] = pta[2]; pta[2] = pta[1]; pta[1] = pta[0]; pta[0] = *pts;
-				}
-				else
-				{
-					*pts = pta[3]; pta[3] = pta[2]; pta[2] = pta[1]; pta[1] = *pts;
-				}
-			}
-			else if (cmp(pta + 2, pta + 3) > 0)
-			{
-				*pts = pta[3]; pta[3] = pta[2]; pta[2] = *pts;
-			}
-
-			for (cnt = 4 ; cnt + 8 < nmemb ; cnt++)
-			{
-				tail_insert32(pta, pta[cnt], cnt, cmp);
+				tail_insert32(pta, pta[i], i, cmp);
 			}
 			break;
 	}
-	pta -= 8;
 
-	// step 3
+	pta -= 8;
 
 	if (cmp(&pta[3], &pta[4]) <= 0)
 	{
@@ -355,12 +304,12 @@ void tail_swap32(int *array, unsigned char nmemb, CMPFUNC *cmp)
 	}
 }
 
-void tail_merge32(int *array, int *swap, size_t nmemb, size_t block, CMPFUNC *cmp);
+void tail_merge32(int *array, int *swap, unsigned int nmemb, unsigned int block, CMPFUNC *cmp);
 
-size_t quad_swap32(int *array, size_t nmemb, CMPFUNC *cmp)
+unsigned int quad_swap32(int *array, unsigned int nmemb, CMPFUNC *cmp)
 {
 	int swap[16];
-	size_t offset;
+	unsigned int offset;
 	register int *pta, *pts, *ptt, *pte, tmp;
 
 	pta = array;
@@ -804,14 +753,16 @@ size_t quad_swap32(int *array, size_t nmemb, CMPFUNC *cmp)
 		}
 	}
 
-	tail_merge32(pta, swap, nmemb % 16, 4, cmp);
-
+	if (nmemb % 16 > 4)
+	{
+		tail_merge32(pta, swap, nmemb % 16, 4, cmp);
+	}
 	return 0;
 }
 
-void quad_merge32(int *array, int *swap, const size_t nmemb, size_t block, CMPFUNC *cmp)
+void quad_merge32(int *array, int *swap, unsigned int nmemb, unsigned int block, CMPFUNC *cmp)
 {
-	size_t offset;
+	unsigned int offset;
 	register int *pta, *pts, *c, *c_max, *d, *d_max;
 
 	while (block * 8 < nmemb)
@@ -1007,9 +958,9 @@ void quad_merge32(int *array, int *swap, const size_t nmemb, size_t block, CMPFU
 }
 
 
-void tail_merge32(int *array, int *swap, size_t nmemb, size_t block, CMPFUNC *cmp)
+void tail_merge32(int *array, int *swap, unsigned int nmemb, unsigned int block, CMPFUNC *cmp)
 {
-	size_t offset;
+	unsigned int offset;
 	register int *pta, *pts, *c, *c_max, *d, *d_max, *e;
 
 	pts = swap;
@@ -1036,43 +987,43 @@ void tail_merge32(int *array, int *swap, size_t nmemb, size_t block, CMPFUNC *cm
 				d_max = array + nmemb;
 			}
 
+			if (offset + block * 2 <= nmemb)
+			{
+				c_max = pts + block;
+			}
+			else
+			{
+				c_max = pts + nmemb - (offset + block);
+			}
+
+			d = d_max - 1;
+			e = pta + block - 1;
+
+			while (cmp(e, d) <= 0)
+			{
+				d_max--;
+				d--;
+				c_max--;
+			}
+
+			c = c_max - 1;
+
+			while (c >= pts + 8)
+			{
+				*c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--;
+			}
+
+			while (c >= pts)
+			{
+				*c-- = *d--;
+			}
+
+			c = c_max - 1;
+			d = pta + block - 1;
+			e = d_max - 1;
+
 			if (cmp(pta, pta + block) <= 0)
 			{
-				if (offset + block * 2 <= nmemb)
-				{
-					c_max = pts + block;
-				}
-				else
-				{
-					c_max = pts + nmemb - (offset + block);
-				}
-
-				d = d_max - 1;
-				e = pta + block - 1;
-
-				while (cmp(e, d) <= 0)
-				{
-					d_max--;
-					d--;
-					c_max--;
-				}
-
-				c = c_max - 1;
-
-				while (c >= pts + 8)
-				{
-					*c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--;
-				}
-
-				while (c >= pts)
-				{
-					*c-- = *d--;
-				}
-
-				c = c_max - 1;
-				d = pta + block - 1;
-				e = d_max - 1;
-
 				*e-- = *d--;
 
 				while (c >= pts)
@@ -1086,41 +1037,6 @@ void tail_merge32(int *array, int *swap, size_t nmemb, size_t block, CMPFUNC *cm
 			}
 			else
 			{
-				if (offset + block * 2 <= nmemb)
-				{
-					c_max = pts + block;
-				}
-				else
-				{
-					c_max = pts + nmemb - (offset + block);
-				}
-
-				d = d_max - 1;
-				e = pta + block - 1;
-
-				while (cmp(e, d) <= 0)
-				{
-					d_max--;
-					d--;
-					c_max--;
-				}
-
-				c = c_max - 1;
-
-				while (c >= pts + 8)
-				{
-					*c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--;
-				}
-
-				while (c >= pts)
-				{
-					*c-- = *d--;
-				}
-
-				c = c_max - 1;
-				d = pta + block - 1;
-				e = d_max - 1;
-
 				*e-- = *d--;
 
 				while (d >= pta)
@@ -1152,35 +1068,37 @@ void tail_merge32(int *array, int *swap, size_t nmemb, size_t block, CMPFUNC *cm
 // └────────────────────────────────────────────────┘//
 ///////////////////////////////////////////////////////
 
-
-void tail_insert64(long long *array, long long key, unsigned char nmemb, CMPFUNC *cmp)
+inline void tail_insert64(long long *array, long long key, unsigned char nmemb, CMPFUNC *cmp)
 {
 	long long *pta = array + nmemb - 1;
 
-	if (nmemb > 4 && cmp(pta - 4, &key) > 0)
+	if (cmp(pta, &key) > 0)
 	{
-		array[nmemb--] = *pta--;
-		array[nmemb--] = *pta--;
-		array[nmemb--] = *pta--;
-		array[nmemb--] = *pta--;
-	}
+		if (nmemb > 4 && cmp(pta - 3, &key) > 0)
+		{
+			array[nmemb--] = *pta--;
+			array[nmemb--] = *pta--;
+			array[nmemb--] = *pta--;
+			array[nmemb--] = *pta--;
+		}
 
-	if (nmemb > 2 && cmp(pta - 2, &key) > 0)
-	{
-		array[nmemb--] = *pta--;
-		array[nmemb--] = *pta--;
+		if (nmemb > 2 && cmp(pta - 2, &key) > 0)
+		{
+			array[nmemb--] = *pta--;
+			array[nmemb--] = *pta--;
+		}
+	
+		if (nmemb > 1 && cmp(pta - 1, &key) > 0)
+		{
+			array[nmemb--] = *pta--;
+		}
+	
+		if (nmemb > 0 && cmp(pta, &key) > 0)
+		{
+			array[nmemb--] = *pta--;
+		}
+		array[nmemb] = key;
 	}
-
-	if (nmemb > 1 && cmp(pta - 1, &key) > 0)
-	{
-		array[nmemb--] = *pta--;
-	}
-
-	if (nmemb > 0 && cmp(pta, &key) > 0)
-	{
-		array[nmemb--] = *pta--;
-	}
-	array[nmemb] = key;
 }
 
 void tail_swap64(long long *array, unsigned char nmemb, CMPFUNC *cmp)
@@ -1189,126 +1107,40 @@ void tail_swap64(long long *array, unsigned char nmemb, CMPFUNC *cmp)
 	register long long *pta = array;
 	register unsigned char i, mid, cnt;
 
-	if (nmemb < 2)
+	switch (nmemb)
 	{
-		return;
+		case 0:
+		case 1:
+			return;
+
+		case 2:
+			swap_two(pta, *pts);
+			return;
+
+		case 3:
+			swap_three(pta, *pts);
+			return;
+
+		case 4:
+			swap_four(pta, *pts);
+			return;
 	}
+	swap_four(pta, *pts);
 
-	if (nmemb < 3)
+	if (nmemb <= 8)
 	{
-		if (cmp(pta, pta + 1) > 0)
+		for (i = 4 ; i < nmemb ; i++)
 		{
-			*pts = pta[1]; pta[1] = pta[0]; pta[0] = *pts;
-		}
-		return;
-	}
-
-	if (nmemb < 4)
-	{
-		if (cmp(pta, pta + 1) > 0)
-		{
-			*pts = pta[1]; pta[1] = pta[0]; pta[0] = *pts;
-		}
-
-		if (cmp(pta + 1, pta + 2) > 0)
-		{
-			*pts = pta[2];
-
-			if (cmp(pta, pta + 2) > 0)
-			{
-				pta[2] = pta[1]; pta[1] = pta[0]; pta[0] = *pts;
-			}
-			else 
-			{
-				pta[2] = pta[1]; pta[1] = *pts;
-			}
-		}
-
-		return;
-	}
-
-	// step 1
-
-	if (cmp(pta, pta + 1) > 0)
-	{
-		*pts = pta[1]; pta[1] = pta[0]; pta[0] = *pts;
-	}
-	
-	if (cmp(pta + 1, pta + 2) > 0)
-	{
-		if (cmp(pta, pta + 2) > 0)
-		{
-			*pts = pta[2]; pta[2] = pta[1]; pta[1] = pta[0]; pta[0] = *pts;
-		}
-		else 
-		{
-			*pts = pta[2]; pta[2] = pta[1]; pta[1] = *pts;
-		}
-	}
-
-	if (cmp(pta + 1, pta + 3) > 0)
-	{
-		if (cmp(pta, pta + 3) > 0)
-		{
-			*pts = pta[3]; pta[3] = pta[2]; pta[2] = pta[1]; pta[1] = pta[0]; pta[0] = *pts;
-		}
-		else
-		{
-			*pts = pta[3]; pta[3] = pta[2]; pta[2] = pta[1]; pta[1] = *pts;
-		}
-	}
-	else if (cmp(pta + 2, pta + 3) > 0)
-	{
-		*pts = pta[3]; pta[3] = pta[2]; pta[2] = *pts;
-	}
-
-	if (nmemb < 9)
-	{
-		for (cnt = 4 ; cnt < nmemb ; cnt++)
-		{
-			tail_insert64(pta, pta[cnt], cnt, cmp);
+			tail_insert64(pta, pta[i], i, cmp);
 		}
 		return;
 	}
 
 	pta += 4;
 
-	if (cmp(pta, pta + 1) > 0)
-	{
-		*pts = pta[1]; pta[1] = pta[0]; pta[0] = *pts;
-	}
-	
-	if (cmp(pta + 1, pta + 2) > 0)
-	{
-		if (cmp(pta, pta + 2) > 0)
-		{
-			*pts = pta[2]; pta[2] = pta[1]; pta[1] = pta[0]; pta[0] = *pts;
-		}
-		else 
-		{
-			*pts = pta[2]; pta[2] = pta[1]; pta[1] = *pts;
-		}
-	}
-
-	if (cmp(pta + 1, pta + 3) > 0)
-	{
-		if (cmp(pta, pta + 3) > 0)
-		{
-			*pts = pta[3]; pta[3] = pta[2]; pta[2] = pta[1]; pta[1] = pta[0]; pta[0] = *pts;
-		}
-		else
-		{
-			*pts = pta[3]; pta[3] = pta[2]; pta[2] = pta[1]; pta[1] = *pts;
-		}
-	}
-	else if (cmp(pta + 2, pta + 3) > 0)
-	{
-		*pts = pta[3]; pta[3] = pta[2]; pta[2] = *pts;
-	}
+	swap_four(pta, *pts);
 
 	pta += 4;
-
-	// step 2
 
 	switch (nmemb)
 	{
@@ -1316,76 +1148,24 @@ void tail_swap64(long long *array, unsigned char nmemb, CMPFUNC *cmp)
 			break;
 
 		case 10:
-			if (cmp(&pta[0], &pta[1]) > 0)
-			{
-				*pts = pta[0]; pta[0] = pta[1]; pta[1] = *pts;
-			}
+			swap_two(pta, *pts);
 			break;
 
 		case 11:
-			if (cmp(pta, pta + 1) > 0)
-			{
-				*pts = pta[1]; pta[1] = pta[0]; pta[0] = *pts;
-			}
-
-			if (cmp(pta + 1, pta + 2) > 0)
-			{
-				*pts = pta[2];
-
-				if (cmp(pta, pta + 2) > 0)
-				{
-					pta[2] = pta[1]; pta[1] = pta[0]; pta[0] = *pts;
-				}
-				else 
-				{
-					pta[2] = pta[1]; pta[1] = *pts;
-				}
-			}
+			swap_three(pta, *pts);
 			break;
 
 		default:
-			if (cmp(pta, pta + 1) > 0)
-			{
-				*pts = pta[1]; pta[1] = pta[0]; pta[0] = *pts;
-			}
-	
-			if (cmp(pta + 1, pta + 2) > 0)
-			{
-				if (cmp(pta, pta + 2) > 0)
-				{
-					*pts = pta[2]; pta[2] = pta[1]; pta[1] = pta[0]; pta[0] = *pts;
-				}
-				else 
-				{
-					*pts = pta[2]; pta[2] = pta[1]; pta[1] = *pts;
-				}
-			}
+			swap_four(pta, *pts);
 
-			if (cmp(pta + 1, pta + 3) > 0)
+			for (i = 4 ; i + 8 < nmemb ; i++)
 			{
-				if (cmp(pta, pta + 3) > 0)
-				{
-					*pts = pta[3]; pta[3] = pta[2]; pta[2] = pta[1]; pta[1] = pta[0]; pta[0] = *pts;
-				}
-				else
-				{
-					*pts = pta[3]; pta[3] = pta[2]; pta[2] = pta[1]; pta[1] = *pts;
-				}
-			}
-			else if (cmp(pta + 2, pta + 3) > 0)
-			{
-				*pts = pta[3]; pta[3] = pta[2]; pta[2] = *pts;
-			}
-
-			for (cnt = 4 ; cnt + 8 < nmemb ; cnt++)
-			{
-				tail_insert64(pta, pta[cnt], cnt, cmp);
+				tail_insert64(pta, pta[i], i, cmp);
 			}
 			break;
 	}
-	pta -= 8;
 
-	// step 3
+	pta -= 8;
 
 	if (cmp(&pta[3], &pta[4]) <= 0)
 	{
@@ -1466,7 +1246,7 @@ void tail_swap64(long long *array, unsigned char nmemb, CMPFUNC *cmp)
 	}
 }
 
-void tail_merge64(long long *array, long long *swap, const size_t nmemb, size_t block, CMPFUNC *cmp);
+void tail_merge64(long long *array, long long *swap, size_t nmemb, size_t block, CMPFUNC *cmp);
 
 size_t quad_swap64(long long *array, size_t nmemb, CMPFUNC *cmp)
 {
@@ -1502,28 +1282,30 @@ size_t quad_swap64(long long *array, size_t nmemb, CMPFUNC *cmp)
 
 		if (cmp(&pta[1], &pta[2]) > 0)
 		{
+			tmp = pta[1];
+
 			if (cmp(&pta[0], &pta[2]) <= 0)
 			{
 				if (cmp(&pta[1], &pta[3]) <= 0)
 				{
-					tmp = pta[1]; pta[1] = pta[2]; pta[2] = tmp;
+					pta[1] = pta[2]; pta[2] = tmp;
 				}
 				else
 				{
-					tmp = pta[1]; pta[1] = pta[2]; pta[2] = pta[3]; pta[3] = tmp;
+					pta[1] = pta[2]; pta[2] = pta[3]; pta[3] = tmp;
 				}
 			}
 			else if (cmp(&pta[0], &pta[3]) > 0)
 			{
-				tmp = pta[0]; pta[0] = pta[2]; pta[2] = tmp; tmp = pta[1]; pta[1] = pta[3]; pta[3] = tmp;
+				pta[1] = pta[3]; pta[3] = tmp; tmp = pta[0]; pta[0] = pta[2]; pta[2] = tmp;
 			}
 			else if (cmp(&pta[1], &pta[3]) <= 0)
 			{
-				tmp = pta[0]; pta[0] = pta[2]; pta[2] = pta[1]; pta[1] = tmp;
+				pta[1] = pta[0]; pta[0] = pta[2]; pta[2] = tmp;
 			}
 			else
 			{
-				tmp = pta[0]; pta[0] = pta[2]; pta[2] = pta[3]; pta[3] = pta[1]; pta[1] = tmp;
+				pta[1] = pta[0]; pta[0] = pta[2]; pta[2] = pta[3]; pta[3] = tmp;
 			}
 		}
 		pta += 4;
@@ -1644,46 +1426,9 @@ size_t quad_swap64(long long *array, size_t nmemb, CMPFUNC *cmp)
 		return 1;
 	}
 
-	switch (nmemb % 4)
-	{
-		case 0:
-		case 1:
-			break;
-		case 2:
-			if (cmp(&pta[0], &pta[1]) > 0)
-			{
-				tmp = pta[0]; pta[0] = pta[1]; pta[1] = tmp;
-			}
-			break;
-		case 3:
-			if (cmp(&pta[0], &pta[1]) > 0)
-			{
-				if (cmp(&pta[1], &pta[2]) > 0)
-				{
-					tmp = pta[0]; pta[0] = pta[2]; pta[2] = tmp;
-				}
-				else if (cmp(&pta[0], &pta[2]) > 0)
-				{
-					tmp = pta[0]; pta[0] = pta[1]; pta[1] = pta[2]; pta[2] = tmp;
-				}
-				else
-				{
-					tmp = pta[0]; pta[0] = pta[1]; pta[1] = tmp;
-				}
-			}
-			else if (cmp(&pta[1], &pta[2]) > 0)
-			{
-				if (cmp(&pta[0], &pta[2]) > 0)
-				{
-					tmp = pta[0]; pta[0] = pta[2]; pta[2] = pta[1]; pta[1] = tmp;
-				}
-				else
-				{
-					tmp = pta[1]; pta[1] = pta[2]; pta[2] = tmp;
-				}
-			}
-			break;
-	}
+	tail_swap64(pta, nmemb % 4, cmp);
+
+	// block 4 quadmerge
 
 	pta = pte = array + offset;
 
@@ -1957,7 +1702,7 @@ size_t quad_swap64(long long *array, size_t nmemb, CMPFUNC *cmp)
 	return 0;
 }
 
-void quad_merge64(long long *array, long long *swap, const size_t nmemb, size_t block, CMPFUNC *cmp)
+void quad_merge64(long long *array, long long *swap, size_t nmemb, size_t block, CMPFUNC *cmp)
 {
 	size_t offset;
 	register long long *pta, *pts, *c, *c_max, *d, *d_max;
@@ -1995,8 +1740,9 @@ void quad_merge64(long long *array, long long *swap, const size_t nmemb, size_t 
 						*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
 					}
 					while (c < c_max)
+					{
 						*pts++ = *c++;
-
+					}
 					c = c_max;
 					c_max = c + block * 2;
 
@@ -2006,8 +1752,9 @@ void quad_merge64(long long *array, long long *swap, const size_t nmemb, size_t 
 						*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
 					}
 					while (c < c_max)
+					{
 						*pts++ = *c++;
-
+					}
 					goto step3;
 				}
 				pts = swap;
@@ -2016,8 +1763,9 @@ void quad_merge64(long long *array, long long *swap, const size_t nmemb, size_t 
 				c_max = pta + block * 2;
 
 				while (c < c_max)
+				{
 					*pts++ = *c++;
-
+				}
 				goto step2;
 			}
 
@@ -2041,7 +1789,9 @@ void quad_merge64(long long *array, long long *swap, const size_t nmemb, size_t 
 					*pts++ = *c++;
 				}
 				while (d < d_max)
+				{
 					*pts++ = *d++;
+				}
 			}
 			else
 			{
@@ -2053,9 +1803,10 @@ void quad_merge64(long long *array, long long *swap, const size_t nmemb, size_t 
 					}
 					*pts++ = *d++;
 				}
-
 				while (c < c_max)
+				{
 					*pts++ = *c++;
+				}
 			}
 
 			step2:
@@ -2076,9 +1827,10 @@ void quad_merge64(long long *array, long long *swap, const size_t nmemb, size_t 
 					}
 					*pts++ = *c++;
 				}
-
 				while (d < d_max)
+				{
 					*pts++ = *d++;
+				}
 			}
 			else
 			{
@@ -2092,7 +1844,9 @@ void quad_merge64(long long *array, long long *swap, const size_t nmemb, size_t 
 				}
 
 				while (c < c_max)
+				{
 					*pts++ = *c++;
+				}
 			}
 
 			step3:
@@ -2116,9 +1870,10 @@ void quad_merge64(long long *array, long long *swap, const size_t nmemb, size_t 
 					}
 					*pta++ = *c++;
 				}
-
 				while (d < d_max)
+				{
 					*pta++ = *d++;
+				}
 			}
 			else
 			{
@@ -2130,9 +1885,10 @@ void quad_merge64(long long *array, long long *swap, const size_t nmemb, size_t 
 					}
 					*pta++ = *d++;
 				}
-
 				while (c < c_max)
+				{
 					*pta++ = *c++;
+				}
 			}
 			offset += block * 4;
 		}
@@ -2142,6 +1898,7 @@ void quad_merge64(long long *array, long long *swap, const size_t nmemb, size_t 
 	}
 	tail_merge64(array, swap, nmemb, block, cmp);
 }
+
 
 void tail_merge64(long long *array, long long *swap, size_t nmemb, size_t block, CMPFUNC *cmp)
 {
@@ -2164,43 +1921,51 @@ void tail_merge64(long long *array, long long *swap, size_t nmemb, size_t block,
 			}
 
 			if (offset + block * 2 <= nmemb)
+			{
 				d_max = pta + block * 2;
+			}
 			else
+			{
 				d_max = array + nmemb;
+			}
+
+			if (offset + block * 2 <= nmemb)
+			{
+				c_max = pts + block;
+			}
+			else
+			{
+				c_max = pts + nmemb - (offset + block);
+			}
+
+			d = d_max - 1;
+			e = pta + block - 1;
+
+			while (cmp(e, d) <= 0)
+			{
+				d_max--;
+				d--;
+				c_max--;
+			}
+
+			c = c_max - 1;
+
+			while (c >= pts + 8)
+			{
+				*c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--;
+			}
+
+			while (c >= pts)
+			{
+				*c-- = *d--;
+			}
+
+			c = c_max - 1;
+			d = pta + block - 1;
+			e = d_max - 1;
 
 			if (cmp(pta, pta + block) <= 0)
 			{
-				if (offset + block * 2 <= nmemb)
-					c_max = pts + block;
-				else
-					c_max = pts + nmemb - (offset + block);
-
-				d = d_max - 1;
-				e = pta + block - 1;
-
-				while (cmp(e, d) <= 0)
-				{
-					d_max--;
-					d--;
-					c_max--;
-				}
-
-				c = c_max - 1;
-
-				while (c >= pts + 8)
-				{
-					*c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--;
-				}
-
-				while (c >= pts)
-				{
-					*c-- = *d--;
-				}
-
-				c = c_max - 1;
-				d = pta + block - 1;
-				e = d_max - 1;
-
 				*e-- = *d--;
 
 				while (c >= pts)
@@ -2214,37 +1979,6 @@ void tail_merge64(long long *array, long long *swap, size_t nmemb, size_t block,
 			}
 			else
 			{
-				if (offset + block * 2 <= nmemb)
-					c_max = pts + block;
-				else
-					c_max = pts + nmemb - (offset + block);
-
-				d = d_max - 1;
-				e = pta + block - 1;
-
-				while (cmp(e, d) <= 0)
-				{
-					d_max--;
-					d--;
-					c_max--;
-				}
-
-				c = c_max - 1;
-
-				while (c >= pts + 8)
-				{
-					*c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--; *c-- = *d--;
-				}
-
-				while (c >= pts)
-				{
-					*c-- = *d--;
-				}
-
-				c = c_max - 1;
-				d = pta + block - 1;
-				e = d_max - 1;
-
 				*e-- = *d--;
 
 				while (d >= pta)
@@ -2285,7 +2019,7 @@ void quadsort(void *array, size_t nmemb, size_t size, CMPFUNC *cmp)
 
 	if (size == sizeof(int))
 	{
-		if (nmemb <= 16)
+		if (nmemb < 16)
 		{
 			tail_swap32(array, (unsigned char) nmemb, cmp);
 		}
@@ -2319,7 +2053,7 @@ void quadsort(void *array, size_t nmemb, size_t size, CMPFUNC *cmp)
 	}
 	else if (size == sizeof(long long))
 	{
-		if (nmemb <= 16)
+		if (nmemb < 16)
 		{
 			tail_swap64(array, (unsigned char) nmemb, cmp);
 		}
