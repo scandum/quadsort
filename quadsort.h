@@ -126,7 +126,7 @@ typedef int CMPFUNC (const void *a, const void *b);
 // └────────────────────────────────────────────────┘//
 ///////////////////////////////////////////////////////
 
-inline void tail_insert32(int *array, int key, unsigned char nmemb, CMPFUNC *cmp)
+void tail_insert32(int *array, int key, unsigned char nmemb, CMPFUNC *cmp)
 {
 	int *pta = array + nmemb - 1;
 
@@ -1068,7 +1068,7 @@ void tail_merge32(int *array, int *swap, unsigned int nmemb, unsigned int block,
 // └────────────────────────────────────────────────┘//
 ///////////////////////////////////////////////////////
 
-inline void tail_insert64(long long *array, long long key, unsigned char nmemb, CMPFUNC *cmp)
+void tail_insert64(long long *array, long long key, unsigned char nmemb, CMPFUNC *cmp)
 {
 	long long *pta = array + nmemb - 1;
 
