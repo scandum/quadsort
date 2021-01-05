@@ -288,6 +288,7 @@ The X axis of the bar graph below is the execution time.
 ![Graph](/graph1.png)
 
 <details><summary><b>quadsort vs std::stable_sort vs timsort vs pdqsort vs wolfsort data table</b></summary>
+
 |      Name |    Items | Type |     Best |  Average | Comparisons |     Distribution |
 | --------- | -------- | ---- | -------- | -------- | ----------- | ---------------- |
 |  quadsort |  1000000 |  i32 | 0.070469 | 0.070635 |             |     random order |
