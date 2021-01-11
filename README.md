@@ -140,11 +140,11 @@ the traditional merge sort.
 
 This can be visualized as following:
 
-    main memory: AAAA BBBB CCCC DDDD
+    main memory: ABCD ABCD ABCD ABCD
 
-    swap memory: ABABABAB  CDCDCDCD
+    swap memory: AABBCCDD AABBCCDD
 
-    main memory: ABCDABCDABCDABCD
+    main memory: AAAABBBBCCCCDDDD
 
 In the first row quad swap has been used to create 4 blocks of 4 sorted
 elements each. In the second row quad merge has been used to merge the blocks
