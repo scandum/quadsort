@@ -1,20 +1,26 @@
 /*
-	Copyright (C) 2014-2020 Igor van den Hoven ivdhoven@gmail.com
+	Copyright (C) 2014-2021 Igor van den Hoven ivdhoven@gmail.com
 */
 
 /*
-	This program is free software: you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
+	Permission is hereby granted, free of charge, to any person obtaining
+	a copy of this software and associated documentation files (the
+	"Software"), to deal in the Software without restriction, including
+	without limitation the rights to use, copy, modify, merge, publish,
+	distribute, sublicense, and/or sell copies of the Software, and to
+	permit persons to whom the Software is furnished to do so, subject to
+	the following conditions:
 
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details.
+	The above copyright notice and this permission notice shall be
+	included in all copies or substantial portions of the Software.
 
-	You should have received a copy of the GNU General Public License
-	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+	EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+	MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+	IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+	CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+	TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+	SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 /*
@@ -30,6 +36,8 @@
 #include <errno.h>
 
 typedef int CMPFUNC (const void *a, const void *b);
+
+// take 2, 3, or 4 elements and put them in order
 
 #define swap_two(array, swap)  \
 {  \
@@ -126,6 +134,8 @@ typedef int CMPFUNC (const void *a, const void *b);
 // └────────────────────────────────────────────────┘//
 ///////////////////////////////////////////////////////
 
+// Binary insertion sort for arrays up to 8 elements in size.
+
 void tail_insert32(int *array, int key, unsigned char nmemb, CMPFUNC *cmp)
 {
 	int *pta = array + nmemb - 1;
@@ -158,6 +168,9 @@ void tail_insert32(int *array, int key, unsigned char nmemb, CMPFUNC *cmp)
 		array[nmemb] = key;
 	}
 }
+
+// Small array optimization. Sort arrays up to 16 elements in size as fast as
+// possible.
 
 void tail_swap32(int *array, unsigned char nmemb, CMPFUNC *cmp)
 {
@@ -317,6 +330,8 @@ unsigned int quad_swap32(int *array, unsigned int nmemb, CMPFUNC *cmp)
 
 	offset = 0;
 
+	// Turn the array into sorted blocks of 4 elements, using inplace quad swap
+
 	while (pta <= pte)
 	{
 		if (cmp(&pta[0], &pta[1]) > 0)
@@ -369,6 +384,8 @@ unsigned int quad_swap32(int *array, unsigned int nmemb, CMPFUNC *cmp)
 		pta += 4;
 
 		continue;
+
+		// reverse order run detection
 
 		swapper:
 
@@ -486,7 +503,9 @@ unsigned int quad_swap32(int *array, unsigned int nmemb, CMPFUNC *cmp)
 
 	tail_swap32(pta, nmemb % 4, cmp);
 
-	// block 4 quadmerge
+	// Turn the array into sorted blocks of 16 elements, using quad merge.
+	// At this point the array could be sent through quad_merge or
+	// tail_merge, but this is slightly faster.
 
 	pta = pte = array + offset;
 
@@ -760,6 +779,10 @@ unsigned int quad_swap32(int *array, unsigned int nmemb, CMPFUNC *cmp)
 	return 0;
 }
 
+// Quad merge blocks of 16 sorted elements into blocks of 64, 256, 1024, etc.
+// Maximum final block size is less than nmemb / 2.
+// tail_merge is called to finish the sort.
+
 void quad_merge32(int *array, int *swap, unsigned int nmemb, unsigned int block, CMPFUNC *cmp)
 {
 	unsigned int offset;
@@ -957,6 +980,9 @@ void quad_merge32(int *array, int *swap, unsigned int nmemb, unsigned int block,
 	tail_merge32(array, swap, nmemb, block, cmp);
 }
 
+// Bottom up merge sort. It copies the right array to swap, next merges
+// starting at the tails ends of the two sorted arrays.
+// Can be used stand alone. Uses at most nmemb / 2 swap memory.
 
 void tail_merge32(int *array, int *swap, unsigned int nmemb, unsigned int block, CMPFUNC *cmp)
 {
@@ -1056,6 +1082,11 @@ void tail_merge32(int *array, int *swap, unsigned int nmemb, unsigned int block,
 		block *= 2;
 	}
 }
+
+// This is a duplicate of the 32 bit version and the only difference is that
+// each instance of 'int' has been changed to 'long long'. It's a bit
+// unorthodox, but it does allow for string sorting on both 32 and 64 bit
+// systems with (hopefully) optimal optimization.
 
 ///////////////////////////////////////////////////////
 // ┌────────────────────────────────────────────────┐//
