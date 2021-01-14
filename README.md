@@ -262,6 +262,12 @@ Wolfsort and flowsort
 ---------------------
 [wolfsort](https://github.com/scandum/wolfsort) and flowsort are a hybrid radixsort / quadsort with improved performance on random data. They're mostly a proof of concept that only work on unsigned 32 and 64 bit integers.
 
+Tailsort
+--------
+[Tailsort](https://github.com/scandum/tailsort) is a simplified quadsort with a
+much smaller code size. It should still be faster than Timsort. Tailsort might
+be of use to people who want to port or understand quadsort.
+
 Visualization
 -------------
 
