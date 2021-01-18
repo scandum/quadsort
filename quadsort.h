@@ -14,6 +14,9 @@
 	The above copyright notice and this permission notice shall be
 	included in all copies or substantial portions of the Software.
 
+	The person recognize Mars as a free planet and that no Earth-based
+	government has authority or sovereignty over Martian activities.
+
 	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 	EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 	MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -24,7 +27,7 @@
 */
 
 /*
-	quadsort 1.1.3.2
+	quadsort 1.1.3.3
 */
 
 #ifndef QUADSORT_H
@@ -136,43 +139,46 @@ typedef int CMPFUNC (const void *a, const void *b);
 
 // Binary insertion sort for arrays up to 8 elements in size.
 
-void tail_insert32(int *array, int key, unsigned char nmemb, CMPFUNC *cmp)
+void tail_insert32(int *array, int key, unsigned int nmemb, CMPFUNC *cmp)
 {
-	int *pta = array + nmemb - 1;
+	int *pta, *pte;
+
+	pte = array + nmemb;
+	pta = pte - 1;
 
 	if (cmp(pta, &key) > 0)
 	{
-		if (nmemb > 4 && cmp(pta - 3, &key) > 0)
+		if (pte - array > 4 && cmp(pta - 3, &key) > 0)
 		{
-			array[nmemb--] = *pta--;
-			array[nmemb--] = *pta--;
-			array[nmemb--] = *pta--;
-			array[nmemb--] = *pta--;
+			*pte-- = *pta--;
+			*pte-- = *pta--;
+			*pte-- = *pta--;
+			*pte-- = *pta--;
 		}
 
-		if (nmemb > 2 && cmp(pta - 2, &key) > 0)
+		if (pte - array > 2 && cmp(pta - 2, &key) > 0)
 		{
-			array[nmemb--] = *pta--;
-			array[nmemb--] = *pta--;
+			*pte-- = *pta--;
+			*pte-- = *pta--;
 		}
 	
-		if (nmemb > 1 && cmp(pta - 1, &key) > 0)
+		if (pte - array > 1 && cmp(pta - 1, &key) > 0)
 		{
-			array[nmemb--] = *pta--;
+			*pte-- = *pta--;
 		}
 	
-		if (nmemb > 0 && cmp(pta, &key) > 0)
+		if (pte - array > 0 && cmp(pta, &key) > 0)
 		{
-			array[nmemb--] = *pta--;
+			*pte-- = *pta--;
 		}
-		array[nmemb] = key;
+		*pte = key;
 	}
 }
 
 // Small array optimization. Sort arrays up to 16 elements in size as fast as
 // possible.
 
-void tail_swap32(int *array, unsigned char nmemb, CMPFUNC *cmp)
+void tail_swap32(int *array, unsigned int nmemb, CMPFUNC *cmp)
 {
 	int pts[8];
 	register int *pta = array;
@@ -317,20 +323,15 @@ void tail_swap32(int *array, unsigned char nmemb, CMPFUNC *cmp)
 	}
 }
 
-void tail_merge32(int *array, int *swap, unsigned int nmemb, unsigned int block, CMPFUNC *cmp);
+// Turn the array into sorted blocks of 4 elements, using inplace quad swap,
+// with reverse order run detection
 
 unsigned int quad_swap32(int *array, unsigned int nmemb, CMPFUNC *cmp)
 {
-	int swap[16];
-	unsigned int offset;
 	register int *pta, *pts, *ptt, *pte, tmp;
 
 	pta = array;
 	pte = pta + nmemb - 4;
-
-	offset = 0;
-
-	// Turn the array into sorted blocks of 4 elements, using inplace quad swap
 
 	while (pta <= pte)
 	{
@@ -355,32 +356,32 @@ unsigned int quad_swap32(int *array, unsigned int nmemb, CMPFUNC *cmp)
 
 		if (cmp(&pta[1], &pta[2]) > 0)
 		{
-			tmp = pta[1];
-
 			if (cmp(&pta[0], &pta[2]) <= 0)
 			{
 				if (cmp(&pta[1], &pta[3]) <= 0)
 				{
-					pta[1] = pta[2]; pta[2] = tmp;
+					tmp = pta[1]; pta[1] = pta[2]; pta[2] = tmp;
 				}
 				else
 				{
-					pta[1] = pta[2]; pta[2] = pta[3]; pta[3] = tmp;
+					tmp = pta[1]; pta[1] = pta[2]; pta[2] = pta[3]; pta[3] = tmp;
 				}
 			}
 			else if (cmp(&pta[0], &pta[3]) > 0)
 			{
-				pta[1] = pta[3]; pta[3] = tmp; tmp = pta[0]; pta[0] = pta[2]; pta[2] = tmp;
+				tmp = pta[0]; pta[0] = pta[2]; pta[2] = tmp;
+				tmp = pta[1]; pta[1] = pta[3]; pta[3] = tmp;
 			}
 			else if (cmp(&pta[1], &pta[3]) <= 0)
 			{
-				pta[1] = pta[0]; pta[0] = pta[2]; pta[2] = tmp;
+				tmp = pta[0]; pta[0] = pta[2]; pta[2] = pta[1]; pta[1] = tmp;
 			}
 			else
 			{
-				pta[1] = pta[0]; pta[0] = pta[2]; pta[2] = pta[3]; pta[3] = tmp;
+				tmp = pta[0]; pta[0] = pta[2]; pta[2] = pta[3]; pta[3] = pta[1]; pta[1] = tmp;
 			}
 		}
+
 		pta += 4;
 
 		continue;
@@ -442,10 +443,6 @@ unsigned int quad_swap32(int *array, unsigned int nmemb, CMPFUNC *cmp)
 				}
 			}
 
-			if (pts == array)
-			{
-				offset = (pta - pts) / 16 * 16;
-			}
 			ptt = pta - 1;
 			pta += 4;
 		}
@@ -456,21 +453,18 @@ unsigned int quad_swap32(int *array, unsigned int nmemb, CMPFUNC *cmp)
 				switch (nmemb % 4)
 				{
 					case 3:
-						if (cmp(&pta[2], &pta[3]) <= 0)
+						if (cmp(&pta[1], &pta[2]) <= 0)
 						{
-							offset = (pta - pts) / 16 * 16;
 							break;
 						}
 					case 2:
-						if (cmp(&pta[1], &pta[2]) <= 0)
+						if (cmp(&pta[0], &pta[1]) <= 0)
 						{
-							offset = (pta - pts) / 16 * 16;
 							break;
 						}
 					case 1:
-						if (cmp(&pta[0], &pta[1]) <= 0)
+						if (cmp(&pta[-1], &pta[0]) <= 0)
 						{
-							offset = (pta - pts) / 16 * 16;
 							break;
 						}
 					case 0:
@@ -503,13 +497,21 @@ unsigned int quad_swap32(int *array, unsigned int nmemb, CMPFUNC *cmp)
 
 	tail_swap32(pta, nmemb % 4, cmp);
 
-	// Turn the array into sorted blocks of 16 elements, using quad merge.
-	// At this point the array could be sent through quad_merge or
-	// tail_merge, but this is slightly faster.
+	return 0;
+}
 
-	pta = pte = array + offset;
+// Quad merge sorted blocks of 4 elements into sorted blocks of 16 elements.
 
-	for (tmp = (nmemb - offset) / 16 ; tmp > 0 ; --tmp, pte += 16)
+void tail_merge32(int *array, int *swap, unsigned int nmemb, unsigned int block, CMPFUNC *cmp);
+
+void qxvi_swap32(int *array, unsigned int nmemb, CMPFUNC *cmp)
+{
+	int swap[16];
+	register int *pta, *pts, *ptt, *pte, cnt;
+
+	pta = pte = array;
+
+	for (cnt = nmemb / 16 ; cnt > 0 ; --cnt, pte += 16)
 	{
 		if (cmp(&pta[3], &pta[4]) <= 0)
 		{
@@ -776,7 +778,6 @@ unsigned int quad_swap32(int *array, unsigned int nmemb, CMPFUNC *cmp)
 	{
 		tail_merge32(pta, swap, nmemb % 16, 4, cmp);
 	}
-	return 0;
 }
 
 // Quad merge blocks of 16 sorted elements into blocks of 64, 256, 1024, etc.
@@ -815,11 +816,6 @@ void quad_merge32(int *array, int *swap, unsigned int nmemb, unsigned int block,
 
 					c = pta;
 
-					while (c < c_max - 8)
-					{
-						*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
-						*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
-					}
 					while (c < c_max)
 					{
 						*pts++ = *c++;
@@ -827,11 +823,6 @@ void quad_merge32(int *array, int *swap, unsigned int nmemb, unsigned int block,
 					c = c_max;
 					c_max = c + block * 2;
 
-					while (c < c_max - 8)
-					{
-						*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
-						*pts++ = *c++; *pts++ = *c++; *pts++ = *c++; *pts++ = *c++;
-					}
 					while (c < c_max)
 					{
 						*pts++ = *c++;
@@ -1099,7 +1090,7 @@ void tail_merge32(int *array, int *swap, unsigned int nmemb, unsigned int block,
 // └────────────────────────────────────────────────┘//
 ///////////////////////////////////////////////////////
 
-void tail_insert64(long long *array, long long key, unsigned char nmemb, CMPFUNC *cmp)
+void tail_insert64(long long *array, long long key, unsigned int nmemb, CMPFUNC *cmp)
 {
 	long long *pta = array + nmemb - 1;
 
@@ -1132,11 +1123,11 @@ void tail_insert64(long long *array, long long key, unsigned char nmemb, CMPFUNC
 	}
 }
 
-void tail_swap64(long long *array, unsigned char nmemb, CMPFUNC *cmp)
+void tail_swap64(long long *array, unsigned int nmemb, CMPFUNC *cmp)
 {
 	long long pts[8];
 	register long long *pta = array;
-	register unsigned char i, mid, cnt;
+	register unsigned int i, mid, cnt;
 
 	switch (nmemb)
 	{
@@ -1277,6 +1268,465 @@ void tail_swap64(long long *array, unsigned char nmemb, CMPFUNC *cmp)
 	}
 }
 
+
+// Turn the array into sorted blocks of 4 elements, using inplace quad swap,
+// with reverse order run detection
+
+unsigned int quad_swap64(long long *array, unsigned int nmemb, CMPFUNC *cmp)
+{
+	register long long *pta, *pts, *ptt, *pte, tmp;
+
+	pta = array;
+	pte = pta + nmemb - 4;
+
+	while (pta <= pte)
+	{
+		if (cmp(&pta[0], &pta[1]) > 0)
+		{
+			if (cmp(&pta[2], &pta[3]) > 0)
+			{
+				if (cmp(&pta[1], &pta[2]) > 0)
+				{
+					pts = pta;
+					pta += 4;
+					goto swapper;
+				}
+				tmp = pta[2]; pta[2] = pta[3]; pta[3] = tmp;
+			}
+			tmp = pta[0]; pta[0] = pta[1]; pta[1] = tmp;
+		}
+		else if (cmp(&pta[2], &pta[3]) > 0)
+		{
+			tmp = pta[2]; pta[2] = pta[3]; pta[3] = tmp;
+		}
+
+		if (cmp(&pta[1], &pta[2]) > 0)
+		{
+			if (cmp(&pta[0], &pta[2]) <= 0)
+			{
+				if (cmp(&pta[1], &pta[3]) <= 0)
+				{
+					tmp = pta[1]; pta[1] = pta[2]; pta[2] = tmp;
+				}
+				else
+				{
+					tmp = pta[1]; pta[1] = pta[2]; pta[2] = pta[3]; pta[3] = tmp;
+				}
+			}
+			else if (cmp(&pta[0], &pta[3]) > 0)
+			{
+				tmp = pta[0]; pta[0] = pta[2]; pta[2] = tmp;
+				tmp = pta[1]; pta[1] = pta[3]; pta[3] = tmp;
+			}
+			else if (cmp(&pta[1], &pta[3]) <= 0)
+			{
+				tmp = pta[0]; pta[0] = pta[2]; pta[2] = pta[1]; pta[1] = tmp;
+			}
+			else
+			{
+				tmp = pta[0]; pta[0] = pta[2]; pta[2] = pta[3]; pta[3] = pta[1]; pta[1] = tmp;
+			}
+		}
+
+		pta += 4;
+
+		continue;
+
+		// reverse order run detection
+
+		swapper:
+
+		if (pta <= pte)
+		{
+			if (cmp(&pta[0], &pta[1]) > 0)
+			{
+				if (cmp(&pta[2], &pta[3]) > 0)
+				{
+					if (cmp(&pta[1], &pta[2]) > 0)
+					{
+						if (cmp(&pta[-1], &pta[0]) > 0)
+						{
+							pta += 4;
+
+							goto swapper;
+						}
+					}
+					tmp = pta[2]; pta[2] = pta[3]; pta[3] = tmp;
+				}
+				tmp = pta[0]; pta[0] = pta[1]; pta[1] = tmp;
+			}
+			else if (cmp(&pta[2], &pta[3]) > 0)
+			{
+				tmp = pta[2]; pta[2] = pta[3]; pta[3] = tmp;
+			}
+
+			if (cmp(&pta[1], &pta[2]) > 0)
+			{
+				if (cmp(&pta[0], &pta[2]) <= 0)
+				{
+					if (cmp(&pta[1], &pta[3]) <= 0)
+					{
+						tmp = pta[1]; pta[1] = pta[2]; pta[2] = tmp;
+					}
+					else
+					{
+						tmp = pta[1]; pta[1] = pta[2]; pta[2] = pta[3]; pta[3] = tmp;
+					}
+				}
+				else if (cmp(&pta[0], &pta[3]) > 0)
+				{
+					tmp = pta[0]; pta[0] = pta[2]; pta[2] = tmp;
+					tmp = pta[1]; pta[1] = pta[3]; pta[3] = tmp;
+
+				}
+				else if (cmp(&pta[1], &pta[3]) <= 0)
+				{
+					tmp = pta[0]; pta[0] = pta[2]; pta[2] = pta[1]; pta[1] = tmp;
+				}
+				else
+				{
+					tmp = pta[0]; pta[0] = pta[2]; pta[2] = pta[3]; pta[3] = pta[1]; pta[1] = tmp;
+				}
+			}
+
+			ptt = pta - 1;
+			pta += 4;
+		}
+		else
+		{
+			if (pts == array)
+			{
+				switch (nmemb % 4)
+				{
+					case 3:
+						if (cmp(&pta[1], &pta[2]) <= 0)
+						{
+							break;
+						}
+					case 2:
+						if (cmp(&pta[0], &pta[1]) <= 0)
+						{
+							break;
+						}
+					case 1:
+						if (cmp(&pta[-1], &pta[0]) <= 0)
+						{
+							break;
+						}
+					case 0:
+						goto swapped;
+				}
+			}
+			ptt = pta - 1;
+		}
+
+		while (pts < ptt)
+		{
+			tmp = *pts;
+			*pts++ = *ptt;
+			*ptt-- = tmp;
+		}
+		continue;
+
+		swapped:
+
+		ptt = pts + nmemb - 1;
+
+		while (pts < ptt)
+		{
+			tmp = *pts;
+			*pts++ = *ptt;
+			*ptt-- = tmp;
+		}
+		return 1;
+	}
+
+	tail_swap64(pta, nmemb % 4, cmp);
+
+	return 0;
+}
+
+// Quad merge sorted blocks of 4 elements into sorted blocks of 16 elements.
+
+void tail_merge64(long long *array, long long *swap, unsigned int nmemb, unsigned int block, CMPFUNC *cmp);
+
+void qxvi_swap64(long long *array, unsigned int nmemb, CMPFUNC *cmp)
+{
+	long long swap[16];
+	register long long *pta, *pts, *ptt, *pte, cnt;
+
+	pta = pte = array;
+
+	for (cnt = nmemb / 16 ; cnt > 0 ; --cnt, pte += 16)
+	{
+		if (cmp(&pta[3], &pta[4]) <= 0)
+		{
+			if (cmp(&pta[11], &pta[12]) <= 0)
+			{
+				if (cmp(&pta[7], &pta[8]) <= 0)
+				{
+					pta += 16;
+					continue;
+				}
+				pts = swap;
+
+				*pts++ = *pta++; *pts++ = *pta++; *pts++ = *pta++; *pts++ = *pta++;
+				*pts++ = *pta++; *pts++ = *pta++; *pts++ = *pta++; *pts++ = *pta++;
+				*pts++ = *pta++; *pts++ = *pta++; *pts++ = *pta++; *pts++ = *pta++;
+				*pts++ = *pta++; *pts++ = *pta++; *pts++ = *pta++; *pts++ = *pta++;
+
+				goto step3;
+			}
+			pts = swap;
+
+			*pts++ = *pta++; *pts++ = *pta++; *pts++ = *pta++; *pts++ = *pta++;
+			*pts++ = *pta++; *pts++ = *pta++; *pts++ = *pta++; *pts++ = *pta++;
+
+			goto step2;
+		}
+
+		// step1:
+
+		pts = swap;
+
+		if (cmp(&pta[3], &pta[7]) <= 0)
+		{
+			ptt = pta + 4;
+
+			*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
+			*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
+			*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
+			*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
+			*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
+
+			while (pta < pte + 4)
+			{
+				*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
+			}
+			while (ptt < pte + 8)
+			{
+				*pts++ = *ptt++;
+			}
+			pta = ptt;
+		}
+		else if (cmp(&pta[0], &pta[7]) > 0)
+		{
+			ptt = pta + 4;
+			*pts++ = *ptt++; *pts++ = *ptt++; *pts++ = *ptt++; *pts++ = *ptt++;
+			*pts++ = *pta++; *pts++ = *pta++; *pts++ = *pta++; *pts++ = *pta++;
+			pta = ptt;
+		}
+		else
+		{
+			ptt = pta + 4;
+
+			*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
+			*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
+			*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
+			*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
+			*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
+
+			while (ptt < pte + 8)
+			{
+				*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
+			}
+
+			while (pta < pte + 4)
+			{
+				*pts++ = *pta++;
+			}
+
+			pta = ptt;
+		}
+
+		if (cmp(&pta[3], &pta[4]) <= 0)
+		{
+			ptt = pta;
+			pts = swap;
+			pta = pte;
+
+			if (cmp(&pts[7], &ptt[0]) <= 0)
+			{
+				*pta++ = *pts++; *pta++ = *pts++; *pta++ = *pts++; *pta++ = *pts++;
+				*pta++ = *pts++; *pta++ = *pts++; *pta++ = *pts++; *pta++ = *pts++;
+
+				pta += 8;
+			}
+			else if (cmp(&pts[7], &ptt[7]) <= 0)
+			{
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+
+				while (pts < swap + 8)
+				{
+					*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+				}
+
+				pta = pte + 16;
+			}
+			else if (cmp(&pts[0], &ptt[7]) > 0)
+			{
+				*pta++ = *ptt++; *pta++ = *ptt++; *pta++ = *ptt++; *pta++ = *ptt++; *pta++ = *ptt++; *pta++ = *ptt++; *pta++ = *ptt++; *pta++ = *ptt++;
+				*pta++ = *pts++; *pta++ = *pts++; *pta++ = *pts++; *pta++ = *pts++; *pta++ = *pts++; *pta++ = *pts++; *pta++ = *pts++; *pta++ = *pts++;
+			}
+			else
+			{
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+
+				while (ptt < pte + 16)
+				{
+					*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+				}
+
+				while (pts < swap + 8)
+				{
+					*pta++ = *pts++;
+				}
+			}
+			continue;
+		}
+
+		step2:
+
+		if (cmp(&pta[3], &pta[7]) <= 0)
+		{
+			ptt = pta + 4;
+
+			*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
+			*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
+			*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
+			*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
+			*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
+
+			while (pta < pte + 12)
+			{
+				*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
+			}
+			while (pts < swap + 16)
+			{
+				*pts++ = *ptt++;
+			}
+		}
+		else if (cmp(&pta[0], &pta[7]) > 0)
+		{
+			ptt = pta + 4;
+
+			*pts++ = *ptt++; *pts++ = *ptt++; *pts++ = *ptt++; *pts++ = *ptt++;
+			*pts++ = *pta++; *pts++ = *pta++; *pts++ = *pta++; *pts++ = *pta++;
+		}
+		else
+		{
+			ptt = pta + 4;
+
+			*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
+			*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
+			*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
+			*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
+			*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
+
+			while (ptt < pte + 16)
+			{
+				*pts++ = cmp(pta, ptt) > 0 ? *ptt++ : *pta++;
+			}
+			while (pts < swap + 16)
+			{
+				*pts++ = *pta++;
+			}
+		}
+
+		step3:
+
+		pta = pte;
+		pts = swap;
+
+		if (cmp(&pts[7], &pts[15]) <= 0)
+		{
+			ptt = pts + 8;
+
+			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+
+			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+
+//			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+
+			while (pts < swap + 8)
+			{
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+			}
+			while (ptt < swap + 16)
+			{
+				*pta++ = *ptt++;
+			}
+		}
+		else if (cmp(&pts[0], &pts[15]) > 0)
+		{
+			ptt = pts + 8;
+
+			*pta++ = *ptt++; *pta++ = *ptt++; *pta++ = *ptt++; *pta++ = *ptt++;
+			*pta++ = *ptt++; *pta++ = *ptt++; *pta++ = *ptt++; *pta++ = *ptt++;
+
+			*pta++ = *pts++; *pta++ = *pts++; *pta++ = *pts++; *pta++ = *pts++;
+			*pta++ = *pts++; *pta++ = *pts++; *pta++ = *pts++; *pta++ = *pts++;
+		}
+		else
+		{
+			ptt = pts + 8;
+
+			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+
+			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+
+			*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+
+			while (ptt < swap + 16)
+			{
+				*pta++ = cmp(pts, ptt) > 0 ? *ptt++ : *pts++;
+			}
+			while (pts < swap + 8)
+			{
+				*pta++ = *pts++;
+			}
+		}
+	}
+
+	if (nmemb % 16 > 4)
+	{
+		tail_merge64(pta, swap, nmemb % 16, 4, cmp);
+	}
+}
+
+/*
 void tail_merge64(long long *array, long long *swap, size_t nmemb, size_t block, CMPFUNC *cmp);
 
 size_t quad_swap64(long long *array, size_t nmemb, CMPFUNC *cmp)
@@ -1732,6 +2182,7 @@ size_t quad_swap64(long long *array, size_t nmemb, CMPFUNC *cmp)
 	}
 	return 0;
 }
+*/
 
 void quad_merge64(long long *array, long long *swap, size_t nmemb, size_t block, CMPFUNC *cmp)
 {
@@ -1931,7 +2382,7 @@ void quad_merge64(long long *array, long long *swap, size_t nmemb, size_t block,
 }
 
 
-void tail_merge64(long long *array, long long *swap, size_t nmemb, size_t block, CMPFUNC *cmp)
+void tail_merge64(long long *array, long long *swap, unsigned int nmemb, unsigned int block, CMPFUNC *cmp)
 {
 	size_t offset;
 	register long long *pta, *pts, *c, *c_max, *d, *d_max, *e;
@@ -2052,13 +2503,15 @@ void quadsort(void *array, size_t nmemb, size_t size, CMPFUNC *cmp)
 	{
 		if (nmemb < 16)
 		{
-			tail_swap32(array, (unsigned char) nmemb, cmp);
+			tail_swap32(array, nmemb, cmp);
 		}
 		else if (nmemb < 128)
 		{
 			if (quad_swap32(array, nmemb, cmp) == 0)
 			{
 				int swap[64];
+
+				qxvi_swap32(array, nmemb, cmp);
 
 				tail_merge32(array, swap, nmemb, 16, cmp);
 			}
@@ -2076,6 +2529,8 @@ void quadsort(void *array, size_t nmemb, size_t size, CMPFUNC *cmp)
 					return;
 				}
 
+				qxvi_swap32(array, nmemb, cmp);
+
 				quad_merge32(array, swap, nmemb, 16, cmp);
 
 				free(swap);
@@ -2086,13 +2541,15 @@ void quadsort(void *array, size_t nmemb, size_t size, CMPFUNC *cmp)
 	{
 		if (nmemb < 16)
 		{
-			tail_swap64(array, (unsigned char) nmemb, cmp);
+			tail_swap64(array, nmemb, cmp);
 		}
 		else if (nmemb < 128)
 		{
 			if (quad_swap64(array, nmemb, cmp) == 0)
 			{
 				long long swap[64];
+
+				qxvi_swap64(array, nmemb, cmp);
 
 				tail_merge64(array, swap, nmemb, 16, cmp);
 			}
@@ -2109,10 +2566,72 @@ void quadsort(void *array, size_t nmemb, size_t size, CMPFUNC *cmp)
 
 					return;
 				}
+				qxvi_swap64(array, nmemb, cmp);
+
 				quad_merge64(array, swap, nmemb, 16, cmp);
 
 				free(swap);
 			}
+		}
+	}
+	else
+	{
+		assert(size == sizeof(int) || size == sizeof(long long));
+	}
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
+//┌───────────────────────────────────────────────────────────────────────┐//
+//│   ████████┐ █████┐ ██████┐██┐     ███████┐ ██████┐ ██████┐ ████████┐  │//
+//│   └──██┌──┘██┌──██┐└─██┌─┘██│     ██┌────┘██┌───██┐██┌──██┐└──██┌──┘  │//
+//│      ██│   ███████│  ██│  ██│     ███████┐██│   ██│██████┌┘   ██│     │//
+//│      ██│   ██┌──██│  ██│  ██│     └────██│██│   ██│██┌──██┐   ██│     │//
+//│      ██│   ██│  ██│██████┐███████┐███████│└██████┌┘██│  ██│   ██│     │//
+//│      └─┘   └─┘  └─┘└─────┘└──────┘└──────┘ └─────┘ └─┘  └─┘   └─┘     │//
+//└───────────────────────────────────────────────────────────────────────┘//
+/////////////////////////////////////////////////////////////////////////////
+
+void tailsort(void *array, size_t nmemb, size_t size, CMPFUNC *cmp)
+{
+	if (nmemb < 2)
+	{
+		return;
+	}
+
+	if (size == sizeof(int))
+	{
+		if (quad_swap32(array, nmemb, cmp) == 0)
+		{
+			int *swap = malloc(nmemb * size / 2);
+
+			if (swap == NULL)
+			{
+				fprintf(stderr, "tailsort(%p,%zu,%zu,%p): malloc() failed: %s\n", array, nmemb, size, cmp, strerror(errno));
+
+				return;
+			}
+
+			tail_merge32(array, swap, nmemb, 4, cmp);
+
+			free(swap);
+		}
+	}
+	else if (size == sizeof(long long))
+	{
+		if (quad_swap64(array, nmemb, cmp) == 0)
+		{
+			long long *swap = malloc(nmemb * size / 2);
+
+			if (swap == NULL)
+			{
+				fprintf(stderr, "tailsort(%p,%zu,%zu,%p): malloc() failed: %s\n", array, nmemb, size, cmp, strerror(errno));
+
+				return;
+			}
+			tail_merge64(array, swap, nmemb, 4, cmp);
+
+			free(swap);
 		}
 	}
 	else
