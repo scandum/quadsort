@@ -243,10 +243,19 @@ space of quadsort to n / 2 without notably impacting performance.
 
 Big O
 -----
-
-| Name | Best | Average | Worst | Stable | Memory |
-| ---- | ---- | ------- | ----- | ------ | ------ |
-| quadsort | n | n log n | n log n | yes | n |
+```cobol
+                 ┌─────────────────┐┌─────────────────┐
+                 │comparisons      ││swap memory      │
+┌───────────────┐├─────┬─────┬─────┤├─────┬─────┬─────┤┌──────┐┌──────────┐┌──────────┐
+│name           ││min  │avg  │max  ││min  │avg  │max  ││stable││partitions││comparison│
+├───────────────┤├─────┼─────┼─────┤├─────┼─────┼─────┤├──────┤├──────────┤├──────────┤
+│mergesort      ││nᴸᴼᴳn│nᴸᴼᴳn│nᴸᴼᴳn││n    │n    │n    ││yes   ││no        ││yes       │
+├───────────────┤├─────┼─────┼─────┤├─────┼─────┼─────┤├──────┤├──────────┤├──────────┤
+│quadsort       ││n    │nᴸᴼᴳn│nᴸᴼᴳn││1    │2ⁿ/n │n    ││yes   ││no        ││yes       │
+├───────────────┤├─────┼─────┼─────┤├─────┼─────┼─────┤├──────┤├──────────┤├──────────┤
+│quicksort      ││n    │nᴸᴼᴳn│n²   ││1    │1    │1    ││no    ││yes       ││yes       │
+└───────────────┘└─────┴─────┴─────┘└─────┴─────┴─────┘└──────┘└──────────┘└──────────┘
+```
 
 Quadsort makes n comparisons when the data is already sorted or reverse sorted.
 
