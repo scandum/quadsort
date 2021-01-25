@@ -512,9 +512,9 @@ benchmark using 1000000 100 1 as the argument.
 |     qsort |  1000000 |  i32 | 0.038299 | 0.038299 |    10333679 |         unstable |
 
 In this benchmark it becomes clear why quicksort is often preferred above a traditional mergesort,
-it has fewer comparisons for ascending, uniform, and descending order data. However, it performs
-worse than quadsort on all tests except for generic order, which is due to the fact that quicksort
-is an unstable sort. Quicksort also has an extremely poor sorting speed for wave order data.
+it has fewer comparisons for ascending, generic, and descending order data. However, it performs
+worse than quadsort on all tests except for generic order. Quicksort has an abysmal sorting
+speed for wave order data.
 
 Benchmark: quadsort vs qsort (mergesort) small arrays
 -----------------------------------------------------
@@ -554,3 +554,5 @@ benchmark using 4096 0 0 as the argument.
 |  quadsort |     4095 |  i32 | 0.005938 | 0.006545 |       23605 | random 2048-4095 |
 |     qsort |     4095 |  i32 | 0.007640 | 0.008040 |       20707 | random 2048-4095 |
 
+As long as the L1 cache is not exhausted it is unlikely for quadsort to be beaten. When
+sorting arrays under 1000 elements quadsort is between 1.8 and 2.3 times faster than qsort.
