@@ -273,16 +273,17 @@ in-place sorts. Based on my benchmarks it appears that quadsort is faster than
 in-place sorts for array sizes that do not exhaust the L1 cache, which can be up
 to 64KB on modern processors.
 
-Wolfsort and flowsort
----------------------
-[wolfsort](https://github.com/scandum/wolfsort) and flowsort are a hybrid radixsort / quadsort with improved performance on random data. They're mostly a proof of concept that only work on unsigned 32 and 64 bit integers.
-
-Twinsort
+Variants
 --------
-[Twinsort](https://github.com/scandum/twinsort) is a simplified quadsort with a
-much smaller code size. It should still be faster than Timsort. Twinsort might
-be of use to people who want to port or understand quadsort; it does not use
+- [gridsort](https://github.com/scandum/gridsort) is a hybrid cubesort / quadsort with improved performance on random data.
+
+- [twinsort](https://github.com/scandum/twinsort) is a simplified quadsort with a
+much smaller code size. Twinsort might be of use to people who want to port or understand quadsort; it does not use
 pointers or gotos.
+
+- [wolfsort](https://github.com/scandum/wolfsort) is a hybrid radixsort / quadsort with improved performance on random data. It's mostly a proof of concept that only work on unsigned 32 and 64 bit integers.
+
+- [fluxsort](https://github.com/scandum/wolfsort) is a hybrid partition / quadsort with improved performance on random data. It doesn't have its own project page and is just tossed in with the other sorts in the wolfsort benchmark.
 
 Visualization
 -------------
