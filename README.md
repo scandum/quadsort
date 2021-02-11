@@ -152,7 +152,7 @@ into 2 blocks of 8 sorted elements each in swap memory. In the last row the
 blocks are merged back to main memory and we're left with 1 block of 16
 sorted elements. The following is a visualization.
 
-![quadsort visualization](https://github.com/scandum/quadsort/blob/master/quadsort.gif)
+![quadsort visualization](/images/quadsort.gif)
 
 These operations do require doubling the memory overhead for the swap space.
 More on this later.
@@ -295,7 +295,7 @@ distribution, and the fourth on an ascending distribution with a random tail.
 The upper half shows the swap memory and the bottom half shows the main memory.
 Colors are used to differentiate between skip, swap, merge, and copy operations.
 
-![quadsort benchmark](https://github.com/scandum/quadsort/blob/master/benchmark.gif)
+![quadsort benchmark](/images/benchmark.gif)
 
 Benchmark: quadsort vs std::stable_sort vs timsort vs pdqsort vs wolfsort
 -------------------------------------------------------------------------
@@ -308,7 +308,7 @@ faster on generic order data.
 
 The X axis of the bar graph below is the execution time.
 
-![Graph](/graph1.png)
+![Graph](/images/graph1)
 
 <details><summary><b>quadsort vs std::stable_sort vs timsort vs pdqsort vs wolfsort data table</b></summary>
 
@@ -376,7 +376,7 @@ ranging from 256 to 1,048,576.
 
 The X axis of the graph below is the number of elements, the Y axis is the execution time.
 
-![Graph](/graph2.png)
+![Graph](/images/graph2.png)
 <details><summary><b>quadsort vs std::stable_sort vs timsort vs pdqsort vs wolfsort vs flowsort data table</b></summary>
 
 |      Name |    Items | Type |     Best |  Average | Comparisons |     Distribution |
