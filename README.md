@@ -308,7 +308,7 @@ faster on generic order data.
 
 The X axis of the bar graph below is the execution time.
 
-![Graph](/images/graph1)
+![Graph](/images/graph1.png)
 
 <details><summary><b>quadsort vs std::stable_sort vs timsort vs pdqsort vs wolfsort data table</b></summary>
 
