@@ -374,8 +374,6 @@ The source code was compiled using `g++ -O3 -w -fpermissive bench.c`. Each test 
 and only the best run is reported. It measures the performance on random data with array sizes
 ranging from 16 to 262144.
 
-The X axis of the graph below is the number of elements, the Y axis is the execution time.
-
 ![Graph](/images/graph2.png)
 
 <details><summary><b>data table</b></summary>
