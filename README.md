@@ -152,7 +152,7 @@ into 2 blocks of 8 sorted elements each in swap memory. In the last row the
 blocks are merged back to main memory and we're left with 1 block of 16
 sorted elements. The following is a visualization.
 
-![quadsort visualization](https://github.com/scandum/quadsort/blob/master/quadsort.gif)
+![quadsort visualization](/images/quadsort.gif)
 
 These operations do require doubling the memory overhead for the swap space.
 More on this later.
@@ -295,88 +295,88 @@ distribution, and the fourth on an ascending distribution with a random tail.
 The upper half shows the swap memory and the bottom half shows the main memory.
 Colors are used to differentiate between skip, swap, merge, and copy operations.
 
-![quadsort benchmark](https://github.com/scandum/quadsort/blob/master/benchmark.gif)
+![quadsort benchmark](/images/benchmark.gif)
 
 Benchmark: quadsort vs std::stable_sort vs timsort vs pdqsort vs wolfsort
 -------------------------------------------------------------------------
-The following benchmark was on WSL gcc version 7.4.0 (Ubuntu 7.4.0-1ubuntu1~18.04.1).
-The source code was compiled using g++ -O3 quadsort.cpp. Each test was ran 100 times
+The following benchmark was on WSL 2 gcc version 7.5.0 (Ubuntu 7.5.0-3ubuntu1~18.04)
+using the [wolfsort benchmark](https://github.com/scandum/wolfsort).
+The source code was compiled using `g++ -O3 -w -fpermissive bench.c`. Each test was ran 100 times
 and only the best run is reported.
 
-It should be noted that pdqsort is not a stable sort which is the reason it's much
-faster on generic order data.
+![Graph](/images/graph1.png)
 
-The X axis of the bar graph below is the execution time.
+<details><summary><b>data table</b></summary>
 
-![Graph](/graph1.png)
+|      Name |    Items | Type |     Best |  Average |     Loops | Samples |     Distribution |
+| --------- | -------- | ---- | -------- | -------- | --------- | ------- | ---------------- |
+|stablesort |   100000 |   32 | 0.005997 | 0.006029 |         1 |     100 |     random order |
+|  gridsort |   100000 |   32 | 0.004571 | 0.004599 |         1 |     100 |     random order |
+|   timsort |   100000 |   32 | 0.007613 | 0.007634 |         1 |     100 |     random order |
+|  quadsort |   100000 |   32 | 0.005826 | 0.005851 |         1 |     100 |     random order |
+|  fluxsort |   100000 |   32 | 0.003984 | 0.003995 |         1 |     100 |     random order |
+|  wolfsort |   100000 |   32 | 0.001280 | 0.001300 |         1 |     100 |     random order |
+|           |          |      |          |          |           |         |                  |
+|stablesort |   100000 |   32 | 0.000684 | 0.000731 |         1 |     100 |  ascending order |
+|  gridsort |   100000 |   32 | 0.000368 | 0.000378 |         1 |     100 |  ascending order |
+|   timsort |   100000 |   32 | 0.000045 | 0.000046 |         1 |     100 |  ascending order |
+|  quadsort |   100000 |   32 | 0.000064 | 0.000064 |         1 |     100 |  ascending order |
+|  fluxsort |   100000 |   32 | 0.000525 | 0.000529 |         1 |     100 |  ascending order |
+|  wolfsort |   100000 |   32 | 0.000067 | 0.000070 |         1 |     100 |  ascending order |
+|           |          |      |          |          |           |         |                  |
+|stablesort |   100000 |   32 | 0.001371 | 0.001436 |         1 |     100 |    ascending saw |
+|  gridsort |   100000 |   32 | 0.001445 | 0.001459 |         1 |     100 |    ascending saw |
+|   timsort |   100000 |   32 | 0.000842 | 0.000847 |         1 |     100 |    ascending saw |
+|  quadsort |   100000 |   32 | 0.000879 | 0.000889 |         1 |     100 |    ascending saw |
+|  fluxsort |   100000 |   32 | 0.002586 | 0.002604 |         1 |     100 |    ascending saw |
+|  wolfsort |   100000 |   32 | 0.001199 | 0.001216 |         1 |     100 |    ascending saw |
+|           |          |      |          |          |           |         |                  |
+|stablesort |   100000 |   32 | 0.003828 | 0.003857 |         1 |     100 |    generic order |
+|  gridsort |   100000 |   32 | 0.001661 | 0.001693 |         1 |     100 |    generic order |
+|   timsort |   100000 |   32 | 0.005591 | 0.005614 |         1 |     100 |    generic order |
+|  quadsort |   100000 |   32 | 0.003777 | 0.003861 |         1 |     100 |    generic order |
+|  fluxsort |   100000 |   32 | 0.001438 | 0.001450 |         1 |     100 |    generic order |
+|  wolfsort |   100000 |   32 | 0.003788 | 0.003872 |         1 |     100 |    generic order |
+|           |          |      |          |          |           |         |                  |
+|stablesort |   100000 |   32 | 0.000900 | 0.000909 |         1 |     100 | descending order |
+|  gridsort |   100000 |   32 | 0.000387 | 0.000399 |         1 |     100 | descending order |
+|   timsort |   100000 |   32 | 0.000090 | 0.000093 |         1 |     100 | descending order |
+|  quadsort |   100000 |   32 | 0.000067 | 0.000068 |         1 |     100 | descending order |
+|  fluxsort |   100000 |   32 | 0.000526 | 0.000534 |         1 |     100 | descending order |
+|  wolfsort |   100000 |   32 | 0.000072 | 0.000073 |         1 |     100 | descending order |
+|           |          |      |          |          |           |         |                  |
+|stablesort |   100000 |   32 | 0.001013 | 0.001029 |         1 |     100 |   descending saw |
+|  gridsort |   100000 |   32 | 0.001020 | 0.001055 |         1 |     100 |   descending saw |
+|   timsort |   100000 |   32 | 0.000460 | 0.000463 |         1 |     100 |   descending saw |
+|  quadsort |   100000 |   32 | 0.000490 | 0.000499 |         1 |     100 |   descending saw |
+|  fluxsort |   100000 |   32 | 0.000998 | 0.001025 |         1 |     100 |   descending saw |
+|  wolfsort |   100000 |   32 | 0.000495 | 0.000503 |         1 |     100 |   descending saw |
+|           |          |      |          |          |           |         |                  |
+|stablesort |   100000 |   32 | 0.002053 | 0.002104 |         1 |     100 |      random tail |
+|  gridsort |   100000 |   32 | 0.001430 | 0.001440 |         1 |     100 |      random tail |
+|   timsort |   100000 |   32 | 0.002004 | 0.002025 |         1 |     100 |      random tail |
+|  quadsort |   100000 |   32 | 0.001567 | 0.001576 |         1 |     100 |      random tail |
+|  fluxsort |   100000 |   32 | 0.001626 | 0.001639 |         1 |     100 |      random tail |
+|  wolfsort |   100000 |   32 | 0.001000 | 0.001020 |         1 |     100 |      random tail |
+|           |          |      |          |          |           |         |                  |
+|stablesort |   100000 |   32 | 0.003511 | 0.003558 |         1 |     100 |      random half |
+|  gridsort |   100000 |   32 | 0.002555 | 0.002587 |         1 |     100 |      random half |
+|   timsort |   100000 |   32 | 0.004037 | 0.004066 |         1 |     100 |      random half |
+|  quadsort |   100000 |   32 | 0.003092 | 0.003116 |         1 |     100 |      random half |
+|  fluxsort |   100000 |   32 | 0.002612 | 0.002624 |         1 |     100 |      random half |
+|  wolfsort |   100000 |   32 | 0.001164 | 0.001181 |         1 |     100 |      random half |
 
-<details><summary><b>quadsort vs std::stable_sort vs timsort vs pdqsort vs wolfsort data table</b></summary>
-
-|      Name |    Items | Type |     Best |  Average | Comparisons |     Distribution |
-| --------- | -------- | ---- | -------- | -------- | ----------- | ---------------- |
-|  quadsort |  1000000 |  i32 | 0.070469 | 0.070635 |             |     random order |
-|stablesort |  1000000 |  i32 | 0.073865 | 0.074078 |             |     random order |
-|   timsort |  1000000 |  i32 | 0.089192 | 0.089301 |             |     random order |
-|   pdqsort |  1000000 |  i32 | 0.029911 | 0.029948 |             |     random order |
-|  wolfsort |  1000000 |  i32 | 0.017359 | 0.017744 |             |     random order |
-|           |          |      |          |          |             |                  |
-|  quadsort |  1000000 |  i32 | 0.000485 | 0.000511 |             |        ascending |
-|stablesort |  1000000 |  i32 | 0.010188 | 0.010261 |             |        ascending |
-|   timsort |  1000000 |  i32 | 0.000331 | 0.000342 |             |        ascending |
-|   pdqsort |  1000000 |  i32 | 0.000863 | 0.000875 |             |        ascending |
-|  wolfsort |  1000000 |  i32 | 0.000539 | 0.000579 |             |        ascending |
-|           |          |      |          |          |             |                  |
-|  quadsort |  1000000 |  i32 | 0.008901 | 0.008934 |             |    ascending saw |
-|stablesort |  1000000 |  i32 | 0.017093 | 0.017275 |             |    ascending saw |
-|   timsort |  1000000 |  i32 | 0.008615 | 0.008674 |             |    ascending saw |
-|   pdqsort |  1000000 |  i32 | 0.047785 | 0.047921 |             |    ascending saw |
-|  wolfsort |  1000000 |  i32 | 0.012490 | 0.012554 |             |    ascending saw |
-|           |          |      |          |          |             |                  |
-|  quadsort |  1000000 |  i32 | 0.038260 | 0.038343 |             |    generic order |
-|stablesort |  1000000 |  i32 | 0.042292 | 0.042388 |             |    generic order |
-|   timsort |  1000000 |  i32 | 0.055855 | 0.055967 |             |    generic order |
-|   pdqsort |  1000000 |  i32 | 0.008093 | 0.008168 |             |    generic order |
-|  wolfsort |  1000000 |  i32 | 0.038320 | 0.038417 |             |    generic order |
-|           |          |      |          |          |             |                  |
-|  quadsort |  1000000 |  i32 | 0.000559 | 0.000576 |             | descending order |
-|stablesort |  1000000 |  i32 | 0.010343 | 0.010438 |             | descending order |
-|   timsort |  1000000 |  i32 | 0.000891 | 0.000900 |             | descending order |
-|   pdqsort |  1000000 |  i32 | 0.001882 | 0.001897 |             | descending order |
-|  wolfsort |  1000000 |  i32 | 0.000604 | 0.000625 |             | descending order |
-|           |          |      |          |          |             |                  |
-|  quadsort |  1000000 |  i32 | 0.006174 | 0.006245 |             |   descending saw |
-|stablesort |  1000000 |  i32 | 0.014679 | 0.014767 |             |   descending saw |
-|   timsort |  1000000 |  i32 | 0.006419 | 0.006468 |             |   descending saw |
-|   pdqsort |  1000000 |  i32 | 0.016603 | 0.016629 |             |   descending saw |
-|  wolfsort |  1000000 |  i32 | 0.006264 | 0.006329 |             |   descending saw |
-|           |          |      |          |          |             |                  |
-|  quadsort |  1000000 |  i32 | 0.018675 | 0.018729 |             |      random tail |
-|stablesort |  1000000 |  i32 | 0.026384 | 0.026508 |             |      random tail |
-|   timsort |  1000000 |  i32 | 0.023226 | 0.023395 |             |      random tail |
-|   pdqsort |  1000000 |  i32 | 0.028599 | 0.028674 |             |      random tail |
-|  wolfsort |  1000000 |  i32 | 0.009517 | 0.009631 |             |      random tail |
-|           |          |      |          |          |             |                  |
-|  quadsort |  1000000 |  i32 | 0.037593 | 0.037679 |             |      random half |
-|stablesort |  1000000 |  i32 | 0.043755 | 0.043899 |             |      random half |
-|   timsort |  1000000 |  i32 | 0.047008 | 0.047112 |             |      random half |
-|   pdqsort |  1000000 |  i32 | 0.029800 | 0.029847 |             |      random half |
-|  wolfsort |  1000000 |  i32 | 0.013238 | 0.013355 |             |      random half |
-|           |          |      |          |          |             |                  |
-|  quadsort |  1000000 |  i32 | 0.009605 | 0.009673 |             |       wave order |
-|stablesort |  1000000 |  i32 | 0.013667 | 0.013785 |             |       wave order |
-|   timsort |  1000000 |  i32 | 0.007994 | 0.008138 |             |       wave order |
-|   pdqsort |  1000000 |  i32 | 0.024683 | 0.024727 |             |       wave order |
-|  wolfsort |  1000000 |  i32 | 0.009642 | 0.009709 |             |       wave order |
 </details>
 
-The following benchmark was on WSL gcc version 7.4.0 (Ubuntu 7.4.0-1ubuntu1~18.04.1). The
+The following benchmark was on WSL 2 gcc version 7.5.0 (Ubuntu 7.5.0-3ubuntu1~18.04). The
 source code was compiled using g++ -O3 quadsort.cpp. Each test was ran 100 times and only
 the best run is reported. It measures the performance on random data with array sizes
 ranging from 256 to 1,048,576.
 
 The X axis of the graph below is the number of elements, the Y axis is the execution time.
 
-![Graph](/graph2.png)
+![Graph](/images/graph2.png)
+
 <details><summary><b>quadsort vs std::stable_sort vs timsort vs pdqsort vs wolfsort vs flowsort data table</b></summary>
 
 |      Name |    Items | Type |     Best |  Average | Comparisons |     Distribution |
