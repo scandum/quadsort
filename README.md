@@ -368,16 +368,17 @@ and only the best run is reported.
 
 </details>
 
-The following benchmark was on WSL 2 gcc version 7.5.0 (Ubuntu 7.5.0-3ubuntu1~18.04). The
-source code was compiled using g++ -O3 quadsort.cpp. Each test was ran 100 times and only
-the best run is reported. It measures the performance on random data with array sizes
-ranging from 256 to 1,048,576.
+The following benchmark was on WSL 2 gcc version 7.5.0 (Ubuntu 7.5.0-3ubuntu1~18.04)
+using the [wolfsort benchmark](https://github.com/scandum/wolfsort).
+The source code was compiled using `g++ -O3 -w -fpermissive bench.c`. Each test was ran 100 times
+and only the best run is reported. It measures the performance on random data with array sizes
+ranging from 16 to 262144.
 
 The X axis of the graph below is the number of elements, the Y axis is the execution time.
 
 ![Graph](/images/graph2.png)
 
-<details><summary><b>quadsort vs std::stable_sort vs timsort vs pdqsort vs wolfsort vs flowsort data table</b></summary>
+<details><summary><b>data table</b></summary>
 
 |      Name |    Items | Type |     Best |  Average |     Loops | Samples |     Distribution |
 | --------- | -------- | ---- | -------- | -------- | --------- | ------- | ---------------- |
