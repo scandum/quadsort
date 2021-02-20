@@ -46,7 +46,7 @@ original four variables.
 This process is visualized in the diagram above.
 
 After the first round of sorting a single if check determines if the four
-swap variables are sorted in order, if that's the case the swap
+swap variables are sorted in-order, if that's the case the swap
 finishes up immediately. Next it checks if the swap variables
 are sorted in reverse-order, if that's the case the sort finishes up
 immediately. If both checks fail the final arrangement is known and
@@ -125,13 +125,13 @@ wasteful swapping. In C the basic quad swap looks as following:
 In the case the array cannot be perfectly divided by 4, the tail, existing
 of 1-3 elements, is sorted using the traditional swap.
 
-in-place quad swap
+In-place quad swap
 ------------------
 There are however several problems with the simple quad swap above. If an array is already fully sorted it writes a lot of data back and forth from swap unnecessarily. If an array is fully in reverse order it will change `8 7 6 5 4 3 2 1` to `5 6 7 8 1 2 3 4` which reduces the degree of orderliness rather than increasing it.
 
 To solve these problems the quad swap needs to be implemented in-place.
 
-chain swap
+Chain swap
 ----------
 The chain swap is easiest explained with an example. Traditionally many sorts would sort three random values by executing three binary swaps.
 ```c
@@ -181,9 +181,11 @@ int swap_three(int array[], swap)
     }
 }
 ```
-While swapping like this takes up a lot more real estate the advantages should be pretty clear. By doing a triple swap you always perform 3 comparisons and up to 3 swaps. By conjoining the three operations you perform only 2 comparisons in the best case and the swaps are chained together turning a worst case of 9 assignments into a worst case of 4. Another advantage is that if the array is already ordered no assignments take place.
+While swapping like this takes up a lot more real estate the advantages should be pretty clear. By doing a triple swap you always perform 3 comparisons and up to 3 swaps. By conjoining the three operations you perform only 2 comparisons in the best case and the swaps are chained together turning a worst case of 9 assignments into a worst case of 4.
 
-reverse order handling
+If the array is already in-order no assignments take place.
+
+Reverse order handling
 ----------------------
 As mentioned previously, reverse order data has a high degree of orderliness and subsequently it can be sorted efficiently. In fact, if a quad swap were to turn `9 8 7 6  5 4 3 2  1` into `6 7 8 9  2 3 4 5  1` it would be taking a step backward instead of forward. Reverse order data is typically handled using a simple reversal function, as following.
 ```c
@@ -197,24 +199,41 @@ int reverse(int array[], int start, int end, int swap)
     }
 }
 ```
-While random data can only be sorted using `n log n comparisons` and `n log n moves`, reverse-order data can be sorted using `n comparisons` and `n moves` through run detection. Without run detection the best you can do is sort it in `n comparisons` and `n log n moves`. 
+While random data can only be sorted using `n log n comparisons` and
+`n log n moves`, reverse-order data can be sorted using `n comparisons`
+and `n moves` through run detection. Without run detection the best you
+can do is sort it in `n comparisons` and `n log n moves`. 
 
-Run detection, of course, comes at a cost. Thanks to the laws of probability a quad swap can cheat however. The chance of 4 random numbers having the order `4 3 2 1` is 1 in 16. So when sorting random blocks of 4 elements, by expanding the sorting network, a quad swap only has to check if it's dealing with a reverse-order runs in 6.25% of cases.
+Run detection, of course, comes at a cost. Thanks to the laws of probability
+a quad swap can cheat however. The chance of 4 random numbers having the
+order `4 3 2 1` is 1 in 16. So when sorting random blocks of 4 elements,
+by expanding the sorting network, a quad swap only has to check if it's 
+dealing with a reverse-order run in 6.25% of cases.
 
-What about run detection for in-order data? While we're turning `n log n moves` into `n moves` with reverse order run detection, we'd be turning `0 moves` into `0 moves` with forward run detection. There would still be the advantage of only having to check in-order runs in 6.25% of cases. However, the benefit from turning `n log n moves` into `0 moves` is so massive that we want to check for in-order runs in 100% of cases.
+What about run detection for in-order data? While we're turning
+`n log n moves` into `n moves` with reverse order run detection, we'd be
+turning `0 moves` into `0 moves` with forward run detection. There would
+still be the advantage of only having to check in-order runs in 6.25% of
+cases. However, the benefit from turning `n log n moves` into `0 moves` 
+is so massive that we want to check for in-order runs in 100% of cases.
 
-One last optimization is to write the quad swap in such a way that we can perform a simple check to see if the entire array was in reverse order, if so, the sort is finished.
+But doing in-order run checks in the quad swap routine is not efficient
+because that would mean we need to start remembering run lengths. Instead
+we keep it simple and check in-order runs at a later stage.
 
-quad merge
+One last optimization is to write the quad swap in such a way that we can
+perform a simple check to see if the entire array was in reverse order,
+if so, the sort is finished. Otherwise we know the array has been turned
+into a series of ordered blocks of 4 elements.
+
+Quad merge
 ----------
 
 In the first stage of quadsort the quad swap is used to pre-sort the
 array into sorted 4-element blocks as described above.
 
-The second stage uses an approach similar to the quad swap to detect
-in-order arrangements, but as it's sorting blocks of
-4, 16, 64, or more elements, the final step needs to be handled like
-the traditional merge sort.
+The second stage uses an approach similar to the quad swap, but it's
+sorting blocks of 4, 16, 64, or more elements.
 
 The quad merge can be visualized as following:
 ```
@@ -226,19 +245,21 @@ The quad merge can be visualized as following:
 
 In the first row quad swap has been used to create 4 blocks of 4 sorted
 elements each. In the second row, step 1, block A and B have been merged
-to swap memory into a single sorted block of 8 elements. In the third row, step 2, block C and D have also been merged to swap memory.
-In the last row, step 3, the blocks are merged back to main memory and we're left with 1 block of 16
-sorted elements. The following is a visualization of an array with 64 random elements getting sorted.
+to swap memory into a single sorted block of 8 elements. In the third row,
+step 2, block C and D have also been merged to swap memory. In the last row,
+step 3, the blocks are merged back to main memory and we're left with 1 block
+of 16 sorted elements. The following is a visualization of an array with 64
+random elements getting sorted.
 
 ![quadsort visualization](/images/quadsort.gif)
 
 Skipping
 --------
 
-Another difference is that due to the increased cost of merge operations it
-is beneficial to check whether the 4 blocks are in order.
+Just like with the quad swap it is beneficial to check whether the 4 blocks
+are in-order.
 
-In the case of the 4 blocks being in order the merge operation is skipped,
+In the case of the 4 blocks being in-order the merge operation is skipped,
 as this would be pointless. This does however require an extra if check, and
 for randomly sorted data this if check becomes increasingly unlikely to be
 true as the block size increases. Fortunately the frequency of this if check
@@ -247,11 +268,11 @@ is quartered each loop, while the potential benefit is quadrupled each loop.
 Because reverse order data is handled in the quad swap there is no need to
 check for reverse order blocks.
 
-In the case only 2 out of 4 blocks are in order the comparisons in the merge
+In the case only 2 out of 4 blocks are in-order the comparisons in the merge
 itself are unnecessary and subsequently omitted. The data still needs to be
 copied to swap memory.
 
-This allows quadsort to sort in order sequences using `n comparisons` instead
+This allows quadsort to sort in-order sequences using `n comparisons` instead
 of `n * log n comparisons`.
 
 Boundary checks
