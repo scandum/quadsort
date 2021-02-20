@@ -357,7 +357,7 @@ Cache
 -----
 Because quadsort uses n / 2 swap memory and does not partition its cache utilization
 is not as ideal as quicksort. Based on my benchmarks it appears that quadsort is faster than
-in-place sorts if for array sizes that do not exhaust the L1 cache, which can be up
+in-place sorts for array sizes that do not exhaust the L1 cache, which can be up
 to 64KB on modern processors.
 
 While quadsort is faster than quicksort it will be slower than a well written hybrid quicksort on
