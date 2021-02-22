@@ -216,7 +216,7 @@ What about run detection for in-order data? While we're turning
 **n log n** moves into **n** moves with reverse order run detection, we'd be
 turning **0** moves into **0** moves with forward run detection. There would
 still be the advantage of only having to check in-order runs in 6.25% of
-cases. However, the benefit from turning **n log n** moves into **0 moves** 
+cases. However, the benefit from turning **n log n** moves into **0** moves 
 is so massive that we want to check for in-order runs in 100% of cases.
 
 But doing in-order run checks in the quad swap routine is not efficient
@@ -275,8 +275,8 @@ In the case only 2 out of 4 blocks are in-order the comparisons in the merge
 itself are unnecessary and subsequently omitted. The data still needs to be
 copied to swap memory.
 
-This allows quadsort to sort in-order sequences using `n comparisons` instead
-of `n * log n comparisons`.
+This allows quadsort to sort in-order sequences using **n** comparisons instead
+of **n * log n** comparisons.
 
 Boundary checks
 ---------------
@@ -329,7 +329,8 @@ is sorted using a tail merge.
 
 The main advantage of the tail merge is that it allows reducing the swap
 space of quadsort to **n / 2** and that it has been optimized to merge arrays
-of different lengths.
+of different lengths. It also simplifies the quad merge routine which only
+needs to work on arrays of equal length.
 
 Big O
 -----
