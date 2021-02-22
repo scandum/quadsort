@@ -379,6 +379,8 @@ pointers or gotos.
 
 - [fluxsort](https://github.com/scandum/wolfsort) is a hybrid partition / quadsort with improved performance on random data. It doesn't have its own project page and is just tossed in with the other sorts in the wolfsort benchmark.
 
+- [octosort](https://github.com/scandum/octosort) is based on quadsort and [WikiSort](https://github.com/BonzaiThePenguin/WikiSort). It operates with O(1) memory while being only slightly slower.
+
 Visualization
 -------------
 
