@@ -206,17 +206,17 @@ can do is sort it in **n** comparisons and **n log n** moves.
 
 Run detection, as the name implies, comes with a detection cost. Thanks
 to the laws of probability a quad swap can cheat however. The chance of
-4 random numbers having the order **4 3 2 1** is 1 in 16. So when sorting
+4 random numbers having the order **4 3 2 1** is 1 in 24. So when sorting
 random blocks of 4 elements, by expanding the sorting network, a quad
 swap only has to check if it's dealing with a reverse-order run when it
 encounters a reverse order sequence (like **4 3 2 1**), which for random
-data occurs in 6.25% of cases.
+data occurs in 4.16% of cases.
 
 What about run detection for in-order data? While we're turning
 **n log n** moves into **n** moves with reverse order run detection, we'd be
 turning **0** moves into **0** moves with forward run detection. There would
-still be the advantage of only having to check in-order runs in 6.25% of
-cases. However, the benefit from turning **n log n** moves into **0** moves 
+still be the advantage of only having to check in-order runs in 4.17% of
+cases. However, the benefit of turning **n log n** moves into **0** moves 
 is so massive that we want to check for in-order runs in 100% of cases.
 
 But doing in-order run checks in the quad swap routine is not efficient
