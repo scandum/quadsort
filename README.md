@@ -215,7 +215,7 @@ data occurs in 4.16% of cases.
 What about run detection for in-order data? While we're turning
 **n log n** moves into **n** moves with reverse order run detection, we'd be
 turning **0** moves into **0** moves with forward run detection. There would
-still be the advantage of only having to check in-order runs in 4.17% of
+still be the advantage of only having to check in-order runs in 4.16% of
 cases. However, the benefit of turning **n log n** moves into **0** moves 
 is so massive that we want to check for in-order runs in 100% of cases.
 
