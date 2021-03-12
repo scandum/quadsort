@@ -24,7 +24,7 @@
 */
 
 /*
-	quadsort 1.1.3.4
+	quadsort 1.1.3.5
 */
 
 #ifndef QUADSORT_H
@@ -81,45 +81,89 @@ typedef int CMPFUNC (const void *a, const void *b);
 {  \
 	if (cmp(array, array + 1) > 0)  \
 	{  \
+		swap = array[0]; array[0] = array[1]; array[1] = swap;  \
+	}  \
+	if (cmp(array + 2, array + 3) > 0)  \
+	{  \
+		swap = array[2]; array[2] = array[3]; array[3] = swap;  \
+	}  \
+	if (cmp(array + 1, array + 2) > 0)  \
+	{  \
 		if (cmp(array, array + 2) <= 0)  \
 		{  \
-			swap = array[0]; array[0] = array[1]; array[1] = swap;  \
+			if (cmp(array + 1, array + 3) <= 0)  \
+			{  \
+				swap = array[1]; array[1] = array[2]; array[2] = swap;  \
+			}  \
+			else  \
+			{  \
+				swap = array[1]; array[1] = array[2]; array[2] = array[3]; array[3] = swap;  \
+			}  \
 		}  \
-		else if (cmp(array + 1, array + 2) > 0)  \
+		else if (cmp(array, array + 3) > 0)  \
 		{  \
+			swap = array[1]; array[1] = array[3]; array[3] = swap;  \
 			swap = array[0]; array[0] = array[2]; array[2] = swap;  \
 		}  \
-		else  \
+		else if (cmp(array + 1, array + 3) <= 0)  \
 		{  \
-			swap = array[0]; array[0] = array[1]; array[1] = array[2]; array[2] = swap;  \
-		}  \
-	}  \
-	else if (cmp(array + 1, array + 2) > 0)  \
-	{  \
-		if (cmp(array, array + 2) > 0)  \
-		{  \
-			swap = array[2]; array[2] = array[1]; array[1] = array[0]; array[0] = swap;  \
-		}  \
-		else   \
-		{  \
-			swap = array[2]; array[2] = array[1]; array[1] = swap;  \
-		}  \
-	}  \
-	if (cmp(array + 1, array + 3) > 0)  \
-	{  \
-		if (cmp(array, array + 3) > 0)  \
-		{  \
-			swap = array[3]; array[3] = array[2]; array[2] = array[1]; array[1] = array[0]; array[0] = swap;  \
+			swap = array[1]; array[1] = array[0]; array[0] = array[2]; array[2] = swap;  \
 		}  \
 		else  \
 		{  \
-			swap = array[3]; array[3] = array[2]; array[2] = array[1]; array[1] = swap;  \
+			swap = array[1]; array[1] = array[0]; array[0] = array[2]; array[2] = array[3]; array[3] = swap;  \
 		}  \
 	}  \
-	else if (cmp(array + 2, array + 3) > 0)  \
-	{  \
-		swap = array[3]; array[3] = array[2]; array[2] = swap;  \
-	}  \
+}
+
+#define tail_swap_eight(array, pta, ptt, end, key, cmp) \
+{ \
+	pta = end++; \
+	ptt = pta--; \
+ \
+	if (cmp(pta, ptt) > 0) \
+	{ \
+		key = *ptt; \
+ \
+		if (cmp(pta - 3, &key) > 0) \
+		{ \
+			*ptt-- = *pta--; *ptt-- = *pta--; *ptt-- = *pta--; *ptt-- = *pta--; \
+		} \
+		if (pta >= array + 1 && cmp(pta - 1, &key) > 0) \
+		{ \
+			*ptt-- = *pta--; *ptt-- = *pta--; \
+		} \
+		if (pta >= array && cmp(pta, &key) > 0) \
+		{ \
+			*ptt-- = *pta; \
+		} \
+		*ptt = key; \
+	} \
+}
+
+#define swap_five(array, pta, ptt, end, key, cmp) \
+{ \
+	swap_four(array, key); \
+	end = array + 4; \
+	tail_swap_eight(array, pta, ptt, end, key, cmp); \
+}
+
+#define swap_six(array, pta, ptt, end, key, cmp) \
+{ \
+	swap_five(array, pta, ptt, end, key, cmp); \
+	tail_swap_eight(array, pta, ptt, end, key, cmp); \
+}
+
+#define swap_seven(array, pta, ptt, end, key, cmp) \
+{ \
+	swap_six(array, pta, ptt, end, key, cmp); \
+	tail_swap_eight(array, pta, ptt, end, key, cmp); \
+}
+
+#define swap_eight(array, pta, ptt, end, key, cmp) \
+{ \
+	swap_seven(array, pta, ptt, end, key, cmp); \
+	tail_swap_eight(array, pta, ptt, end, key, cmp); \
 }
 
 //////////////////////////////////////////////////////////
@@ -249,22 +293,22 @@ void quadsort(void *array, size_t nmemb, size_t size, CMPFUNC *cmp)
 	switch (size)
 	{
 		case sizeof(char):
-			return quadsort8(array, nmemb, size, cmp);
+			return quadsort8(array, nmemb, cmp);
 
 		case sizeof(short):
-			return quadsort16(array, nmemb, size, cmp);
+			return quadsort16(array, nmemb, cmp);
 
 		case sizeof(int):
-			return quadsort32(array, nmemb, size, cmp);
+			return quadsort32(array, nmemb, cmp);
 
 		case sizeof(long long):
-			return quadsort64(array, nmemb, size, cmp);
+			return quadsort64(array, nmemb, cmp);
 
 		case sizeof(long double):
-			return quadsort128(array, nmemb, size, cmp);
+			return quadsort128(array, nmemb, cmp);
 
 		default:
-			return assert(size == sizeof(int) || size == sizeof(long long) || size == sizeof(long double));
+			return assert(size == sizeof(char) || size == sizeof(short) || size == sizeof(int) || size == sizeof(long long) || size == sizeof(long double));
 	}
 }
 
