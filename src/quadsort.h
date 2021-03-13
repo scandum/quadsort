@@ -129,10 +129,12 @@ typedef int CMPFUNC (const void *a, const void *b);
 		{ \
 			*ptt-- = *pta--; *ptt-- = *pta--; *ptt-- = *pta--; *ptt-- = *pta--; \
 		} \
+ \
 		if (pta >= array + 1 && cmp(pta - 1, &key) > 0) \
 		{ \
 			*ptt-- = *pta--; *ptt-- = *pta--; \
 		} \
+ \
 		if (pta >= array && cmp(pta, &key) > 0) \
 		{ \
 			*ptt-- = *pta; \
