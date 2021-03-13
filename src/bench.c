@@ -805,7 +805,7 @@ int main(int argc, char **argv)
 
 	small_range_test:
 
-	mem = 32768 * 4;
+	mem = 32768 * 32;
 
 	a_array = (int *) malloc(max * sizeof(int));
 	r_array = (int *) malloc(mem * sizeof(int));
@@ -823,7 +823,7 @@ int main(int argc, char **argv)
 		goto large_range_test;
 	}
 
-	for (lst = 1, samples = 32768, repetitions = 4 ; repetitions <= 4096 ; repetitions *= 2, samples /= 2)
+	for (lst = 1, samples = 32768*8, repetitions = 4 ; repetitions <= samples && repetitions <= 4096 ; repetitions *= 2, samples /= 2)
 	{
 		if (max >= repetitions)
 		{
