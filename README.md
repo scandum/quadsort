@@ -393,8 +393,8 @@ Colors are used to differentiate between skip, swap, merge, and copy operations.
 
 ![quadsort benchmark](/images/benchmark.gif)
 
-Benchmark: quadsort vs std::stable_sort vs timsort vs pdqsort vs wolfsort
--------------------------------------------------------------------------
+Benchmark: quadsort vs std::stable_sort vs timsort
+--------------------------------------------------
 The following benchmark was on WSL 2 gcc version 7.5.0 (Ubuntu 7.5.0-3ubuntu1~18.04)
 using the [wolfsort benchmark](https://github.com/scandum/wolfsort).
 The source code was compiled using `g++ -O3 -w -fpermissive bench.c`. Each test was ran 100 times
