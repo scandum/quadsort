@@ -124,17 +124,16 @@ typedef int CMPFUNC (const void *a, const void *b);
 	if (cmp(pta, ptt) > 0) \
 	{ \
 		key = *ptt; \
+		*ptt-- = *pta--; \
  \
-		if (cmp(pta - 3, &key) > 0) \
+		if (cmp(pta - 2, &key) > 0) \
 		{ \
-			*ptt-- = *pta--; *ptt-- = *pta--; *ptt-- = *pta--; *ptt-- = *pta--; \
+			*ptt-- = *pta--; *ptt-- = *pta--; *ptt-- = *pta--; \
 		} \
- \
-		if (pta >= array + 1 && cmp(pta - 1, &key) > 0) \
+		if (pta > array && cmp(pta - 1, &key) > 0) \
 		{ \
 			*ptt-- = *pta--; *ptt-- = *pta--; \
 		} \
- \
 		if (pta >= array && cmp(pta, &key) > 0) \
 		{ \
 			*ptt-- = *pta; \
@@ -145,9 +144,26 @@ typedef int CMPFUNC (const void *a, const void *b);
 
 #define swap_five(array, pta, ptt, end, key, cmp) \
 { \
-	swap_four(array, key); \
 	end = array + 4; \
-	tail_swap_eight(array, pta, ptt, end, key, cmp); \
+ \
+	pta = end++; \
+	ptt = pta--; \
+ \
+	if (cmp(pta, ptt) > 0) \
+	{ \
+		key = *ptt; \
+		*ptt-- = *pta--; \
+ \
+		if (pta > array && cmp(pta - 1, &key) > 0) \
+		{ \
+			*ptt-- = *pta--; *ptt-- = *pta--; \
+		} \
+		if (pta >= array && cmp(pta, &key) > 0) \
+		{ \
+			*ptt-- = *pta; \
+		} \
+		*ptt = key; \
+	} \
 }
 
 #define swap_six(array, pta, ptt, end, key, cmp) \
