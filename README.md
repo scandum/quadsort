@@ -618,6 +618,8 @@ halves each time the number of items doubles.
 
 <details><summary><b>data table</b></summary>
 
+|      Name |    Items | Type |     Best |  Average |  Compares | Samples |     Distribution |
+| --------- | -------- | ---- | -------- | -------- | --------- | ------- | ---------------- |
 |     qsort |        4 |   32 | 0.012951 | 0.015632 |         5 |     100 |         random 4 |
 |  quadsort |        4 |   32 | 0.005826 | 0.007321 |         5 |     100 |         random 4 |
 |           |          |      |          |          |           |         |                  |
