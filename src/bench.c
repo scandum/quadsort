@@ -185,7 +185,7 @@ void test_sort(void *array, void *unsorted, void *valid, int minimum, int maximu
 
 			for (int rep = repetitions - 1 ; rep >= 0 ; rep--)
 			{
-				memcpy(array, unsorted + maximum * rep, max * size);
+				memcpy(array, (char *) unsorted + maximum * rep * size, max * size);
 
 				comparisons = 0;
 
@@ -560,7 +560,7 @@ int main(int argc, char **argv)
 
 	for (cnt = 0 ; cnt < mem ; cnt++)
 	{
-		dr_array[cnt] = rand() + 1.0 / (long double) (rand() + (rand() << 30LL));
+		dr_array[cnt] = rand() + 1.0 / (long double) (1 + rand());
 	}
 
 	memcpy(dv_array, dr_array, max * sizeof(long double));
@@ -798,10 +798,7 @@ int main(int argc, char **argv)
 		test_sort(a_array, r_array, v_array, max, max, samples, repetitions, qsort, sorts[cnt], dist, sizeof(int), cmp_stable);
 	}
 
-	if (repetitions > 0)
-	{
-		goto end;
-	}
+	goto end;
 
 	small_range_test:
 
@@ -861,7 +858,6 @@ int main(int argc, char **argv)
 	}
 
 	end:
-
 
 	free(a_array);
 	free(r_array);
