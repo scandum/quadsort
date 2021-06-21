@@ -236,10 +236,12 @@ blocks of 16 elements. While it lacks adaptive properties it can be fully
 unrolled. Performance wise it's slightly faster than insertion sort.
 
 It takes advantage of the fact that if you have two n length arrays, you can
-perform n merge operations on the start of each array, and n merge operations
-on the end of each array.
+fully merge the two arrays by performing n merge operations on the start of
+each array, and n merge operations on the end of each array. The arrays must
+be of exactly equal length.
 
-The two arrays must be of equal length and the merge requires auxiliary memory.
+To sort 4 blocks of 4 elements into a sorted block of 16 elements takes 32
+comparisons, 32 moves, and requires 16 elements of auxiliary memory.
 
 Quad merge
 ----------
