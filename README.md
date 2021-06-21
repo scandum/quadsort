@@ -19,8 +19,8 @@ following.
         val[1] = swap[0];
     }
 ```
-Instead the quad swap sorts four variables using four swap variables.
-During the first stage the four variables are partially sorted in the four
+Instead the quad swap sorts four variables at once. During the first
+stage the four variables are partially sorted in the four
 swap variables, in the second stage they are fully sorted back to the
 original four variables.
 ```javascript
@@ -229,14 +229,25 @@ perform a simple check to see if the entire array was in reverse order,
 if so, the sort is finished. If not, we know the array has been turned
 into a series of ordered blocks of 4 elements.
 
+Parity merge
+------------
+The parity merge is a boundless merge used to turn blocks of 4 elements into
+blocks of 16 elements. While it lacks adaptive properties it can be fully
+unrolled. Performance wise it's slightly faster than insertion sort.
+
+It takes advantage of the fact that if you have two n length arrays, you can
+perform n merge operations on the start of each array, and n merge operations
+on the end of each array.
+
+The two arrays must be of equal length and the merge requires auxiliary memory.
+
 Quad merge
 ----------
+In the first stage of quadsort the quad swap and parity merge are used to
+pre-sort the array into sorted 16-element blocks as described above.
 
-In the first stage of quadsort the quad swap is used to pre-sort the
-array into sorted 4-element blocks as described above.
-
-The second stage uses an approach similar to the quad swap, but it's
-sorting blocks of 4, 16, 64, or more elements.
+The second stage uses an approach similar to the parity merge, but it's
+sorting blocks of 16, 64, 256, or more elements.
 
 The quad merge can be visualized as following:
 ```
