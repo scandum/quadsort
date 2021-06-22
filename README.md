@@ -137,7 +137,10 @@ The chain swap is easiest explained with an example. Traditionally many sorts wo
 ```c
 int swap_two(int a, int b, int swap)
 {
-    swap = a; a = b; b = swap;
+    if (a > b)
+    {
+        swap = a; a = b; b = swap;
+    }
 }
 
 int swap_three(int array[], swap)
