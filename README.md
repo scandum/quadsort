@@ -19,8 +19,8 @@ following.
         val[1] = swap[0];
     }
 ```
-Instead the quad swap sorts four variables using four swap variables.
-During the first stage the four variables are partially sorted in the four
+Instead the quad swap sorts four variables at once. During the first
+stage the four variables are partially sorted in the four
 swap variables, in the second stage they are fully sorted back to the
 original four variables.
 ```javascript
@@ -137,7 +137,10 @@ The chain swap is easiest explained with an example. Traditionally many sorts wo
 ```c
 int swap_two(int a, int b, int swap)
 {
-    swap = a; a = b; b = swap;
+    if (a > b)
+    {
+        swap = a; a = b; b = swap;
+    }
 }
 
 int swap_three(int array[], swap)
@@ -229,14 +232,27 @@ perform a simple check to see if the entire array was in reverse order,
 if so, the sort is finished. If not, we know the array has been turned
 into a series of ordered blocks of 4 elements.
 
+Parity merge
+------------
+The parity merge is a boundless merge used to turn blocks of 4 elements into
+blocks of 16 elements. While it lacks adaptive properties it can be fully
+unrolled. Performance wise it's slightly faster than insertion sort.
+
+It takes advantage of the fact that if you have two n length arrays, you can
+fully merge the two arrays by performing n merge operations on the start of
+each array, and n merge operations on the end of each array. The arrays must
+be of exactly equal length.
+
+To sort 4 blocks of 4 elements into a sorted block of 16 elements takes 32
+comparisons, 32 moves, and requires 16 elements of auxiliary memory.
+
 Quad merge
 ----------
+In the first stage of quadsort the quad swap and parity merge are used to
+pre-sort the array into sorted 16-element blocks as described above.
 
-In the first stage of quadsort the quad swap is used to pre-sort the
-array into sorted 4-element blocks as described above.
-
-The second stage uses an approach similar to the quad swap, but it's
-sorting blocks of 4, 16, 64, or more elements.
+The second stage uses an approach similar to the parity merge, but it's
+sorting blocks of 16, 64, 256, or more elements.
 
 The quad merge can be visualized as following:
 ```
@@ -371,6 +387,8 @@ Variants
 --------
 - [gridsort](https://github.com/scandum/gridsort) is a hybrid cubesort / quadsort with improved performance on random data. It is currently the fastest stable comparison sort for random data.
 
+- [blitsort](https://github.com/scandum/blitsort) is a quadsort based rotate merge sort. It is currently the fastest O(1) memory stable sort.
+
 - [twinsort](https://github.com/scandum/twinsort) is a simplified quadsort with a
 much smaller code size. Twinsort might be of use to people who want to port or understand quadsort; it does not use
 pointers or gotos.
@@ -378,8 +396,6 @@ pointers or gotos.
 - [wolfsort](https://github.com/scandum/wolfsort) is a hybrid radixsort / quadsort with improved performance on random data. It's mostly a proof of concept that only work on unsigned 32 and 64 bit integers.
 
 - [fluxsort](https://github.com/scandum/wolfsort) is a hybrid partition / quadsort with improved performance on random data. It doesn't have its own project page and is just tossed in with the other sorts in the wolfsort benchmark. It has performance similar to gridsort.
-
-- [octosort](https://github.com/scandum/octosort) is based on quadsort and [WikiSort](https://github.com/BonzaiThePenguin/WikiSort). It operates with O(1) memory with performance similar but slower than quadsort.
 
 Visualization
 -------------
