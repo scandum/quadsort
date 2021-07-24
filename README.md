@@ -385,17 +385,17 @@ larger random distributions. It will beat hybrid quicksorts on ordered distribut
 
 Variants
 --------
-- [gridsort](https://github.com/scandum/gridsort) is a hybrid cubesort / quadsort with improved performance on random data. It is currently the fastest stable comparison sort for random data.
-
 - [blitsort](https://github.com/scandum/blitsort) is a quadsort based rotate merge sort. It is currently the fastest O(1) memory stable sort.
+
+- [fluxsort](https://github.com/scandum/fluxsort) is a hybrid partition / quadsort with improved performance on random data. It is currently the fastest stable comparison sort for random data.
+
+- [gridsort](https://github.com/scandum/gridsort) is a hybrid cubesort / quadsort with improved performance on random data. 
 
 - [twinsort](https://github.com/scandum/twinsort) is a simplified quadsort with a
 much smaller code size. Twinsort might be of use to people who want to port or understand quadsort; it does not use
 pointers or gotos.
 
 - [wolfsort](https://github.com/scandum/wolfsort) is a hybrid radixsort / quadsort with improved performance on random data. It's mostly a proof of concept that only work on unsigned 32 and 64 bit integers.
-
-- [fluxsort](https://github.com/scandum/wolfsort) is a hybrid partition / quadsort with improved performance on random data. It doesn't have its own project page and is just tossed in with the other sorts in the wolfsort benchmark. It has performance similar to gridsort.
 
 Visualization
 -------------
