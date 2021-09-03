@@ -348,6 +348,12 @@ space of quadsort to **n / 2** and that it has been optimized to merge arrays
 of different lengths. It also simplifies the quad merge routine which only
 needs to work on arrays of equal length.
 
+rotate merge
+------------
+By using rotations the swap space of quadsort is reduced further from **n / 2**
+to **n / 4**. Rotations can be performed with minimal performance loss by using
+[monobound binary searches](https://github.com/scandum/binary_search) and [trinity rotations](https://github.com/scandum/rotate).
+
 Big O
 -----
 ```cobol
@@ -373,15 +379,13 @@ Interface
 ---------
 Quadsort uses the same interface as qsort, which is described in [man qsort](https://man7.org/linux/man-pages/man3/qsort.3p.html).
 
-Cache
------
-Because quadsort uses n / 2 swap memory and does not partition its cache utilization
-is not as ideal as quicksort. Based on my benchmarks it appears that quadsort is faster than
-in-place sorts for array sizes that do not exhaust the L1 cache, which can be up
-to 64KB on modern processors.
+Memory
+------
+By default quadsort uses n / 4 swap memory. If memory allocation fails quadsort will switch to sorting in-place through rotations.
 
-While quadsort is faster than quicksort it will be slower than a well written hybrid quicksort on
-larger random distributions. It will beat hybrid quicksorts on ordered distributions.
+Performance
+-----------
+Quadsort is faster than quicksort, with the exception of branchless quicksorts, where quadsort will be slower on mostly random data and faster on mostly ordered data.
 
 Variants
 --------
