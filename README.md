@@ -418,7 +418,7 @@ Benchmark: quadsort vs std::stable_sort vs timsort
 The following benchmark was on WSL 2 gcc version 7.5.0 (Ubuntu 7.5.0-3ubuntu1~18.04)
 using the [wolfsort benchmark](https://github.com/scandum/wolfsort).
 The source code was compiled using `g++ -O3 -w -fpermissive bench.c`. Each test was ran 100 times
-and only the best run is reported. Stablesort is g++'s std:stablesort function.
+on 100,000 elements and only the best run is reported. Stablesort is g++'s std:stablesort function.
 
 ![Graph](/images/graph1.png)
 
@@ -426,53 +426,45 @@ and only the best run is reported. Stablesort is g++'s std:stablesort function.
 
 |      Name |    Items | Type |     Best |  Average |     Loops | Samples |     Distribution |
 | --------- | -------- | ---- | -------- | -------- | --------- | ------- | ---------------- |
-|stablesort |   100000 |   32 | 0.006063 | 0.006094 |         1 |     100 |     random order |
-|  quadsort |   100000 |   32 | 0.005168 | 0.005202 |         1 |     100 |     random order |
-|   timsort |   100000 |   32 | 0.007630 | 0.007679 |         1 |     100 |     random order |
+|stablesort |   100000 |   32 | 0.006081 | 0.006114 |         1 |     100 |     random order |
+|  quadsort |   100000 |   32 | 0.002855 | 0.002869 |         1 |     100 |     random order |
+|   timsort |   100000 |   32 | 0.007582 | 0.007609 |         1 |     100 |     random order |
 |           |          |      |          |          |           |         |                  |
-|stablesort |   100000 |   32 | 0.002987 | 0.003020 |         1 |     100 |     random % 100 |
-|  quadsort |   100000 |   32 | 0.002239 | 0.002324 |         1 |     100 |     random % 100 |
-|   timsort |   100000 |   32 | 0.004601 | 0.004628 |         1 |     100 |     random % 100 |
+|stablesort |   100000 |   32 | 0.003050 | 0.003086 |         1 |     100 |     random % 100 |
+|  quadsort |   100000 |   32 | 0.002353 | 0.002362 |         1 |     100 |     random % 100 |
+|   timsort |   100000 |   32 | 0.004603 | 0.004634 |         1 |     100 |     random % 100 |
 |           |          |      |          |          |           |         |                  |
-|stablesort |   100000 |   32 | 0.004940 | 0.004964 |         1 |     100 |    random % 1000 |
-|  quadsort |   100000 |   32 | 0.004085 | 0.004120 |         1 |     100 |    random % 1000 |
-|   timsort |   100000 |   32 | 0.006563 | 0.006596 |         1 |     100 |    random % 1000 |
+|stablesort |   100000 |   32 | 0.000786 | 0.000791 |         1 |     100 |        ascending |
+|  quadsort |   100000 |   32 | 0.000065 | 0.000066 |         1 |     100 |        ascending |
+|   timsort |   100000 |   32 | 0.000045 | 0.000045 |         1 |     100 |        ascending |
 |           |          |      |          |          |           |         |                  |
-|stablesort |   100000 |   32 | 0.003848 | 0.003960 |         1 |     100 |   square % 10000 |
-|  quadsort |   100000 |   32 | 0.003145 | 0.003273 |         1 |     100 |   square % 10000 |
-|   timsort |   100000 |   32 | 0.005205 | 0.005279 |         1 |     100 |   square % 10000 |
+|stablesort |   100000 |   32 | 0.001468 | 0.001534 |         1 |     100 |    ascending saw |
+|  quadsort |   100000 |   32 | 0.000893 | 0.000899 |         1 |     100 |    ascending saw |
+|   timsort |   100000 |   32 | 0.000842 | 0.000849 |         1 |     100 |    ascending saw |
 |           |          |      |          |          |           |         |                  |
-|stablesort |   100000 |   32 | 0.000658 | 0.000689 |         1 |     100 |        ascending |
-|  quadsort |   100000 |   32 | 0.000057 | 0.000060 |         1 |     100 |        ascending |
-|   timsort |   100000 |   32 | 0.000044 | 0.000044 |         1 |     100 |        ascending |
+|stablesort |   100000 |   32 | 0.000868 | 0.000906 |         1 |     100 |       pipe organ |
+|  quadsort |   100000 |   32 | 0.000229 | 0.000231 |         1 |     100 |       pipe organ |
+|   timsort |   100000 |   32 | 0.000169 | 0.000171 |         1 |     100 |       pipe organ |
 |           |          |      |          |          |           |         |                  |
-|stablesort |   100000 |   32 | 0.001351 | 0.001422 |         1 |     100 |    ascending saw |
-|  quadsort |   100000 |   32 | 0.000823 | 0.000831 |         1 |     100 |    ascending saw |
-|   timsort |   100000 |   32 | 0.000843 | 0.000849 |         1 |     100 |    ascending saw |
+|stablesort |   100000 |   32 | 0.000899 | 0.000911 |         1 |     100 |       descending |
+|  quadsort |   100000 |   32 | 0.000053 | 0.000054 |         1 |     100 |       descending |
+|   timsort |   100000 |   32 | 0.000088 | 0.000092 |         1 |     100 |       descending |
 |           |          |      |          |          |           |         |                  |
-|stablesort |   100000 |   32 | 0.000804 | 0.000837 |         1 |     100 |       pipe organ |
-|  quadsort |   100000 |   32 | 0.000173 | 0.000174 |         1 |     100 |       pipe organ |
-|   timsort |   100000 |   32 | 0.000175 | 0.000175 |         1 |     100 |       pipe organ |
+|stablesort |   100000 |   32 | 0.001001 | 0.001027 |         1 |     100 |   descending saw |
+|  quadsort |   100000 |   32 | 0.000414 | 0.000417 |         1 |     100 |   descending saw |
+|   timsort |   100000 |   32 | 0.000301 | 0.000304 |         1 |     100 |   descending saw |
 |           |          |      |          |          |           |         |                  |
-|stablesort |   100000 |   32 | 0.000897 | 0.000909 |         1 |     100 |       descending |
-|  quadsort |   100000 |   32 | 0.000050 | 0.000050 |         1 |     100 |       descending |
-|   timsort |   100000 |   32 | 0.000101 | 0.000102 |         1 |     100 |       descending |
+|stablesort |   100000 |   32 | 0.002147 | 0.002211 |         1 |     100 |      random tail |
+|  quadsort |   100000 |   32 | 0.000898 | 0.000906 |         1 |     100 |      random tail |
+|   timsort |   100000 |   32 | 0.001996 | 0.002015 |         1 |     100 |      random tail |
 |           |          |      |          |          |           |         |                  |
-|stablesort |   100000 |   32 | 0.001046 | 0.001069 |         1 |     100 |   descending saw |
-|  quadsort |   100000 |   32 | 0.000343 | 0.000346 |         1 |     100 |   descending saw |
-|   timsort |   100000 |   32 | 0.000470 | 0.000473 |         1 |     100 |   descending saw |
+|stablesort |   100000 |   32 | 0.003606 | 0.003638 |         1 |     100 |      random half |
+|  quadsort |   100000 |   32 | 0.001656 | 0.001662 |         1 |     100 |      random half |
+|   timsort |   100000 |   32 | 0.004015 | 0.004031 |         1 |     100 |      random half |
 |           |          |      |          |          |           |         |                  |
-|stablesort |   100000 |   32 | 0.002061 | 0.002124 |         1 |     100 |      random tail |
-|  quadsort |   100000 |   32 | 0.001398 | 0.001410 |         1 |     100 |      random tail |
-|   timsort |   100000 |   32 | 0.002002 | 0.002048 |         1 |     100 |      random tail |
-|           |          |      |          |          |           |         |                  |
-|stablesort |   100000 |   32 | 0.003539 | 0.003587 |         1 |     100 |      random half |
-|  quadsort |   100000 |   32 | 0.002764 | 0.002779 |         1 |     100 |      random half |
-|   timsort |   100000 |   32 | 0.004030 | 0.004059 |         1 |     100 |      random half |
-|           |          |      |          |          |           |         |                  |
-|stablesort |   100000 |   32 | 0.000972 | 0.001000 |         1 |     100 |  ascending tiles |
-|  quadsort |   100000 |   32 | 0.000873 | 0.000924 |         1 |     100 |  ascending tiles |
-|   timsort |   100000 |   32 | 0.000835 | 0.000955 |         1 |     100 |  ascending tiles |
+|stablesort |   100000 |   32 | 0.001105 | 0.001127 |         1 |     100 |  ascending tiles |
+|  quadsort |   100000 |   32 | 0.000920 | 0.000929 |         1 |     100 |  ascending tiles |
+|   timsort |   100000 |   32 | 0.000943 | 0.000979 |         1 |     100 |  ascending tiles |
 
 </details>
 
@@ -488,37 +480,41 @@ ranging from 16 to 262144.
 
 |      Name |    Items | Type |     Best |  Average |  Compares | Samples |     Distribution |
 | --------- | -------- | ---- | -------- | -------- | --------- | ------- | ---------------- |
-|stablesort |       16 |   32 | 0.005139 | 0.005184 |     32768 |     100 |        random 16 |
-|  quadsort |       16 |   32 | 0.002644 | 0.002673 |     32768 |     100 |        random 16 |
-|   timsort |       16 |   32 | 0.004774 | 0.004951 |     32768 |     100 |        random 16 |
+|stablesort |        8 |   32 | 0.006216 | 0.006264 |     65536 |     100 |         random 8 |
+|  quadsort |        8 |   32 | 0.002582 | 0.002616 |     65536 |     100 |         random 8 |
+|   timsort |        8 |   32 | 0.006350 | 0.006527 |     65536 |     100 |         random 8 |
 |           |          |      |          |          |           |         |                  |
-|stablesort |       64 |   32 | 0.006731 | 0.007089 |      8192 |     100 |        random 64 |
-|  quadsort |       64 |   32 | 0.004040 | 0.004069 |      8192 |     100 |        random 64 |
-|   timsort |       64 |   32 | 0.008642 | 0.008754 |      8192 |     100 |        random 64 |
+|stablesort |       32 |   32 | 0.009274 | 0.009420 |     16384 |     100 |        random 32 |
+|  quadsort |       32 |   32 | 0.004139 | 0.004197 |     16384 |     100 |        random 32 |
+|   timsort |       32 |   32 | 0.013048 | 0.013224 |     16384 |     100 |        random 32 |
 |           |          |      |          |          |           |         |                  |
-|stablesort |      256 |   32 | 0.008643 | 0.008758 |      2048 |     100 |       random 256 |
-|  quadsort |      256 |   32 | 0.006263 | 0.006306 |      2048 |     100 |       random 256 |
-|   timsort |      256 |   32 | 0.011307 | 0.011409 |      2048 |     100 |       random 256 |
+|stablesort |      128 |   32 | 0.012983 | 0.013039 |      4096 |     100 |       random 128 |
+|  quadsort |      128 |   32 | 0.005409 | 0.005488 |      4096 |     100 |       random 128 |
+|   timsort |      128 |   32 | 0.019890 | 0.020001 |      4096 |     100 |       random 128 |
 |           |          |      |          |          |           |         |                  |
-|stablesort |     1024 |   32 | 0.010748 | 0.011014 |       512 |     100 |      random 1024 |
-|  quadsort |     1024 |   32 | 0.007767 | 0.007821 |       512 |     100 |      random 1024 |
-|   timsort |     1024 |   32 | 0.013527 | 0.013628 |       512 |     100 |      random 1024 |
+|stablesort |      512 |   32 | 0.016939 | 0.017043 |      1024 |     100 |       random 512 |
+|  quadsort |      512 |   32 | 0.006991 | 0.007075 |      1024 |     100 |       random 512 |
+|   timsort |      512 |   32 | 0.024692 | 0.024837 |      1024 |     100 |       random 512 |
 |           |          |      |          |          |           |         |                  |
-|stablesort |     4096 |   32 | 0.012671 | 0.012947 |       128 |     100 |      random 4096 |
-|  quadsort |     4096 |   32 | 0.009483 | 0.009527 |       128 |     100 |      random 4096 |
-|   timsort |     4096 |   32 | 0.015660 | 0.015753 |       128 |     100 |      random 4096 |
+|stablesort |     2048 |   32 | 0.020756 | 0.020830 |       256 |     100 |      random 2048 |
+|  quadsort |     2048 |   32 | 0.008530 | 0.008581 |       256 |     100 |      random 2048 |
+|   timsort |     2048 |   32 | 0.029035 | 0.029147 |       256 |     100 |      random 2048 |
 |           |          |      |          |          |           |         |                  |
-|stablesort |    16384 |   32 | 0.014823 | 0.015470 |        32 |     100 |     random 16384 |
-|  quadsort |    16384 |   32 | 0.011357 | 0.011512 |        32 |     100 |     random 16384 |
-|   timsort |    16384 |   32 | 0.017775 | 0.018266 |        32 |     100 |     random 16384 |
+|stablesort |     8192 |   32 | 0.024663 | 0.024730 |        64 |     100 |      random 8192 |
+|  quadsort |     8192 |   32 | 0.010177 | 0.010233 |        64 |     100 |      random 8192 |
+|   timsort |     8192 |   32 | 0.033169 | 0.033263 |        64 |     100 |      random 8192 |
 |           |          |      |          |          |           |         |                  |
-|stablesort |    65536 |   32 | 0.017074 | 0.017690 |         8 |     100 |     random 65536 |
-|  quadsort |    65536 |   32 | 0.013263 | 0.013466 |         8 |     100 |     random 65536 |
-|   timsort |    65536 |   32 | 0.019873 | 0.020335 |         8 |     100 |     random 65536 |
+|stablesort |    32768 |   32 | 0.028623 | 0.028716 |        16 |     100 |     random 32768 |
+|  quadsort |    32768 |   32 | 0.011846 | 0.011891 |        16 |     100 |     random 32768 |
+|   timsort |    32768 |   32 | 0.037333 | 0.037443 |        16 |     100 |     random 32768 |
 |           |          |      |          |          |           |         |                  |
-|stablesort |   262144 |   32 | 0.019233 | 0.019449 |         2 |     100 |    random 262144 |
-|  quadsort |   262144 |   32 | 0.015135 | 0.015246 |         2 |     100 |    random 262144 |
-|   timsort |   262144 |   32 | 0.022009 | 0.022701 |         2 |     100 |    random 262144 |
+|stablesort |   131072 |   32 | 0.032613 | 0.032729 |         4 |     100 |    random 131072 |
+|  quadsort |   131072 |   32 | 0.013536 | 0.013589 |         4 |     100 |    random 131072 |
+|   timsort |   131072 |   32 | 0.041491 | 0.041605 |         4 |     100 |    random 131072 |
+|           |          |      |          |          |           |         |                  |
+|stablesort |   524288 |   32 | 0.036639 | 0.036762 |         1 |     100 |    random 524288 |
+|  quadsort |   524288 |   32 | 0.015221 | 0.015301 |         1 |     100 |    random 524288 |
+|   timsort |   524288 |   32 | 0.045715 | 0.045853 |         1 |     100 |    random 524288 |
 
 </details>
 
@@ -535,42 +531,47 @@ and only the best run is reported. It's generated by running the benchmark using
 
 |      Name |    Items | Type |     Best |  Average |  Compares | Samples |     Distribution |
 | --------- | -------- | ---- | -------- | -------- | --------- | ------- | ---------------- |
-|     qsort |  1000000 |  128 | 0.237263 | 0.242199 |  18674976 |      10 |     random order |
-|  quadsort |  1000000 |  128 | 0.168458 | 0.168711 |  19260870 |      10 |     random order |
+|     qsort |  1000000 |   64 | 0.237162 | 0.238677 |  18673752 |      10 |    random string |
+|  quadsort |  1000000 |   64 | 0.192407 | 0.194719 |  19538735 |      10 |    random string |
 
 |      Name |    Items | Type |     Best |  Average |  Compares | Samples |     Distribution |
 | --------- | -------- | ---- | -------- | -------- | --------- | ------- | ---------------- |
-|     qsort |  1000000 |   64 | 0.112857 | 0.114569 |  18674640 |      10 |     random order |
-|  quadsort |  1000000 |   64 | 0.096308 | 0.096631 |  19261015 |      10 |     random order |
+|     qsort |  1000000 |  128 | 0.238091 | 0.242881 |  18674976 |      10 |     random order |
+|  quadsort |  1000000 |  128 | 0.153232 | 0.153598 |  19537512 |      10 |     random order |
 
 |      Name |    Items | Type |     Best |  Average |  Compares | Samples |     Distribution |
 | --------- | -------- | ---- | -------- | -------- | --------- | ------- | ---------------- |
-|     qsort |  1000000 |   32 | 0.101947 | 0.103925 |  18674792 |      10 |     random order |
-|  quadsort |  1000000 |   32 | 0.084251 | 0.084521 |  19261638 |      10 |     random order |
+|     qsort |  1000000 |   64 | 0.112573 | 0.113432 |  18674640 |      10 |     random order |
+|  quadsort |  1000000 |   64 | 0.055611 | 0.055827 |  19537674 |      10 |     random order |
+
+|      Name |    Items | Type |     Best |  Average |  Compares | Samples |     Distribution |
+| --------- | -------- | ---- | -------- | -------- | --------- | ------- | ---------------- |
+|     qsort |  1000000 |   32 | 0.102495 | 0.103431 |  18674792 |      10 |     random order |
+|  quadsort |  1000000 |   32 | 0.046065 | 0.046385 |  19536519 |      10 |     random order |
 |           |          |      |          |          |           |         |                  |
-|     qsort |  1000000 |   32 | 0.023746 | 0.024488 |   9884992 |      10 |  ascending order |
-|  quadsort |  1000000 |   32 | 0.001928 | 0.001981 |    999999 |      10 |  ascending order |
+|     qsort |  1000000 |   32 | 0.023699 | 0.024186 |   9884992 |      10 |  ascending order |
+|  quadsort |  1000000 |   32 | 0.001930 | 0.001952 |    999999 |      10 |  ascending order |
 |           |          |      |          |          |           |         |                  |
-|     qsort |  1000000 |   32 | 0.031912 | 0.032395 |  10884978 |      10 |    ascending saw |
-|  quadsort |  1000000 |   32 | 0.013704 | 0.013870 |   4279431 |      10 |    ascending saw |
+|     qsort |  1000000 |   32 | 0.031943 | 0.032369 |  10884978 |      10 |    ascending saw |
+|  quadsort |  1000000 |   32 | 0.011989 | 0.012192 |   4067986 |      10 |    ascending saw |
 |           |          |      |          |          |           |         |                  |
-|     qsort |  1000000 |   32 | 0.071231 | 0.072123 |  18618271 |      10 |    generic order |
-|  quadsort |  1000000 |   32 | 0.052140 | 0.052348 |  19179843 |      10 |    generic order |
+|     qsort |  1000000 |   32 | 0.070848 | 0.071297 |  18618271 |      10 |    generic order |
+|  quadsort |  1000000 |   32 | 0.040046 | 0.040308 |  19526121 |      10 |    generic order |
 |           |          |      |          |          |           |         |                  |
-|     qsort |  1000000 |   32 | 0.028399 | 0.028844 |  10066432 |      10 | descending order |
-|  quadsort |  1000000 |   32 | 0.001467 | 0.001491 |    999999 |      10 | descending order |
+|     qsort |  1000000 |   32 | 0.028315 | 0.028653 |  10066432 |      10 | descending order |
+|  quadsort |  1000000 |   32 | 0.001534 | 0.001558 |    999999 |      10 | descending order |
 |           |          |      |          |          |           |         |                  |
-|     qsort |  1000000 |   32 | 0.036018 | 0.036356 |  11066454 |      10 |   descending saw |
-|  quadsort |  1000000 |   32 | 0.018384 | 0.018522 |   7004340 |      10 |   descending saw |
+|     qsort |  1000000 |   32 | 0.035975 | 0.036261 |  11066454 |      10 |   descending saw |
+|  quadsort |  1000000 |   32 | 0.017375 | 0.017585 |   7261994 |      10 |   descending saw |
 |           |          |      |          |          |           |         |                  |
-|     qsort |  1000000 |   32 | 0.044350 | 0.045759 |  12248792 |      10 |      random tail |
-|  quadsort |  1000000 |   32 | 0.023817 | 0.024053 |   6548176 |      10 |      random tail |
+|     qsort |  1000000 |   32 | 0.044251 | 0.044861 |  12248792 |      10 |      random tail |
+|  quadsort |  1000000 |   32 | 0.016244 | 0.016387 |   6918301 |      10 |      random tail |
 |           |          |      |          |          |           |         |                  |
-|     qsort |  1000000 |   32 | 0.064876 | 0.065870 |  14529545 |      10 |      random half |
-|  quadsort |  1000000 |   32 | 0.046070 | 0.046349 |  11209526 |      10 |      random half |
+|     qsort |  1000000 |   32 | 0.064809 | 0.065331 |  14529545 |      10 |      random half |
+|  quadsort |  1000000 |   32 | 0.028955 | 0.029254 |  11248721 |      10 |      random half |
 |           |          |      |          |          |           |         |                  |
-|     qsort |  1000000 |   32 | 0.045845 | 0.047625 |  14656048 |      10 |  ascending tiles |
-|  quadsort |  1000000 |   32 | 0.037940 | 0.038255 |  13530041 |      10 |  ascending tiles |
+|     qsort |  1000000 |   32 | 0.048681 | 0.050011 |  14656048 |      10 |  ascending tiles |
+|  quadsort |  1000000 |   32 | 0.045335 | 0.045865 |  15755690 |      10 |  ascending tiles |
 
 </details>
 
