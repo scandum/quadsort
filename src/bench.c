@@ -151,6 +151,7 @@ void test_sort(void *array, void *unsorted, void *valid, int minimum, int maximu
 	long long *ptla = (long long *) array, *ptlv = valid;
 	long double *ptda = (long double *) array, *ptdv = valid;
 	int *pta = (int *) array, *ptv = (int *) valid, cnt;
+	char **ptsa = (char **) array, **ptsv = (char **) valid;
 
 	if (*name == '*')
 	{
@@ -294,9 +295,9 @@ void test_sort(void *array, void *unsorted, void *valid, int minimum, int maximu
 	{
 		if (cmpf == cmp_str)
 		{
-			if (strcmp((char *) ptla[cnt - 1], (char *) ptla[cnt]) > 0)
+			if (strcmp((char *) ptsa[cnt - 1], (char *) ptsa[cnt]) > 0)
 			{
-				printf("%17s: not properly sorted at index %d. (%s vs %s\n", name, cnt, (char *) ptla[cnt - 1], (char *) ptla[cnt]);
+				printf("%17s: not properly sorted at index %d. (%s vs %s\n", name, cnt, (char *) ptsa[cnt - 1], (char *) ptsa[cnt]);
 				break;
 			}
 		}
@@ -332,7 +333,15 @@ void test_sort(void *array, void *unsorted, void *valid, int minimum, int maximu
 
 	for (cnt = 1 ; cnt < maximum ; cnt++)
 	{
-		if (size == sizeof(int))
+		if (cmpf == cmp_str)
+		{
+			if (strcmp((char *) ptsa[cnt], (char *) ptsv[cnt]))
+			{
+				printf("         validate: array[%d] != valid[%d]. (%s vs %s\n", cnt, cnt, (char *) ptsa[cnt], (char *) ptsv[cnt]);
+				break;
+			}
+		}
+		else if (size == sizeof(int))
 		{
 			if (pta[cnt] != ptv[cnt])
 			{
