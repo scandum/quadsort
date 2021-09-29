@@ -413,15 +413,24 @@ pointers or gotos.
 
 Visualization
 -------------
+In the visualization below nine tests are performed on 256 elements.
 
-In the visualization below four tests are performed. The first test is on a random
-distribution, the second on an ascending distribution, the third on a descending
-distribution, and the fourth on an ascending distribution with a random tail.
+1. Random order
+2. Ascending order
+3. Ascending Saw
+4. Generic random order
+5. Descending order
+6. Descending Saw
+7. Random tail
+8. Random half
+9. Ascending tiles.
 
 The upper half shows the swap memory and the bottom half shows the main memory.
-Colors are used to differentiate between skip, swap, merge, and copy operations.
+Colors are used to differentiate various operations. Quad swaps are in cyan, reversals in magenta, skips in green, parity merges in orange, bridge rotations in yellow, and trinity rotations are in violet.
 
-![quadsort benchmark](/images/benchmark.gif)
+<p align="center">
+      <img src="https://raw.githubusercontent.com/scandum/quadsort/master/images/benchmark.gif">
+</p>
 
 Benchmark: quadsort vs std::stable_sort vs timsort
 --------------------------------------------------
