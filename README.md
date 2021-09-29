@@ -491,13 +491,14 @@ The following benchmark was on WSL 2 gcc version 7.5.0 (Ubuntu 7.5.0-3ubuntu1~18
 using the [wolfsort benchmark](https://github.com/scandum/wolfsort).
 The source code was compiled using `g++ -O3 -w -fpermissive bench.c`. Each test was ran 100 times
 and only the best run is reported. It measures the performance on random data with array sizes
-ranging from 16 to 262144.
+ranging from 8 to 524288. The benchmark is weighted, meaning the number of repetitions
+halves each time the number of items doubles.
 
 ![Graph](/images/graph2.png)
 
 <details><summary><b>data table</b></summary>
 
-|      Name |    Items | Type |     Best |  Average |  Compares | Samples |     Distribution |
+|      Name |    Items | Type |     Best |  Average |      Reps | Samples |     Distribution |
 | --------- | -------- | ---- | -------- | -------- | --------- | ------- | ---------------- |
 |stablesort |        8 |   32 | 0.006216 | 0.006264 |     65536 |     100 |         random 8 |
 |  quadsort |        8 |   32 | 0.002582 | 0.002616 |     65536 |     100 |         random 8 |
