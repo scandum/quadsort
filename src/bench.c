@@ -43,7 +43,8 @@
 
 #include "quadsort.h"
 
-//#define cmp(a,b) (*(a) > *(b))
+// uncomment for fast primitive comparisons
+// #define cmp(a,b) (*(a) > *(b))
 
 //typedef int CMPFUNC (const void *a, const void *b);
 
@@ -93,7 +94,8 @@ __attribute__ ((noinline)) int cmp_long(const void * a, const void * b)
 
 	comparisons++;
 
-	return (fa < fb ? -1 : fa > fb);
+	return (fa > fb) - (fa < fb);
+//	return (fa > fb);
 }
 
 __attribute__ ((noinline)) int cmp_long_double(const void * a, const void * b)
@@ -103,16 +105,22 @@ __attribute__ ((noinline)) int cmp_long_double(const void * a, const void * b)
 
 	comparisons++;
 
-	if (isnan(fa) || isnan(fb))
+	return (fa > fb) - (fa < fb);
+
+/*	if (isnan(fa) || isnan(fb))
 	{
 		return isnan(fa) - isnan(fb);
 	}
-	return (fa < fb ? -1 : fa > fb);
+
+	return (fa > fb);
+*/
 }
 
 
 int cmp_str(const void * a, const void * b)
 {
+	comparisons++;
+
 	return strcmp(*(const char **) a, *(const char **) b);
 }
 
@@ -146,7 +154,7 @@ void test_sort(void *array, void *unsorted, void *valid, int minimum, int maximu
 
 	if (*name == '*')
 	{
-		if (!strcmp(desc, "random order") || !strcmp(desc, "random 1-4") || !strcmp(desc, "random 4"))
+		if (!strcmp(desc, "random order") || !strcmp(desc, "random 1-4") || !strcmp(desc, "random 4") || !strcmp(desc, "random string"))
 		{
 			if (comparisons)
 			{
@@ -284,7 +292,15 @@ void test_sort(void *array, void *unsorted, void *valid, int minimum, int maximu
 
 	for (cnt = 1 ; cnt < maximum ; cnt++)
 	{
-		if (size == sizeof(int))
+		if (cmpf == cmp_str)
+		{
+			if (strcmp((char *) ptla[cnt - 1], (char *) ptla[cnt]) > 0)
+			{
+				printf("%17s: not properly sorted at index %d. (%s vs %s\n", name, cnt, (char *) ptla[cnt - 1], (char *) ptla[cnt]);
+				break;
+			}
+		}
+		else if (size == sizeof(int))
 		{
 			if (pta[cnt - 1] > pta[cnt])
 			{
@@ -542,6 +558,43 @@ int main(int argc, char **argv)
 	}
 
 	mem = max * repetitions;
+
+	// C string
+
+#ifndef cmp
+	if (repetitions == 1)
+	{
+		char **sa_array = (char **) malloc(max * sizeof(char *));
+		char **sr_array = (char **) malloc(max * sizeof(char *));
+		char **sv_array = (char **) malloc(max * sizeof(char *));
+
+		char *buffer = (char *) malloc(max * 16);
+
+		seed_rand(rnd);
+
+		for (cnt = 0 ; cnt < max ; cnt++)
+		{
+			sprintf(buffer + cnt * 16, "%X", rand() % 1000000);
+
+			sr_array[cnt] = buffer + cnt * 16;
+		}
+
+		memcpy(sv_array, sr_array, max * sizeof(char *));
+		qsort(sv_array, max, sizeof(char *), cmp_str);
+
+		for (cnt = 0 ; cnt < sizeof(sorts) / sizeof(char *) ; cnt++)
+		{
+			  test_sort(sa_array, sr_array, sv_array, max, max, samples, repetitions, qsort, sorts[cnt], "random string", sizeof(char *), cmp_str);
+		}
+
+		printf("\n");
+
+		free(sa_array);
+		free(sr_array);
+		free(sv_array);
+		free(buffer);
+	}
+#endif
 
 	// 128 bit
 

@@ -24,7 +24,7 @@
 */
 
 /*
-	quadsort 1.1.3.5
+	quadsort 1.1.5.1
 */
 
 #ifndef QUADSORT_H
@@ -39,149 +39,30 @@ typedef int CMPFUNC (const void *a, const void *b);
 
 //#define cmp(a,b) (*(a) > *(b))
 
-#define swap_two(array, swap)  \
+#define parity_merge_two(array, swap, x, y, ptl, ptr, pts, cmp)  \
 {  \
-	if (cmp(array, array + 1) > 0)  \
-	{  \
-		swap = array[1]; array[1] = array[0]; array[0] = swap;  \
-	}  \
+	ptl = array + 0; ptr = array + 2; pts = swap + 0;  \
+	x = cmp(ptl, ptr) <= 0; y = !x; pts[x] = *ptr; ptr += y; pts[y] = *ptl; ptl += x; pts++;  \
+	*pts = cmp(ptl, ptr) <= 0 ? *ptl : *ptr;  \
+  \
+	ptl = array + 1; ptr = array + 3; pts = swap + 3;  \
+	x = cmp(ptl, ptr) <= 0; y = !x; pts--; pts[x] = *ptr; ptr -= x; pts[y] = *ptl; ptl -= y;  \
+	*pts = cmp(ptl, ptr)  > 0 ? *ptl : *ptr;  \
 }
 
-#define swap_three(array, swap)  \
+#define parity_merge_four(array, swap, x, y, ptl, ptr, pts, cmp)  \
 {  \
-	if (cmp(array, array + 1) > 0)  \
-	{  \
-		if (cmp(array, array + 2) <= 0)  \
-		{  \
-			swap = array[0]; array[0] = array[1]; array[1] = swap;  \
-		}  \
-		else if (cmp(array + 1, array + 2) > 0)  \
-		{  \
-			swap = array[0]; array[0] = array[2]; array[2] = swap;  \
-		}  \
-		else  \
-		{  \
-			swap = array[0]; array[0] = array[1]; array[1] = array[2]; array[2] = swap;  \
-		}  \
-	}  \
-	else if (cmp(array + 1, array + 2) > 0)  \
-	{  \
-		if (cmp(array, array + 2) > 0)  \
-		{  \
-			swap = array[2]; array[2] = array[1]; array[1] = array[0]; array[0] = swap;  \
-		}  \
-		else   \
-		{  \
-			swap = array[2]; array[2] = array[1]; array[1] = swap;  \
-		}  \
-	}  \
-}  \
-
-#define swap_four(array, swap)  \
-{  \
-	if (cmp(array, array + 1) > 0)  \
-	{  \
-		swap = array[0]; array[0] = array[1]; array[1] = swap;  \
-	}  \
-	if (cmp(array + 2, array + 3) > 0)  \
-	{  \
-		swap = array[2]; array[2] = array[3]; array[3] = swap;  \
-	}  \
-	if (cmp(array + 1, array + 2) > 0)  \
-	{  \
-		if (cmp(array, array + 2) <= 0)  \
-		{  \
-			if (cmp(array + 1, array + 3) <= 0)  \
-			{  \
-				swap = array[1]; array[1] = array[2]; array[2] = swap;  \
-			}  \
-			else  \
-			{  \
-				swap = array[1]; array[1] = array[2]; array[2] = array[3]; array[3] = swap;  \
-			}  \
-		}  \
-		else if (cmp(array, array + 3) > 0)  \
-		{  \
-			swap = array[1]; array[1] = array[3]; array[3] = swap;  \
-			swap = array[0]; array[0] = array[2]; array[2] = swap;  \
-		}  \
-		else if (cmp(array + 1, array + 3) <= 0)  \
-		{  \
-			swap = array[1]; array[1] = array[0]; array[0] = array[2]; array[2] = swap;  \
-		}  \
-		else  \
-		{  \
-			swap = array[1]; array[1] = array[0]; array[0] = array[2]; array[2] = array[3]; array[3] = swap;  \
-		}  \
-	}  \
-}
-
-#define tail_swap_eight(array, pta, ptt, end, key, cmp) \
-{ \
-	pta = end++; \
-	ptt = pta--; \
- \
-	if (cmp(pta, ptt) > 0) \
-	{ \
-		key = *ptt; \
-		*ptt-- = *pta--; \
- \
-		if (cmp(pta - 2, &key) > 0) \
-		{ \
-			*ptt-- = *pta--; *ptt-- = *pta--; *ptt-- = *pta--; \
-		} \
-		if (pta > array && cmp(pta - 1, &key) > 0) \
-		{ \
-			*ptt-- = *pta--; *ptt-- = *pta--; \
-		} \
-		if (pta >= array && cmp(pta, &key) > 0) \
-		{ \
-			*ptt-- = *pta; \
-		} \
-		*ptt = key; \
-	} \
-}
-
-#define swap_five(array, pta, ptt, end, key, cmp) \
-{ \
-	end = array + 4; \
- \
-	pta = end++; \
-	ptt = pta--; \
- \
-	if (cmp(pta, ptt) > 0) \
-	{ \
-		key = *ptt; \
-		*ptt-- = *pta--; \
- \
-		if (pta > array && cmp(pta - 1, &key) > 0) \
-		{ \
-			*ptt-- = *pta--; *ptt-- = *pta--; \
-		} \
-		if (pta >= array && cmp(pta, &key) > 0) \
-		{ \
-			*ptt-- = *pta; \
-		} \
-		*ptt = key; \
-	} \
-}
-
-#define swap_six(array, pta, ptt, end, key, cmp) \
-{ \
-	swap_five(array, pta, ptt, end, key, cmp); \
-	tail_swap_eight(array, pta, ptt, end, key, cmp); \
-}
-
-#define swap_seven(array, pta, ptt, end, key, cmp) \
-{ \
-	swap_six(array, pta, ptt, end, key, cmp); \
-	tail_swap_eight(array, pta, ptt, end, key, cmp); \
-}
-
-#define swap_eight(array, pta, ptt, end, key, cmp) \
-{ \
-	swap_seven(array, pta, ptt, end, key, cmp); \
-	tail_swap_eight(array, pta, ptt, end, key, cmp); \
+	ptl = array + 0; ptr = array + 4; pts = swap;  \
+	x = cmp(ptl, ptr) <= 0; y = !x; pts[x] = *ptr; ptr += y; pts[y] = *ptl; ptl += x; pts++;  \
+	x = cmp(ptl, ptr) <= 0; y = !x; pts[x] = *ptr; ptr += y; pts[y] = *ptl; ptl += x; pts++;  \
+	x = cmp(ptl, ptr) <= 0; y = !x; pts[x] = *ptr; ptr += y; pts[y] = *ptl; ptl += x; pts++;  \
+	*pts = cmp(ptl, ptr) <= 0 ? *ptl : *ptr;  \
+  \
+	ptl = array + 3; ptr = array + 7; pts = swap + 7;  \
+	x = cmp(ptl, ptr) <= 0; y = !x; pts--; pts[x] = *ptr; ptr -= x; pts[y] = *ptl; ptl -= y;  \
+	x = cmp(ptl, ptr) <= 0; y = !x; pts--; pts[x] = *ptr; ptr -= x; pts[y] = *ptl; ptl -= y;  \
+	x = cmp(ptl, ptr) <= 0; y = !x; pts--; pts[x] = *ptr; ptr -= x; pts[y] = *ptl; ptl -= y;  \
+	*pts = cmp(ptl, ptr)  > 0 ? *ptl : *ptr;  \
 }
 
 //////////////////////////////////////////////////////////
