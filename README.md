@@ -227,15 +227,21 @@ because that would mean we need to start remembering run lengths and
 perform other kinds of algorithmic gymnastics. Instead we keep it simple
 and check in-order runs at a later stage.
 
-One last optimization is to write the quad swap in such a way that we can
+The next optimization is to write the quad swap in such a way that we can
 perform a simple check to see if the entire array was in reverse order,
-if so, the sort is finished. If not, we know the array has been turned
-into a series of ordered blocks of 4 elements.
+if so, the sort is finished.
+
+One final optimization, reverse order handling is only beneficial on
+runs longer than 4 elements. When no reverse order run is detected
+the next 4 elements are merged with the first 4 elements.
+
+At the end of the loop the array has been turned into a series of ordered
+blocks of 8 elements.
 
 Parity merge
 ------------
-The parity merge is a boundless merge used to turn blocks of 4 elements into
-blocks of 16 elements. While it lacks adaptive properties it can be fully
+The parity merge is a boundless merge used to turn blocks of 8 elements into
+blocks of 32 elements. While it lacks adaptive properties it can be fully
 unrolled. Performance wise it's slightly faster than insertion sort.
 
 It takes advantage of the fact that if you have two n length arrays, you can
@@ -243,16 +249,22 @@ fully merge the two arrays by performing n merge operations on the start of
 each array, and n merge operations on the end of each array. The arrays must
 be of exactly equal length.
 
-To sort 4 blocks of 4 elements into a sorted block of 16 elements takes 32
-comparisons, 32 moves, and requires 16 elements of auxiliary memory.
+To sort 4 blocks of 8 elements into a sorted block of 32 elements takes 64
+comparisons, 64 moves, and requires 32 elements of auxiliary memory.
+
+Branchless parity merge
+-----------------------
+Since the parity merge can be unrolled it's very suitable for branchless
+optimizations to speed up the sorting of random data. This makes the
+routine up to 2.5 times faster on random data. 
 
 Quad merge
 ----------
 In the first stage of quadsort the quad swap and parity merge are used to
-pre-sort the array into sorted 16-element blocks as described above.
+pre-sort the array into sorted 32-element blocks as described above.
 
 The second stage uses an approach similar to the parity merge, but it's
-sorting blocks of 16, 64, 256, or more elements.
+sorting blocks of 32, 128, 512, or more elements.
 
 The quad merge can be visualized as following:
 ```
@@ -266,9 +278,9 @@ In the first row quad swap has been used to create 4 blocks of 4 sorted
 elements each. In the second row, step 1, block A and B have been merged
 to swap memory into a single sorted block of 8 elements. In the third row,
 step 2, block C and D have also been merged to swap memory. In the last row,
-step 3, the blocks are merged back to main memory and we're left with 1 block
-of 16 sorted elements. The following is a visualization of an array with 64
-random elements getting sorted.
+step 3, the blocks are merged back to main memory and we're left with 1 fully
+sorted block. The following is a visualization of an array with 64random
+elements getting sorted.
 
 ![quadsort visualization](/images/quadsort.gif)
 
@@ -334,14 +346,12 @@ This unguarded merge optimization is most effective in the final tail merge.
 
 tail merge
 ----------
-When sorting an array of 65 elements you end up with a sorted array of 64
+When sorting an array of 33 elements you end up with a sorted array of 32
 elements and a sorted array of 1 element in the end. If a program sorts in
-intervals it should pick an optimal array size (64, 256, 1024, etc) to do so.
+intervals it should pick an optimal array size (32, 128, 512, etc) to do so.
 
-Another problem is that a sub-optimal array size results in wasteful swapping. To
-work around these two problems the quad merge routine is aborted when the
-block size reaches 1/8th of the array size, and the remainder of the array
-is sorted using a tail merge.
+To work around this problem the remainder of the array is sorted using a tail
+merge.
 
 The main advantage of the tail merge is that it allows reducing the swap
 space of quadsort to **n / 2** and that it has been optimized to merge arrays
