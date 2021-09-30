@@ -1,7 +1,7 @@
 Intro
 -----
 
-This document describes a stable bottom-up adaptive merge sort named quadsort.
+This document describes a stable bottom-up adaptive merge sort named quadsort. A [visualisation](https://github.com/scandum/quadsort#visualization) and [benchmarks](https://github.com/scandum/quadsort#benchmark-quadsort-vs-stdstable_sort-vs-timsort) are available at the bottom.
 
 
 The quad swap
@@ -403,21 +403,21 @@ By default quadsort uses n / 4 swap memory. If memory allocation fails quadsort 
 
 Performance
 -----------
-Quadsort is faster than quicksort, with the exception of branchless quicksorts, where quadsort will be slower on mostly random data and faster on mostly ordered data.
+Quadsort is faster than quicksort for most data distributions.
 
 Variants
 --------
-- [blitsort](https://github.com/scandum/blitsort) is a quadsort based rotate merge sort. It is currently the fastest O(1) memory stable sort.
+- [blitsort](https://github.com/scandum/blitsort) is a quadsort based rotate merge sort.
 
-- [fluxsort](https://github.com/scandum/fluxsort) is a hybrid partition / quadsort with improved performance on random data. It is currently the fastest stable comparison sort for random data.
+- [fluxsort](https://github.com/scandum/fluxsort) is a hybrid stable quicksort / quadsort with improved performance on random data. It is currently the fastest comparison sort for random data.
 
-- [gridsort](https://github.com/scandum/gridsort) is a hybrid cubesort / quadsort with improved performance on random data. 
+- [gridsort](https://github.com/scandum/gridsort) is a hybrid cubesort / quadsort. It is the fastest online sort and might be of interest to those interested in data structures.
 
 - [twinsort](https://github.com/scandum/twinsort) is a simplified quadsort with a
 much smaller code size. Twinsort might be of use to people who want to port or understand quadsort; it does not use
 pointers or gotos.
 
-- [wolfsort](https://github.com/scandum/wolfsort) is a hybrid radixsort / quadsort with improved performance on random data. It's mostly a proof of concept that only work on unsigned 32 and 64 bit integers.
+- [wolfsort](https://github.com/scandum/wolfsort) is a hybrid radixsort / fluxsort with improved performance on random data. It's mostly a proof of concept that only work on unsigned 32 and 64 bit integers. It's possibly the fastest radix sort for 32 bit integers, overall fluxsort is faster for 64 bit integers.
 
 Visualization
 -------------
