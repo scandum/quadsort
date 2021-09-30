@@ -255,8 +255,10 @@ comparisons, 64 moves, and requires 32 elements of auxiliary memory.
 Branchless parity merge
 -----------------------
 Since the parity merge can be unrolled it's very suitable for branchless
-optimizations to speed up the sorting of random data. This makes the
-routine up to 2.5 times faster on random data. 
+optimizations to speed up the sorting of random data. Another advantage
+is that two separate memory regions can be accessed in the same loop with
+no additional overhead. This makes the routine up to 2.5 times faster on
+random data.
 
 Quad merge
 ----------
@@ -343,6 +345,12 @@ This looks as following:
         }
 ```
 This unguarded merge optimization is most effective in the final tail merge.
+
+Branchless parity quad merge
+-----------------
+Due to the additional overhead of a branchless parity merge it's only faster
+on random data. One additional comparison is performed during the quad merge
+routine to determine whether it'd be faster to use a parity merge instead.
 
 tail merge
 ----------
