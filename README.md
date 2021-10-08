@@ -440,6 +440,8 @@ Colors are used to differentiate various operations. Quad swaps are in cyan, rev
       <img src="https://raw.githubusercontent.com/scandum/quadsort/master/images/benchmark.gif">
 </p>
 
+There's also a [YouTube video of a java port of quadsort](https://www.youtube.com/watch?v=drSeVadf05M) in [ArrayV](https://github.com/Gaming32/ArrayV-v4.0) on a wide variety of data distrubtions.
+
 Benchmark: quadsort vs std::stable_sort vs timsort
 --------------------------------------------------
 The following benchmark was on WSL 2 gcc version 7.5.0 (Ubuntu 7.5.0-3ubuntu1~18.04)
