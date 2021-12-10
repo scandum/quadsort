@@ -665,8 +665,7 @@ time in seconds can be uncollapsed below the bar graph.
 
 In this benchmark it becomes clear why quicksort is often preferred above a traditional mergesort,
 it has fewer comparisons for ascending, generic, and descending order data. However, it performs
-worse than quadsort on all tests except for generic order and ascending tiles. If quadsort was to
-ignore stability it would beat quicksort on all tests.
+worse than quadsort on all tests except for generic order and ascending tiles.
 
 Benchmark: quadsort vs qsort (mergesort) small arrays
 -----------------------------------------------------
