@@ -240,7 +240,7 @@ blocks of 8 elements.
 
 Parity merge
 ------------
-The parity merge is a boundless merge used to turn blocks of 8 elements into
+The parity merge is a boundless merge used to turn 4 blocks of 8 elements into
 blocks of 32 elements. While it lacks adaptive properties it can be fully
 unrolled. Performance wise it's slightly faster than insertion sort.
 
@@ -268,7 +268,7 @@ pre-sort the array into sorted 32-element blocks as described above.
 The second stage uses an approach similar to the parity merge, but it's
 sorting blocks of 32, 128, 512, or more elements.
 
-The quad merge can be visualized as following:
+A quad merge (sometimes referred to as a ping-pong merge) can be visualized as following:
 ```
     main memory:  [A][B][C][D]
     swap memory:  [A  B]        step 1
@@ -276,15 +276,16 @@ The quad merge can be visualized as following:
     main memory:  [A  B  C  D]  step 3
 ```
 
-In the first row quad swap has been used to create 4 blocks of 4 sorted
-elements each. In the second row, step 1, block A and B have been merged
-to swap memory into a single sorted block of 8 elements. In the third row,
-step 2, block C and D have also been merged to swap memory. In the last row,
+In the first row are 4 sorted blocks, A, B, C and D. In the second row,
+step 1, block A and B have been merged to swap memory into a single sorted block.
+In the third row, step 2, block C and D have also been merged to swap memory. In the last row,
 step 3, the blocks are merged back to main memory and we're left with 1 fully
-sorted block. The following is a visualization of an array with 64random
-elements getting sorted.
+sorted block.
 
-![quadsort visualization](/images/quadsort.gif)
+The following is a visualization of an array with 256 random elements getting quad swapped and quad merged
+into sorted blocks of 32 elements using parity merges.
+
+![quadsort visualization](/images/quadswap.gif)
 
 Skipping
 --------
@@ -437,7 +438,7 @@ The upper half shows the swap memory and the bottom half shows the main memory.
 Colors are used to differentiate various operations. Quad swaps are in cyan, reversals in magenta, skips in green, parity merges in orange, bridge rotations in yellow, and trinity rotations are in violet.
 
 <p align="center">
-      <img src="https://raw.githubusercontent.com/scandum/quadsort/master/images/benchmark.gif">
+    [![quadsort benchmark](/images/quadsort.gif)](https://www.youtube.com/watch?v=GJjH_99BS70)
 </p>
 
 There's also a [YouTube video of a java port of quadsort](https://www.youtube.com/watch?v=drSeVadf05M) in [ArrayV](https://github.com/Gaming32/ArrayV-v4.0) on a wide variety of data distributions.
