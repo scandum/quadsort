@@ -437,9 +437,7 @@ In the visualization below nine tests are performed on 256 elements.
 The upper half shows the swap memory and the bottom half shows the main memory.
 Colors are used to differentiate various operations. Quad swaps are in cyan, reversals in magenta, skips in green, parity merges in orange, bridge rotations in yellow, and trinity rotations are in violet.
 
-<p align="center">
-    [![quadsort benchmark](/images/quadsort.gif)](https://www.youtube.com/watch?v=GJjH_99BS70)
-</p>
+[![quadsort benchmark](/images/quadsort.gif)](https://www.youtube.com/watch?v=GJjH_99BS70)
 
 There's also a [YouTube video of a java port of quadsort](https://www.youtube.com/watch?v=drSeVadf05M) in [ArrayV](https://github.com/Gaming32/ArrayV-v4.0) on a wide variety of data distributions.
 
