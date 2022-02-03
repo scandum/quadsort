@@ -351,7 +351,8 @@ Branchless parity quad merge
 -----------------
 Due to the additional overhead of a branchless parity merge it's only faster
 on random data. One additional comparison is performed during the quad merge
-routine to determine whether it'd be faster to use a parity merge instead.
+routine to determine whether it'd be faster to use a branchless parity merge
+or a traditional merge that can take advantage of branch prediction.
 
 tail merge
 ----------
@@ -404,7 +405,7 @@ By default quadsort uses n / 4 swap memory. If memory allocation fails quadsort 
 
 Performance
 -----------
-Quadsort is faster than quicksort for most data distributions.
+Quadsort is the fastest merge sort written to date. It is faster than quicksort for most data distributions.
 
 Variants
 --------
@@ -412,13 +413,13 @@ Variants
 
 - [fluxsort](https://github.com/scandum/fluxsort) is a hybrid stable quicksort / quadsort with improved performance on random data. It is currently the fastest comparison sort for random data.
 
-- [gridsort](https://github.com/scandum/gridsort) is a hybrid cubesort / quadsort. It is the fastest online sort and might be of interest to those interested in data structures.
+- [gridsort](https://github.com/scandum/gridsort) is a hybrid cubesort / quadsort. Gridsort makes O(n) moves rather than the typical O(n log n) moves. It is the fastest online sort and might be of interest to those interested in data structures.
 
 - [twinsort](https://github.com/scandum/twinsort) is a simplified quadsort with a
 much smaller code size. Twinsort might be of use to people who want to port or understand quadsort; it does not use
 pointers or gotos.
 
-- [wolfsort](https://github.com/scandum/wolfsort) is a hybrid radixsort / fluxsort with improved performance on random data. It's mostly a proof of concept that only work on unsigned 32 and 64 bit integers. It's possibly the fastest radix sort for 32 bit integers, overall fluxsort is faster for 64 bit integers.
+- [wolfsort](https://github.com/scandum/wolfsort) is a hybrid radixsort / fluxsort with improved performance on random data. It's mostly a proof of concept that only works on unsigned 32 and 64 bit integers. It's possibly the fastest radix sort for 32 bit integers, overall fluxsort is faster for 64 bit integers.
 
 Visualization
 -------------
