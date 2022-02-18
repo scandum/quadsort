@@ -240,9 +240,11 @@ ordered data slower.
 To deal with this the quad merge works in a similar way to the quad swap.
 Instead of merging the ends of two arrays two items at a time, it merges
 four items at a time.
+```
 ┌───┐┌───┐┌───┐    ┌───┐┌───┐┌───┐
 │ A ││ B ││ C │    │ X ││ Y ││ Z │
 └───┘└───┘└───┘    └───┘└───┘└───┘
+```
 When merging ABC and XYZ it first checks if B is smaller or equal to X. If
 that's the case A and B are copied to swap. Next it checks if A is greater
 than Y. If that's the case X and Y are copied to swap.
