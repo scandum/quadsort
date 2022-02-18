@@ -24,10 +24,10 @@
 */
 
 /*
-	quadsort 1.1.5.1
+	quadsort 1.1.5.2
 */
 
-// the next six functions are used for sorting 0 to 31 elements
+// the next seven functions are used for sorting 0 to 31 elements
 
 void FUNC(unguarded_insert)(VAR *array, size_t offset, size_t nmemb, CMPFUNC *cmp)
 {
@@ -70,16 +70,41 @@ void FUNC(unguarded_insert)(VAR *array, size_t offset, size_t nmemb, CMPFUNC *cm
 	}
 }
 
-void FUNC(parity_swap_four)(VAR *array, CMPFUNC *cmp)
+void FUNC(bubble_sort)(VAR *array, size_t nmemb, CMPFUNC *cmp)
 {
-	VAR swap[4], *ptl, *ptr, *pts;
-	unsigned char x, y;
+	VAR swap, *pta;
+	size_t x, y;
 
-	x = cmp(array + 0, array + 1) <= 0; y = !x; swap[0 + y] = array[0]; swap[0 + x] = array[1];
-	x = cmp(array + 2, array + 3) <= 0; y = !x; swap[2 + y] = array[2]; swap[2 + x] = array[3];
+	if (nmemb > 1)
+	{
+		pta = array;
 
-	parity_merge_two(swap, array, x, y, ptl, ptr, pts, cmp);
+		if (nmemb > 2)
+		{
+			x = cmp(pta, pta + 1) > 0; y = !x; swap = pta[y]; pta[0] = pta[x]; pta[1] = swap; pta++;
+			x = cmp(pta, pta + 1) > 0; y = !x; swap = pta[y]; pta[0] = pta[x]; pta[1] = swap; pta--;
+		}
+		x = cmp(pta, pta + 1) > 0; y = !x; swap = pta[y]; pta[0] = pta[x]; pta[1] = swap;
+	}
+}
 
+void FUNC(quad_swap_four)(VAR *array, CMPFUNC *cmp)
+{
+	VAR *pta, swap;
+	size_t x, y;
+
+	pta = array;
+	x = cmp(pta, pta + 1) > 0; y = !x; swap = pta[y]; pta[0] = pta[x]; pta[1] = swap; pta += 2;
+	x = cmp(pta, pta + 1) > 0; y = !x; swap = pta[y]; pta[0] = pta[x]; pta[1] = swap; pta--;
+
+	if (cmp(pta, pta + 1) > 0)
+	{
+		swap = pta[0]; pta[0] = pta[1]; pta[1] = swap; pta--;
+
+		x = cmp(pta, pta + 1) > 0; y = !x; swap = pta[y]; pta[0] = pta[x]; pta[1] = swap; pta += 2;
+		x = cmp(pta, pta + 1) > 0; y = !x; swap = pta[y]; pta[0] = pta[x]; pta[1] = swap; pta--;
+		x = cmp(pta, pta + 1) > 0; y = !x; swap = pta[y]; pta[0] = pta[x]; pta[1] = swap;
+	}
 }
 
 void FUNC(parity_swap_eight)(VAR *array, CMPFUNC *cmp)
@@ -87,10 +112,11 @@ void FUNC(parity_swap_eight)(VAR *array, CMPFUNC *cmp)
 	VAR swap[8], *ptl, *ptr, *pts;
 	unsigned char x, y;
 
-	if (cmp(array + 0, array + 1) > 0) { swap[0] = array[0]; array[0] = array[1]; array[1] = swap[0]; }
-	if (cmp(array + 2, array + 3) > 0) { swap[0] = array[2]; array[2] = array[3]; array[3] = swap[0]; }
-	if (cmp(array + 4, array + 5) > 0) { swap[0] = array[4]; array[4] = array[5]; array[5] = swap[0]; }
-	if (cmp(array + 6, array + 7) > 0) { swap[0] = array[6]; array[6] = array[7]; array[7] = swap[0]; } else
+	ptl = array;
+	x = cmp(ptl, ptl + 1) > 0; y = !x; swap[0] = ptl[y]; ptl[0] = ptl[x]; ptl[1] = swap[0]; ptl += 2;
+	x = cmp(ptl, ptl + 1) > 0; y = !x; swap[0] = ptl[y]; ptl[0] = ptl[x]; ptl[1] = swap[0]; ptl += 2;
+	x = cmp(ptl, ptl + 1) > 0; y = !x; swap[0] = ptl[y]; ptl[0] = ptl[x]; ptl[1] = swap[0]; ptl += 2;
+	x = cmp(ptl, ptl + 1) > 0; y = !x; swap[0] = ptl[y]; ptl[0] = ptl[x]; ptl[1] = swap[0];
 
 	if (cmp(array + 1, array + 2) <= 0 && cmp(array + 3, array + 4) <= 0 && cmp(array + 5, array + 6) <= 0)
 	{
@@ -128,10 +154,10 @@ void FUNC(parity_swap_sixteen)(VAR *array, CMPFUNC *cmp)
 	VAR swap[16], *ptl, *ptr, *pts;
 	unsigned char x, y;
 
-	FUNC(parity_swap_four)(array +  0, cmp);
-	FUNC(parity_swap_four)(array +  4, cmp);
-	FUNC(parity_swap_four)(array +  8, cmp);
-	FUNC(parity_swap_four)(array + 12, cmp);
+	FUNC(quad_swap_four)(array +  0, cmp);
+	FUNC(quad_swap_four)(array +  4, cmp);
+	FUNC(quad_swap_four)(array +  8, cmp);
+	FUNC(quad_swap_four)(array + 12, cmp);
 
 	if (cmp(array + 3, array + 4) <= 0 && cmp(array + 7, array + 8) <= 0 && cmp(array + 11, array + 12) <= 0)
 	{
@@ -147,12 +173,12 @@ void FUNC(tail_swap)(VAR *array, size_t nmemb, CMPFUNC *cmp)
 {
 	if (nmemb < 4)
 	{
-		FUNC(unguarded_insert)(array, 1, nmemb, cmp);
+		FUNC(bubble_sort)(array, nmemb, cmp);
 		return;
 	}
 	if (nmemb < 8)
 	{
-		FUNC(parity_swap_four)(array, cmp);
+		FUNC(quad_swap_four)(array, cmp);
 		FUNC(unguarded_insert)(array, 4, nmemb, cmp);
 		return;
 	}
@@ -207,7 +233,7 @@ void FUNC(tail_merge)(VAR *array, VAR *swap, size_t swap_size, size_t nmemb, siz
 size_t FUNC(quad_swap)(VAR *array, size_t nmemb, CMPFUNC *cmp)
 {
 	VAR swap[32];
-	size_t count, reverse;
+	size_t count, reverse, x, y;
 	VAR *pta, *pts, *pte, tmp;
 
 	pta = array;
@@ -216,50 +242,50 @@ size_t FUNC(quad_swap)(VAR *array, size_t nmemb, CMPFUNC *cmp)
 
 	while (count--)
 	{
-		if (cmp(&pta[0], &pta[1]) > 0)
+		switch ((cmp(pta, pta + 1) > 0) | (cmp(pta + 1, pta + 2) > 0) * 2 | (cmp(pta + 2, pta + 3) > 0) * 4)
 		{
-			if (cmp(&pta[2], &pta[3]) > 0)
-			{
-				if (cmp(&pta[1], &pta[2]) > 0)
-				{
-					pts = pta;
-					pta += 4;
-					goto swapper;
-				}
+			case 0:
+				break;
+			case 1:
+				tmp = pta[0]; pta[0] = pta[1]; pta[1] = tmp;
+				pta += 1; x = cmp(pta, pta + 1) > 0; y = !x; tmp = pta[y]; pta[0] = pta[x]; pta[1] = tmp;
+				pta += 1; x = cmp(pta, pta + 1) > 0; y = !x; tmp = pta[y]; pta[0] = pta[x]; pta[1] = tmp;
+				pta -= 2;
+				break;
+			case 2:
+				tmp = pta[1]; pta[1] = pta[2]; pta[2] = tmp;
+				          x = cmp(pta, pta + 1) > 0; y = !x; tmp = pta[y]; pta[0] = pta[x]; pta[1] = tmp;
+				pta += 2; x = cmp(pta, pta + 1) > 0; y = !x; tmp = pta[y]; pta[0] = pta[x]; pta[1] = tmp;
+				pta -= 1; x = cmp(pta, pta + 1) > 0; y = !x; tmp = pta[y]; pta[0] = pta[x]; pta[1] = tmp;
+				pta -= 1;
+				break;
+			case 3:
+				tmp = pta[0]; pta[0] = pta[2]; pta[2] = tmp;
+				pta += 2; x = cmp(pta, pta + 1) > 0; y = !x; tmp = pta[y]; pta[0] = pta[x]; pta[1] = tmp;
+				pta -= 1; x = cmp(pta, pta + 1) > 0; y = !x; tmp = pta[y]; pta[0] = pta[x]; pta[1] = tmp;
+				pta -= 1;
+				break;
+			case 4:
 				tmp = pta[2]; pta[2] = pta[3]; pta[3] = tmp;
-			}
-			tmp = pta[0]; pta[0] = pta[1]; pta[1] = tmp;
-		}
-		else if (cmp(&pta[2], &pta[3]) > 0)
-		{
-			tmp = pta[2]; pta[2] = pta[3]; pta[3] = tmp;
-		}
-
-		if (cmp(&pta[1], &pta[2]) > 0)
-		{
-			if (cmp(&pta[0], &pta[2]) <= 0)
-			{
-				if (cmp(&pta[1], &pta[3]) <= 0)
-				{
-					tmp = pta[1]; pta[1] = pta[2]; pta[2] = tmp;
-				}
-				else
-				{
-					tmp = pta[1]; pta[1] = pta[2]; pta[2] = pta[3]; pta[3] = tmp;
-				}
-			}
-			else if (cmp(&pta[0], &pta[3]) > 0)
-			{
-				tmp = pta[1]; pta[1] = pta[3]; pta[3] = tmp; tmp = pta[0]; pta[0] = pta[2]; pta[2] = tmp;
-			}
-			else if (cmp(&pta[1], &pta[3]) <= 0)
-			{
-				tmp = pta[1]; pta[1] = pta[0]; pta[0] = pta[2]; pta[2] = tmp;
-			}
-			else
-			{
-				tmp = pta[1]; pta[1] = pta[0]; pta[0] = pta[2]; pta[2] = pta[3]; pta[3] = tmp;
-			}
+				pta += 1; x = cmp(pta, pta + 1) > 0; y = !x; tmp = pta[y]; pta[0] = pta[x]; pta[1] = tmp;
+				pta -= 1; x = cmp(pta, pta + 1) > 0; y = !x; tmp = pta[y]; pta[0] = pta[x]; pta[1] = tmp;
+				break;
+			case 5:
+				tmp = pta[0]; pta[0] = pta[1]; pta[1] = tmp;
+				tmp = pta[2]; pta[2] = pta[3]; pta[3] = tmp;
+				pta += 1; x = cmp(pta, pta + 1) > 0; y = !x; tmp = pta[y]; pta[0] = pta[x]; pta[1] = tmp;
+				pta += 1; x = cmp(pta, pta + 1) > 0; y = !x; tmp = pta[y]; pta[0] = pta[x]; pta[1] = tmp;
+				pta -= 2; x = cmp(pta, pta + 1) > 0; y = !x; tmp = pta[y]; pta[0] = pta[x]; pta[1] = tmp;
+				break;
+			case 6:
+				tmp = pta[1]; pta[1] = pta[3]; pta[3] = tmp;
+				          x = cmp(pta, pta + 1) > 0; y = !x; tmp = pta[y]; pta[0] = pta[x]; pta[1] = tmp;
+				pta += 1; x = cmp(pta, pta + 1) > 0; y = !x; tmp = pta[y]; pta[0] = pta[x]; pta[1] = tmp;
+				pta -= 1;
+				break;
+			case 7:
+				pts = pta;
+				goto swapper;
 		}
 		count--;
 
@@ -271,6 +297,8 @@ size_t FUNC(quad_swap)(VAR *array, size_t nmemb, CMPFUNC *cmp)
 
 		swapper:
 
+		pta += 4;
+
 		if (count--)
 		{
 			if (cmp(&pta[0], &pta[1]) > 0)
@@ -281,8 +309,6 @@ size_t FUNC(quad_swap)(VAR *array, size_t nmemb, CMPFUNC *cmp)
 					{
 						if (cmp(&pta[-1], &pta[0]) > 0)
 						{
-							pta += 4;
-
 							goto swapper;
 						}
 					}
@@ -297,29 +323,11 @@ size_t FUNC(quad_swap)(VAR *array, size_t nmemb, CMPFUNC *cmp)
 
 			if (cmp(&pta[1], &pta[2]) > 0)
 			{
-				if (cmp(&pta[0], &pta[2]) <= 0)
-				{
-					if (cmp(&pta[1], &pta[3]) <= 0)
-					{
-						tmp = pta[1]; pta[1] = pta[2]; pta[2] = tmp;
-					}
-					else
-					{
-						tmp = pta[1]; pta[1] = pta[2]; pta[2] = pta[3]; pta[3] = tmp;
-					}
-				}
-				else if (cmp(&pta[0], &pta[3]) > 0)
-				{
-					tmp = pta[0]; pta[0] = pta[2]; pta[2] = tmp; tmp = pta[1]; pta[1] = pta[3]; pta[3] = tmp;
-				}
-				else if (cmp(&pta[1], &pta[3]) <= 0)
-				{
-					tmp = pta[0]; pta[0] = pta[2]; pta[2] = pta[1]; pta[1] = tmp;
-				}
-				else
-				{
-					tmp = pta[0]; pta[0] = pta[2]; pta[2] = pta[3]; pta[3] = pta[1]; pta[1] = tmp;
-				}
+				tmp = pta[1]; pta[1] = pta[2]; pta[2] = tmp;
+
+				x = cmp(pta, pta + 1) > 0; y = !x; tmp = pta[y]; pta[0] = pta[x]; pta[1] = tmp; pta += 2;
+				x = cmp(pta, pta + 1) > 0; y = !x; tmp = pta[y]; pta[0] = pta[x]; pta[1] = tmp; pta -= 1;
+				x = cmp(pta, pta + 1) > 0; y = !x; tmp = pta[y]; pta[0] = pta[x]; pta[1] = tmp; pta -= 1;
 			}
 			pte = pta - 1;
 
@@ -352,13 +360,13 @@ size_t FUNC(quad_swap)(VAR *array, size_t nmemb, CMPFUNC *cmp)
 		{
 			switch (nmemb % 8)
 			{
-				case 7: if (cmp(&pta[5], &pta[6]) <= 0) break;
-				case 6: if (cmp(&pta[4], &pta[5]) <= 0) break;
-				case 5: if (cmp(&pta[3], &pta[4]) <= 0) break;
-				case 4: if (cmp(&pta[2], &pta[3]) <= 0) break;
-				case 3: if (cmp(&pta[1], &pta[2]) <= 0) break;
-				case 2: if (cmp(&pta[0], &pta[1]) <= 0) break;
-				case 1: if (cmp(&pta[-1], &pta[0]) <= 0) break;
+				case 7: if (cmp(pta + 5, pta + 6) <= 0) break;
+				case 6: if (cmp(pta + 4, pta + 5) <= 0) break;
+				case 5: if (cmp(pta + 3, pta + 4) <= 0) break;
+				case 4: if (cmp(pta + 2, pta + 3) <= 0) break;
+				case 3: if (cmp(pta + 1, pta + 2) <= 0) break;
+				case 2: if (cmp(pta + 0, pta + 1) <= 0) break;
+				case 1: if (cmp(pta - 1, pta + 0) <= 0) break;
 				case 0:
 					pte = pts + nmemb - 1;
 
@@ -390,8 +398,6 @@ size_t FUNC(quad_swap)(VAR *array, size_t nmemb, CMPFUNC *cmp)
 
 	pta = array;
 
-	count = nmemb / 32;
-
 	for (count = nmemb / 32 ; count-- ; pta += 32)
 	{
 		if (cmp(pta + 7, pta + 8) <= 0 && cmp(pta + 15, pta + 16) <= 0 && cmp(pta + 23, pta + 24) <= 0)
@@ -415,6 +421,7 @@ size_t FUNC(quad_swap)(VAR *array, size_t nmemb, CMPFUNC *cmp)
 void FUNC(forward_merge)(VAR *dest, VAR *from, size_t block, CMPFUNC *cmp)
 {
 	VAR *ptl, *ptr, *m, *e; // left, right, middle, end
+	size_t x, y;
 
 	ptl = from;
 	ptr = from + block;
@@ -423,55 +430,59 @@ void FUNC(forward_merge)(VAR *dest, VAR *from, size_t block, CMPFUNC *cmp)
 
 	if (cmp(m - 1, e - block / 4) <= 0)
 	{
-		do
+		m -= 2;
+
+		while (ptl < m)
 		{
-			if (cmp(ptl, ptr) <= 0)
+			if (cmp(ptl + 1, ptr) <= 0)
 			{
-				*dest++ = *ptl++;
-				continue;
+				*dest++ = *ptl++; *dest++ = *ptl++;
 			}
-			*dest++ = *ptr++;
-			if (cmp(ptl, ptr) <= 0)
+			else if (cmp(ptl, ptr + 1) > 0)
 			{
-				*dest++ = *ptl++;
-				continue;
+				*dest++ = *ptr++; *dest++ = *ptr++;
 			}
-			*dest++ = *ptr++;
-			if (cmp(ptl, ptr) <= 0)
+			else 
 			{
-				*dest++ = *ptl++;
-				continue;
+				x = cmp(ptl, ptr) <= 0; y = !x; dest[x] = *ptr; ptr += 1; dest[y] = *ptl; ptl += 1; dest += 2;
+				x = cmp(ptl, ptr) <= 0; y = !x; dest[x] = *ptr; ptr += y; dest[y] = *ptl; ptl += x; dest++;
 			}
-			*dest++ = *ptr++;
 		}
-		while (ptl < m);
+		m += 2;
+
+		while (ptl < m)
+		{
+			*dest++ = cmp(ptl, ptr) <= 0 ? *ptl++ : *ptr++;
+		}
 
 		do *dest++ = *ptr++; while (ptr < e);
 	}
 	else if (cmp(m - block / 4, e - 1) > 0)
 	{
-		do
+		e -= 2;
+
+		while (ptr < e)
 		{
-			if (cmp(ptl, ptr) > 0)
+			if (cmp(ptl, ptr + 1) > 0)
 			{
-				*dest++ = *ptr++;
-				continue;
+				*dest++ = *ptr++; *dest++ = *ptr++;
 			}
-			*dest++ = *ptl++;
-			if (cmp(ptl, ptr) > 0)
+			else if (cmp(ptl + 1, ptr) <= 0)
 			{
-				*dest++ = *ptr++;
-				continue;
+				*dest++ = *ptl++; *dest++ = *ptl++;
 			}
-			*dest++ = *ptl++;
-			if (cmp(ptl, ptr) > 0)
+			else 
 			{
-				*dest++ = *ptr++;
-				continue;
+				x = cmp(ptl, ptr) <= 0; y = !x; dest[x] = *ptr; ptr += 1; dest[y] = *ptl; ptl += 1; dest += 2;
+				x = cmp(ptl, ptr) <= 0; y = !x; dest[x] = *ptr; ptr += y; dest[y] = *ptl; ptl += x; dest++;
 			}
-			*dest++ = *ptl++;
 		}
-		while (ptr < e);
+		e += 2;
+
+		while (ptr < e)
+		{
+			*dest++ = cmp(ptl, ptr) > 0 ? *ptr++ : *ptl++;
+		}
 
 		do *dest++ = *ptl++; while (ptl < m);
 	}
@@ -533,7 +544,7 @@ void FUNC(quad_merge_block)(VAR *array, VAR *swap, size_t block, CMPFUNC *cmp)
 	FUNC(forward_merge)(array, swap, block_x_2, cmp); // step 3
 }
 
-void FUNC(quad_merge)(VAR *array, VAR *swap, size_t swap_size, size_t nmemb, size_t block, CMPFUNC *cmp)
+size_t FUNC(quad_merge)(VAR *array, VAR *swap, size_t swap_size, size_t nmemb, size_t block, CMPFUNC *cmp)
 {
 	register VAR *pta, *pte;
 
@@ -559,11 +570,14 @@ void FUNC(quad_merge)(VAR *array, VAR *swap, size_t swap_size, size_t nmemb, siz
 	}
 
 	FUNC(tail_merge)(array, swap, swap_size, nmemb, block / 4, cmp);
+
+	return block / 2;
 }
 
 void FUNC(partial_forward_merge)(VAR *array, VAR *swap, size_t nmemb, size_t block, CMPFUNC *cmp)
 {
 	VAR *r, *m, *e, *s; // right, middle, end, swap
+	size_t x, y;
 
 	r = array + block;
 	e = array + nmemb - 1;
@@ -573,113 +587,78 @@ void FUNC(partial_forward_merge)(VAR *array, VAR *swap, size_t nmemb, size_t blo
 	s = swap;
 	m = swap + block - 1;
 
-	if (cmp(m, e) <= 0)
+	while (s <= m - 2 && r <= e - 2)
 	{
-		do
+		if (cmp(s, r + 1) > 0)
 		{
-			while (cmp(s, r) > 0)
-			{
-				*array++ = *r++;
-			}
-			*array++ = *s++;
+			*array++ = *r++; *array++ = *r++;
 		}
-		while (s <= m);
+		else if (cmp(s + 1, r) <= 0)
+		{
+			*array++ = *s++; *array++ = *s++;
+		}
+		else 
+		{
+			x = cmp(s, r) <= 0; y = !x; array[x] = *r; r += 1; array[y] = *s; s += 1; array += 2;
+			x = cmp(s, r) <= 0; y = !x; array[x] = *r; r += y; array[y] = *s; s += x; array++;
+		}
 	}
-	else
+
+	while (s <= m && r <= e)
 	{
-		do
-		{
-			if (cmp(s, r) > 0)
-			{
-				*array++ = *r++;
-				continue;
-			}
-			*array++ = *s++;
+		*array++ = cmp(s, r) <= 0 ? *s++ : *r++;
+	}
 
-			if (cmp(s, r) > 0)
-			{
-				*array++ = *r++;
-				continue;
-			}
-			*array++ = *s++;
-
-			if (cmp(s, r) > 0)
-			{
-				*array++ = *r++;
-				continue;
-			}
-			*array++ = *s++;
-		}
-		while (r <= e);
-
-		do *array++ = *s++; while (s <= m);
+	while (s <= m)
+	{
+		*array++ = *s++;
 	}
 }
 
 void FUNC(partial_backward_merge)(VAR *array, VAR *swap, size_t nmemb, size_t block, CMPFUNC *cmp)
 {
-	VAR *r, *m, *e, *s; // right, middle, end, swap
+	VAR *m, *e, *s; // middle, end, swap
+	size_t x, y;
 
-	m = array + block;
+	m = array + block - 1;
 	e = array + nmemb - 1;
-	r = m--;
 
-	if (cmp(m, r) <= 0)
+	if (cmp(m, m + 1) <= 0)
 	{
 		return;
 	}
 
-	while (cmp(m, e) <= 0)
+	memcpy(swap, array + block, (nmemb - block) * sizeof(VAR));
+
+	s = swap + nmemb - block - 1;
+
+	while (s >= swap + 2 && m >= array + 2)
 	{
-		e--;
-	}
-
-	s = swap;
-
-	do *s++ = *r++; while (r <= e);
-
-	s--;
-
-	*e-- = *m--;
-
-	if (cmp(array, swap) <= 0)
-	{
-		do
+		if (cmp(m - 1, s) > 0)
 		{
-			while (cmp(m, s) > 0)
-			{
-				*e-- = *m--;
-			}
+			*e-- = *m--;
+			*e-- = *m--;
+		}
+		else if (cmp(m, s - 1) <= 0)
+		{
+			*e-- = *s--;
 			*e-- = *s--;
 		}
-		while (s >= swap);
-	}
-	else
-	{
-		do
+		else
 		{
-			if (cmp(m, s) > 0)
-			{
-				*e-- = *m--;
-				continue;
-			}
-			*e-- = *s--;
-			if (cmp(m, s) > 0)
-			{
-				*e-- = *m--;
-				continue;
-			}
-			*e-- = *s--;
-			if (cmp(m, s) > 0)
-			{
-				*e-- = *m--;
-				continue;
-			}
-			*e-- = *s--;
+			x = cmp(m, s) <= 0; y = !x; e--; e[x] = *s; s -= 1; e[y] = *m; m -= 1; e--;
+			x = cmp(m, s) <= 0; y = !x; e--; e[x] = *s; s -= x; e[y] = *m; m -= y;
 		}
-		while (m >= array);
+	}
 
-		do *e-- = *s--; while (s >= swap);
+	while (s >= swap && m >= array)
+	{
+		*e-- = cmp(m, s) > 0 ? *m-- : *s--;
+	}
+
+	while (s >= swap)
+	{
+		*e-- = *s--;
 	}
 }
 
@@ -997,7 +976,7 @@ void FUNC(quadsort)(void *array, size_t nmemb, CMPFUNC *cmp)
 	}
 }
 
-void FUNC(quadsort_swap)(void *array, void *swap, size_t nmemb, CMPFUNC *cmp)
+void FUNC(quadsort_swap)(void *array, void *swap, size_t swap_size, size_t nmemb, CMPFUNC *cmp)
 {
 	if (nmemb < 32)
 	{
@@ -1005,6 +984,10 @@ void FUNC(quadsort_swap)(void *array, void *swap, size_t nmemb, CMPFUNC *cmp)
 	}
 	else if (FUNC(quad_swap)(array, nmemb, cmp) == 0)
 	{
-		FUNC(quad_merge)(array, swap, nmemb, nmemb, 32, cmp);
+		size_t block;
+
+		block = FUNC(quad_merge)(array, swap, swap_size, nmemb, 32, cmp);
+
+		FUNC(blit_merge)(array, swap, swap_size, nmemb, block, cmp);
 	}
 }

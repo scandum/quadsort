@@ -25,11 +25,11 @@
 
 /*
 	To compile use:
-	
+
 	gcc -O3 bench.c
-	
+
 	or
-	
+
 	g++ -O3 -w -fpermissive bench.c
 */
 
@@ -64,6 +64,7 @@ __attribute__ ((noinline)) int cmp_int(const void * a, const void * b)
 
 	comparisons++;
 
+//	return (fa > fb) - (fa < fb);
 	return fa - fb;
 }
 
@@ -518,6 +519,15 @@ void validate()
 	free(v_array);
 }
 
+unsigned int bit_reverse(unsigned int x)
+{
+    x = (((x & 0xaaaaaaaa) >> 1) | ((x & 0x55555555) << 1));
+    x = (((x & 0xcccccccc) >> 2) | ((x & 0x33333333) << 2));
+    x = (((x & 0xf0f0f0f0) >> 4) | ((x & 0x0f0f0f0f) << 4));
+    x = (((x & 0xff00ff00) >> 8) | ((x & 0x00ff00ff) << 8));
+
+    return((x >> 16) | (x << 15));
+}
 
 int main(int argc, char **argv)
 {
@@ -638,7 +648,7 @@ int main(int argc, char **argv)
 	free(dv_array);
 
 	printf("\n");
-	
+
 	// 64 bit
 
 	la_array = (long long *) malloc(max * sizeof(long long));
@@ -697,6 +707,21 @@ int main(int argc, char **argv)
 		test_sort(a_array, r_array, v_array, max, max, samples, repetitions, qsort, sorts[cnt], "random order", sizeof(int), cmp_int);
 	}
 
+	// generic
+
+	for (cnt = 0 ; cnt < mem ; cnt++)
+	{
+		r_array[cnt] = rand() % 100;
+	}
+
+	memcpy(v_array, r_array, max * sizeof(int));
+	quadsort(v_array, max, sizeof(int), cmp_int);
+
+	for (cnt = 0 ; cnt < sizeof(sorts) / sizeof(char *) ; cnt++)
+	{
+		test_sort(a_array, r_array, v_array, max, max, samples, repetitions, qsort, sorts[cnt], "random % 100", sizeof(int), cmp_int);
+	}
+
 	// ascending
 
 	for (cnt = 0 ; cnt < mem ; cnt++)
@@ -721,37 +746,17 @@ int main(int argc, char **argv)
 		r_array[cnt] = rand();
 	}
 
+	quadsort(r_array + max / 4 * 0, max / 4, sizeof(int), cmp_int);
+	quadsort(r_array + max / 4 * 1, max / 4, sizeof(int), cmp_int);
+	quadsort(r_array + max / 4 * 2, max / 4, sizeof(int), cmp_int);
+	quadsort(r_array + max / 4 * 3, max / 4, sizeof(int), cmp_int);
+
 	memcpy(v_array, r_array, max * sizeof(int));
-	quadsort(v_array + max / 4 * 0, max / 4, sizeof(int), cmp_int);
-	quadsort(v_array + max / 4 * 1, max / 4, sizeof(int), cmp_int);
-	quadsort(v_array + max / 4 * 2, max / 4, sizeof(int), cmp_int);
-	quadsort(v_array + max / 4 * 3, max / 4, sizeof(int), cmp_int);
-
-	for (rep = 0 ; rep < repetitions ; rep++)
-	{
-		memcpy(r_array + rep * max, v_array, max * sizeof(int));
-	}
-
 	quadsort(v_array, max, sizeof(int), cmp_int);
 
 	for (cnt = 0 ; cnt < sizeof(sorts) / sizeof(char *) ; cnt++)
 	{
 		test_sort(a_array, r_array, v_array, max, max, samples, repetitions, qsort, sorts[cnt], "ascending saw", sizeof(int), cmp_int);
-	}
-
-	// generic
-
-	for (cnt = 0 ; cnt < mem ; cnt++)
-	{
-		r_array[cnt] = rand() % 100;
-	}
-
-	memcpy(v_array, r_array, max * sizeof(int));
-	quadsort(v_array, max, sizeof(int), cmp_int);
-
-	for (cnt = 0 ; cnt < sizeof(sorts) / sizeof(char *) ; cnt++)
-	{
-		test_sort(a_array, r_array, v_array, max, max, samples, repetitions, qsort, sorts[cnt], "generic order", sizeof(int), cmp_int);
 	}
 
 	// descending
@@ -776,17 +781,12 @@ int main(int argc, char **argv)
 		r_array[cnt] = rand();
 	}
 
+	quadsort(r_array + max / 4 * 0, max / 4, sizeof(int), cmp_rev);
+	quadsort(r_array + max / 4 * 1, max / 4, sizeof(int), cmp_rev);
+	quadsort(r_array + max / 4 * 2, max / 4, sizeof(int), cmp_rev);
+	quadsort(r_array + max / 4 * 3, max / 4, sizeof(int), cmp_rev);
+
 	memcpy(v_array, r_array, max * sizeof(int));
-	quadsort(v_array + max / 4 * 0, max / 4, sizeof(int), cmp_rev);
-	quadsort(v_array + max / 4 * 1, max / 4, sizeof(int), cmp_rev);
-	quadsort(v_array + max / 4 * 2, max / 4, sizeof(int), cmp_rev);
-	quadsort(v_array + max / 4 * 3, max / 4, sizeof(int), cmp_rev);
-
-	for (rep = 0 ; rep < repetitions ; rep++)
-	{
-		memcpy(r_array + rep * max, v_array, max * sizeof(int));
-	}
-
 	quadsort(v_array, max, sizeof(int), cmp_int);
 
 	for (cnt = 0 ; cnt < sizeof(sorts) / sizeof(char *) ; cnt++)
@@ -859,6 +859,21 @@ int main(int argc, char **argv)
 
 		test_sort(a_array, r_array, v_array, max, max, samples, repetitions, qsort, sorts[cnt], dist, sizeof(int), cmp_stable);
 	}
+
+        // bit-reversal
+
+        for (cnt = 0 ; cnt < mem ; cnt++)
+        {
+                r_array[cnt] = bit_reverse(cnt);
+        }
+
+        memcpy(v_array, r_array, max * sizeof(int));
+        quadsort(v_array, max, sizeof(int), cmp_int);
+
+        for (cnt = 0 ; cnt < sizeof(sorts) / sizeof(char *) ; cnt++)
+        {
+                test_sort(a_array, r_array, v_array, max, max, samples, repetitions, qsort, sorts[cnt], "bit reversal", sizeof(int), cmp_int);
+        }
 
 	goto end;
 

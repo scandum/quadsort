@@ -24,7 +24,7 @@
 */
 
 /*
-	quadsort 1.1.5.1
+	quadsort 1.1.5.2
 */
 
 #ifndef QUADSORT_H
