@@ -58,8 +58,7 @@ are rarely comparing truly random data, so in any instance where data is
 more likely to be orderly than disorderly this shift in probability will give
 an advantage.
 
-There is also an overall performance increase due to the elimination of
-wasteful swapping. In C the basic quad swap looks as following:
+In C the basic quad swap looks as following:
 ```c
     if (val[0] > val[1])
     {
@@ -122,8 +121,6 @@ wasteful swapping. In C the basic quad swap looks as following:
        }
     }
 ```
-In the case the array cannot be perfectly divided by 4, the tail, existing
-of 1-3 elements, is sorted using the traditional swap.
 
 In-place quad swap
 ------------------
@@ -131,66 +128,9 @@ There are however several problems with the simple quad swap above. If an array 
 
 To solve these problems the quad swap needs to be implemented in-place.
 
-Chain swap
-----------
-The chain swap is easiest explained with an example. Traditionally many sorts would sort three random values by executing three binary swaps.
-```c
-int swap_two(int a, int b, int swap)
-{
-    if (a > b)
-    {
-        swap = a; a = b; b = swap;
-    }
-}
-
-int swap_three(int array[], swap)
-{
-    swap_two(array[0], array[1], swap);
-    swap_two(array[1], array[2], swap);
-    swap_two(array[0], array[1], swap);
-}
-```
-While placing the swap operation `swap = a;a = b;b = swap;` on one line might be confusing, it does illustrate the symmetric nature of the assignment better than placing it on three lines.
-
-Swapping like this, while convenient, is obviously not the most efficient route to take. So an in-place quadswap implements the sorting of three values as following.
-```c
-int swap_three(int array[], swap)
-{
-    if (array[0] > array[1])
-    {
-        if (array[0] <= array[2])
-        {
-            swap = array[0]; array[0] = array[1]; array[1] = swap;
-        }
-        else if (array[1] > array[2])
-        {
-            swap = array[0]; array[0] = array[2]; array[2] = swap;
-        }
-        else
-        {
-            swap = array[0]; array[0] = array[1]; array[1] = array[2]; array[2] = swap;
-        }
-    }
-    else if (array[1] > array[2])
-    {
-        if (array[0] > array[2])
-        {
-            swap = array[2]; array[2] = array[1]; array[1] = array[0]; array[0] = swap;
-        }
-        else
-        {
-            swap = array[2]; array[2] = array[1]; array[1] = swap;
-        }
-    }
-}
-```
-While swapping like this takes up a lot more real estate the advantages should be pretty clear. By doing a triple swap you always perform 3 comparisons and up to 3 swaps. By conjoining the three operations you perform only 2 comparisons in the best case and the swaps are chained together turning a worst case of 9 assignments into a worst case of 4.
-
-If the array is already in-order no assignments take place.
-
 Reverse order handling
 ----------------------
-As mentioned previously, reverse order data has a high degree of orderliness and subsequently it can be sorted efficiently. In fact, if a quad swap were to turn **9 8 7 6  5 4 3 2  1** into **6 7 8 9  2 3 4 5  1** it would be taking a step backward instead of forward. Reverse order data is typically handled using a simple reversal function, as following.
+Reverse order data is typically handled using a simple reversal function, as following.
 ```c
 int reverse(int array[], int start, int end, int swap)
 {
@@ -210,22 +150,12 @@ can do is sort it in **n** comparisons and **n log n** moves.
 Run detection, as the name implies, comes with a detection cost. Thanks
 to the laws of probability a quad swap can cheat however. The chance of
 4 random numbers having the order **4 3 2 1** is 1 in 24. So when sorting
-random blocks of 4 elements, by expanding the sorting network, a quad
-swap only has to check if it's dealing with a reverse-order run when it
-encounters a reverse order sequence (like **4 3 2 1**), which for random
-data occurs in 4.16% of cases.
+random data we'll only make a wasteful run check in 4.16% of cases.
 
 What about run detection for in-order data? While we're turning
 **n log n** moves into **n** moves with reverse order run detection, we'd be
-turning **0** moves into **0** moves with forward run detection. There would
-still be the advantage of only having to check in-order runs in 4.16% of
-cases. However, the benefit of turning **n log n** moves into **0** moves 
-is so massive that we want to check for in-order runs in 100% of cases.
-
-But doing in-order run checks in the quad swap routine is not efficient
-because that would mean we need to start remembering run lengths and
-perform other kinds of algorithmic gymnastics. Instead we keep it simple
-and check in-order runs at a later stage.
+turning **0** moves into **0** moves with forward run detection. So there's
+no point in doing so.
 
 The next optimization is to write the quad swap in such a way that we can
 perform a simple check to see if the entire array was in reverse order,
@@ -233,24 +163,64 @@ if so, the sort is finished.
 
 One final optimization, reverse order handling is only beneficial on
 runs longer than 4 elements. When no reverse order run is detected
-the next 4 elements are merged with the first 4 elements.
+the next 4 elements are merged with the first 4 elements. This reduces
+the chance of a wasteful run check to 2.08%.
 
 At the end of the loop the array has been turned into a series of ordered
 blocks of 8 elements.
 
+Ping Pong Merge
+---------------
+Now there are a bunch of blocks of 8 sorted elements it's time to start merging.
+Traditionally mergesorts would merge two blocks to swap memory, then copy
+them back to main memory.
+```
+main memory ┌────────┐┌────────┐
+            └────────┘└────────┘
+                  ↓ merge ↓
+swap memory ┌──────────────────┐
+            └──────────────────┘
+                   ↓ copy ↓
+main memory ┌──────────────────┐
+            └──────────────────┘
+```
+This doubles the amount of moves and we can fix this by merging 4 blocks at once
+using a ping pong merge like so:
+```
+main memory ┌────────┐┌────────┐┌────────┐┌────────┐
+            └────────┘└────────┘└────────┘└────────┘
+                  ↓ merge ↓           ↓ merge ↓
+swap memory ┌──────────────────┐┌──────────────────┐
+            └──────────────────┘└──────────────────┘
+                           ↓ merge ↓
+main memory ┌──────────────────────────────────────┐
+            └──────────────────────────────────────┘
+```
+
+Skipping
+--------
+
+Just like with the quad swap it is beneficial to check whether the 4 blocks
+are in-order.
+
+In the case of the 4 blocks being in-order the merge operation is skipped,
+as this would be pointless. Because reverse order data is handled in the
+quad swap there is no need to check for reverse order blocks.
+
+This allows quadsort to sort in-order sequences using **n** comparisons instead
+of **n * log n** comparisons.
+
 Parity merge
 ------------
-The parity merge is a boundless merge used to turn 4 blocks of 8 elements into
-blocks of 32 elements. While it lacks adaptive properties it can be fully
-unrolled. Performance wise it's slightly faster than insertion sort.
-
-It takes advantage of the fact that if you have two n length arrays, you can
-fully merge the two arrays by performing n merge operations on the start of
-each array, and n merge operations on the end of each array. The arrays must
+A parity merge takes advantage of the fact that if you have two n length arrays,
+you can fully merge the two arrays by performing n merge operations on the start
+of each array, and n merge operations on the end of each array. The arrays must
 be of exactly equal length.
 
-To sort 4 blocks of 8 elements into a sorted block of 32 elements takes 64
-comparisons, 64 moves, and requires 32 elements of auxiliary memory.
+The main advantage ovf a parity merge over a traditional merge is that the loop
+of a parity merge can be fully unrolled. To sort 4 blocks of 8 elements into a
+sorted block of 32 elements takes 64 comparisons, 64 moves, and requires 32
+elements of auxiliary memory.
 
 Branchless parity merge
 -----------------------
@@ -260,99 +230,41 @@ is that two separate memory regions can be accessed in the same loop with
 no additional overhead. This makes the routine up to 2.5 times faster on
 random data.
 
-Quad merge
-----------
-In the first stage of quadsort the quad swap and parity merge are used to
-pre-sort the array into sorted 32-element blocks as described above.
-
-The second stage uses an approach similar to the parity merge, but it's
-sorting blocks of 32, 128, 512, or more elements.
-
-A quad merge (sometimes referred to as a ping-pong merge) can be visualized as following:
-```
-    main memory:  [A][B][C][D]
-    swap memory:  [A  B]        step 1
-    swap memory:  [A  B][C  D]  step 2
-    main memory:  [A  B  C  D]  step 3
-```
-
-In the first row are 4 sorted blocks, A, B, C and D. In the second row,
-step 1, block A and B have been merged to swap memory into a single sorted block.
-In the third row, step 2, block C and D have also been merged to swap memory. In the last row,
-step 3, the blocks are merged back to main memory and we're left with 1 fully
-sorted block.
-
-The following is a visualization of an array with 256 random elements getting quad swapped and quad merged
-into sorted blocks of 32 elements using parity merges.
+The following is a visualization of an array with 256 random elements getting
+turned into sorted blocks of 32 elements using ping pong parity merges.
 
 ![quadsort visualization](/images/quadswap.gif)
 
-Skipping
---------
+Quad merge
+----------
+While a branchless parity merge sorts random data faster, it sorts
+ordered data slower.
 
-Just like with the quad swap it is beneficial to check whether the 4 blocks
-are in-order.
+To deal with this the quad merge works in a similar way to the quad swap.
+Instead of merging the ends of two arrays two items at a time, it merges
+four items at a time.
+┌───┐┌───┐┌───┐    ┌───┐┌───┐┌───┐
+│ A ││ B ││ C │    │ X ││ Y ││ Z │
+└───┘└───┘└───┘    └───┘└───┘└───┘
+When merging ABC and XYZ it first checks if B is smaller or equal to X. If
+that's the case A and B are copied to swap. Next it checks if A is greater
+than Y. If that's the case X and Y are copied to swap.
 
-In the case of the 4 blocks being in-order the merge operation is skipped,
-as this would be pointless. This does however require an extra if check, and
-for randomly sorted data this if check becomes increasingly unlikely to be
-true as the block size increases. Fortunately the frequency of this if check
-is quartered each loop, while the potential benefit is quadrupled each loop.
+If either check is false it's known that the two remaining distributions
+are A X and X A. This allows performing an optimal branchless merge. Since
+it's known each block still has at least 1 item remaining (B and Y) and
+there is a high chance of the data to be random, another (sub-optimal)
+branchless merge can be performed.
 
-Because reverse order data is handled in the quad swap there is no need to
-check for reverse order blocks.
+Overall the quad merge gives a decent performance gain.
 
-In the case only 2 out of 4 blocks are in-order the comparisons in the merge
-itself are unnecessary and subsequently omitted. The data still needs to be
-copied to swap memory.
+Merge strategy
+--------------
+Quadsort will merge blocks of 8 into blocks of 32, which it will merge into
+blocks of 128, 512, 2048, etc.
 
-This allows quadsort to sort in-order sequences using **n** comparisons instead
-of **n * log n** comparisons.
-
-Boundary checks
----------------
-
-Another issue with the traditional merge sort is that it performs wasteful
-boundary checks. This looks as following:
-```c
-    while (a <= a_max && b <= b_max)
-        if (a <= b)
-            [insert a++]
-        else
-            [insert b++]
-```
-To optimize this quadsort compares the last element of sequence A against
-the last element of sequence B. If the last element of sequence A is smaller
-than the last element of sequence B we know that the (b < b_max) if check
-will always be false because sequence A will be fully merged first.
-
-Similarly if the last element of sequence A is greater than the last element
-of sequence B we know that the (a < a_max) if check will always be false.
-This looks as following:
-```c
-    if (val[a_max] <= val[b_max])
-        while (a <= a_max)
-        {
-            while (a > b)
-                [insert b++]
-            [insert a++]
-        }
-    else
-        while (b <= b_max)
-        {
-            while (a <= b)
-                [insert a++]
-            [insert b++]
-        }
-```
-This unguarded merge optimization is most effective in the final tail merge.
-
-Branchless parity quad merge
------------------
-Due to the additional overhead of a branchless parity merge it's only faster
-on random data. One additional comparison is performed during the quad merge
-routine to determine whether it'd be faster to use a branchless parity merge
-or a traditional merge that can take advantage of branch prediction.
+Quadsort will use two additional comparisons to see if it will be faster
+to parity merge or quad merge, and pick either one.
 
 tail merge
 ----------
@@ -364,9 +276,9 @@ To work around this problem the remainder of the array is sorted using a tail
 merge.
 
 The main advantage of the tail merge is that it allows reducing the swap
-space of quadsort to **n / 2** and that it has been optimized to merge arrays
-of different lengths. It also simplifies the quad merge routine which only
-needs to work on arrays of equal length.
+space of quadsort to **n / 2** and that the quad merge strategy works best
+on arrays of different lengths. It also simplifies the quad merge routine
+which only needs to work on arrays of equal length.
 
 rotate merge
 ------------
@@ -393,7 +305,7 @@ Quadsort makes n comparisons when the data is already sorted or reverse sorted.
 
 Data Types
 ----------
-The C implementation of quadsort supports long doubles and 8, 16, 32, and 64 bit data types. By using pointers it's possible to sort any other data type.
+The C implementation of quadsort supports long doubles and 8, 16, 32, and 64 bit data types. By using pointers it's possible to sort any other data type, like strings.
 
 Interface
 ---------
@@ -405,11 +317,11 @@ By default quadsort uses n / 4 swap memory. If memory allocation fails quadsort 
 
 Performance
 -----------
-Quadsort is the fastest merge sort written to date. It is faster than quicksort for most data distributions.
+Quadsort is one of the fastest merge sorts written to date. It is faster than quicksort for most data distributions, with the notable exception of generic data.
 
 Variants
 --------
-- [blitsort](https://github.com/scandum/blitsort) is a quadsort based rotate merge sort.
+- [blitsort](https://github.com/scandum/blitsort) is a quadsort based rotate merge sort. It aims to be the fastest in-place stable sort.
 
 - [fluxsort](https://github.com/scandum/fluxsort) is a hybrid stable quicksort / quadsort with improved performance on random data. It is currently the fastest comparison sort for random data.
 
@@ -455,45 +367,45 @@ on 100,000 elements. A table with the best and average time in seconds can be un
 
 |      Name |    Items | Type |     Best |  Average |      Reps | Samples |     Distribution |
 | --------- | -------- | ---- | -------- | -------- | --------- | ------- | ---------------- |
-|stablesort |   100000 |   32 | 0.006081 | 0.006114 |         1 |     100 |     random order |
-|  quadsort |   100000 |   32 | 0.002855 | 0.002869 |         1 |     100 |     random order |
-|   timsort |   100000 |   32 | 0.007582 | 0.007609 |         1 |     100 |     random order |
+|stablesort |   100000 |   32 | 0.006050 | 0.006073 |         1 |     100 |     random order |
+|  quadsort |   100000 |   32 | 0.002677 | 0.002690 |         1 |     100 |     random order |
+|   timsort |   100000 |   32 | 0.007572 | 0.007591 |         1 |     100 |     random order |
 |           |          |      |          |          |           |         |                  |
-|stablesort |   100000 |   32 | 0.003050 | 0.003086 |         1 |     100 |     random % 100 |
-|  quadsort |   100000 |   32 | 0.002353 | 0.002362 |         1 |     100 |     random % 100 |
-|   timsort |   100000 |   32 | 0.004603 | 0.004634 |         1 |     100 |     random % 100 |
+|stablesort |   100000 |   32 | 0.003881 | 0.003904 |         1 |     100 |     random % 100 |
+|  quadsort |   100000 |   32 | 0.002324 | 0.002337 |         1 |     100 |     random % 100 |
+|   timsort |   100000 |   32 | 0.005563 | 0.005590 |         1 |     100 |     random % 100 |
 |           |          |      |          |          |           |         |                  |
-|stablesort |   100000 |   32 | 0.000786 | 0.000791 |         1 |     100 |        ascending |
-|  quadsort |   100000 |   32 | 0.000065 | 0.000066 |         1 |     100 |        ascending |
-|   timsort |   100000 |   32 | 0.000045 | 0.000045 |         1 |     100 |        ascending |
+|stablesort |   100000 |   32 | 0.000652 | 0.000673 |         1 |     100 |        ascending |
+|  quadsort |   100000 |   32 | 0.000071 | 0.000071 |         1 |     100 |        ascending |
+|   timsort |   100000 |   32 | 0.000070 | 0.000070 |         1 |     100 |        ascending |
 |           |          |      |          |          |           |         |                  |
-|stablesort |   100000 |   32 | 0.001468 | 0.001534 |         1 |     100 |    ascending saw |
-|  quadsort |   100000 |   32 | 0.000893 | 0.000899 |         1 |     100 |    ascending saw |
-|   timsort |   100000 |   32 | 0.000842 | 0.000849 |         1 |     100 |    ascending saw |
+|stablesort |   100000 |   32 | 0.001346 | 0.001411 |         1 |     100 |    ascending saw |
+|  quadsort |   100000 |   32 | 0.000777 | 0.000783 |         1 |     100 |    ascending saw |
+|   timsort |   100000 |   32 | 0.000866 | 0.000872 |         1 |     100 |    ascending saw |
 |           |          |      |          |          |           |         |                  |
-|stablesort |   100000 |   32 | 0.000868 | 0.000906 |         1 |     100 |       pipe organ |
-|  quadsort |   100000 |   32 | 0.000229 | 0.000231 |         1 |     100 |       pipe organ |
-|   timsort |   100000 |   32 | 0.000169 | 0.000171 |         1 |     100 |       pipe organ |
+|stablesort |   100000 |   32 | 0.000798 | 0.000817 |         1 |     100 |       pipe organ |
+|  quadsort |   100000 |   32 | 0.000336 | 0.000339 |         1 |     100 |       pipe organ |
+|   timsort |   100000 |   32 | 0.000191 | 0.000192 |         1 |     100 |       pipe organ |
 |           |          |      |          |          |           |         |                  |
-|stablesort |   100000 |   32 | 0.000899 | 0.000911 |         1 |     100 |       descending |
-|  quadsort |   100000 |   32 | 0.000053 | 0.000054 |         1 |     100 |       descending |
-|   timsort |   100000 |   32 | 0.000088 | 0.000092 |         1 |     100 |       descending |
+|stablesort |   100000 |   32 | 0.000893 | 0.000905 |         1 |     100 |       descending |
+|  quadsort |   100000 |   32 | 0.000056 | 0.000057 |         1 |     100 |       descending |
+|   timsort |   100000 |   32 | 0.000101 | 0.000101 |         1 |     100 |       descending |
 |           |          |      |          |          |           |         |                  |
-|stablesort |   100000 |   32 | 0.001001 | 0.001027 |         1 |     100 |   descending saw |
-|  quadsort |   100000 |   32 | 0.000414 | 0.000417 |         1 |     100 |   descending saw |
-|   timsort |   100000 |   32 | 0.000301 | 0.000304 |         1 |     100 |   descending saw |
+|stablesort |   100000 |   32 | 0.001346 | 0.001371 |         1 |     100 |   descending saw |
+|  quadsort |   100000 |   32 | 0.000777 | 0.000792 |         1 |     100 |   descending saw |
+|   timsort |   100000 |   32 | 0.000860 | 0.000865 |         1 |     100 |   descending saw |
 |           |          |      |          |          |           |         |                  |
-|stablesort |   100000 |   32 | 0.002147 | 0.002211 |         1 |     100 |      random tail |
-|  quadsort |   100000 |   32 | 0.000898 | 0.000906 |         1 |     100 |      random tail |
-|   timsort |   100000 |   32 | 0.001996 | 0.002015 |         1 |     100 |      random tail |
+|stablesort |   100000 |   32 | 0.002018 | 0.002073 |         1 |     100 |      random tail |
+|  quadsort |   100000 |   32 | 0.000892 | 0.000899 |         1 |     100 |      random tail |
+|   timsort |   100000 |   32 | 0.002013 | 0.002027 |         1 |     100 |      random tail |
 |           |          |      |          |          |           |         |                  |
-|stablesort |   100000 |   32 | 0.003606 | 0.003638 |         1 |     100 |      random half |
-|  quadsort |   100000 |   32 | 0.001656 | 0.001662 |         1 |     100 |      random half |
-|   timsort |   100000 |   32 | 0.004015 | 0.004031 |         1 |     100 |      random half |
+|stablesort |   100000 |   32 | 0.003524 | 0.003572 |         1 |     100 |      random half |
+|  quadsort |   100000 |   32 | 0.001588 | 0.001596 |         1 |     100 |      random half |
+|   timsort |   100000 |   32 | 0.004023 | 0.004037 |         1 |     100 |      random half |
 |           |          |      |          |          |           |         |                  |
-|stablesort |   100000 |   32 | 0.001105 | 0.001127 |         1 |     100 |  ascending tiles |
-|  quadsort |   100000 |   32 | 0.000920 | 0.000929 |         1 |     100 |  ascending tiles |
-|   timsort |   100000 |   32 | 0.000943 | 0.000979 |         1 |     100 |  ascending tiles |
+|stablesort |   100000 |   32 | 0.000973 | 0.001010 |         1 |     100 |  ascending tiles |
+|  quadsort |   100000 |   32 | 0.000859 | 0.000866 |         1 |     100 |  ascending tiles |
+|   timsort |   100000 |   32 | 0.000941 | 0.001028 |         1 |     100 |  ascending tiles |
 
 </details>
 
