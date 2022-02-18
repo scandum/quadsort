@@ -265,7 +265,7 @@ blocks of 128, 512, 2048, etc.
 Quadsort will use two additional comparisons to see if it will be faster
 to parity merge or quad merge, and pick either one.
 
-tail merge
+Tail merge
 ----------
 When sorting an array of 33 elements you end up with a sorted array of 32
 elements and a sorted array of 1 element in the end. If a program sorts in
@@ -276,14 +276,14 @@ merge.
 
 The main advantage of the tail merge is that it allows reducing the swap
 space of quadsort to **n / 2** and that the quad merge strategy works best
-on arrays of different lengths. It also simplifies the quad merge routine
+on arrays of different lengths. It also simplifies the ping-pong merge routine
 which only needs to work on arrays of equal length.
 
-rotate merge
+Rotate merge
 ------------
 By using rotations the swap space of quadsort is reduced further from **n / 2**
 to **n / 4**. Rotations can be performed with minimal performance loss by using
-[monobound binary searches](https://github.com/scandum/binary_search) and [trinity rotations](https://github.com/scandum/rotate).
+[monobound binary searches](https://github.com/scandum/binary_search) and [trinity / bridge rotations](https://github.com/scandum/rotate).
 
 Big O
 -----
@@ -297,10 +297,10 @@ Big O
 ├───────────────┤├───────┼───────┼───────┤├───────┼───────┼───────┤├──────┤├─────────┤├─────────┤
 │quadsort       ││n      │n log n│n log n││1      │n      │n      ││yes   ││no       ││yes      │
 ├───────────────┤├───────┼───────┼───────┤├───────┼───────┼───────┤├──────┤├─────────┤├─────────┤
-│quicksort      ││n      │n log n│n²     ││1      │1      │1      ││no    ││yes      ││no       │
+│quicksort      ││n log n│n log n│n²     ││1      │1      │1      ││no    ││yes      ││no       │
 └───────────────┘└───────┴───────┴───────┘└───────┴───────┴───────┘└──────┘└─────────┘└─────────┘
 ```
-Quadsort makes n comparisons when the data is already sorted or reverse sorted.
+Quadsort makes n comparisons when the data is fully sorted or reverse sorted.
 
 Data Types
 ----------
