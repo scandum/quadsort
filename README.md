@@ -246,24 +246,48 @@ four items at a time.
 └───┘└───┘└───┘    └───┘└───┘└───┘
 ```
 When merging ABC and XYZ it first checks if B is smaller or equal to X. If
-that's the case A and B are copied to swap. Next it checks if A is greater
+that's the case A and B are copied to swap. If not, it checks if A is greater
 than Y. If that's the case X and Y are copied to swap.
 
 If either check is false it's known that the two remaining distributions
 are A X and X A. This allows performing an optimal branchless merge. Since
 it's known each block still has at least 1 item remaining (B and Y) and
-there is a high chance of the data to be random, another (sub-optimal)
+there is a high probability of the data to be random, another (sub-optimal)
 branchless merge can be performed.
 
+In C this looks as following:
+```c
+while (l < l_size - 1 && r < r_size - 1)
+{
+    if (left[l + 1] <= right[r])
+    {
+        swap[s++] = left[l++];
+        swap[s++] = left[l++];
+    }
+    else if (left[l] > right[r + 1])
+    {
+        swap[s++] = right[r++];
+        swap[s++] = right[r++];
+    }
+    else
+    {
+        a = left[l] > right[r];
+        x = !a;
+        swap[s + a] = left[l++];
+        swap[s + x] = right[r++];
+        s += 2;
+    }
+}
+```
 Overall the quad merge gives a decent performance gain.
 
 Merge strategy
 --------------
 Quadsort will merge blocks of 8 into blocks of 32, which it will merge into
-blocks of 128, 512, 2048, etc.
+blocks of 128, 512, 2048, 8192, etc.
 
-Quadsort will use two additional comparisons to see if it will be faster
-to parity merge or quad merge, and pick either one.
+For each ping-pong merge quadsort will perform two comparisons to see if it will be faster
+to parity merge or quad merge, and pick the best option.
 
 Tail merge
 ----------
@@ -271,13 +295,13 @@ When sorting an array of 33 elements you end up with a sorted array of 32
 elements and a sorted array of 1 element in the end. If a program sorts in
 intervals it should pick an optimal array size (32, 128, 512, etc) to do so.
 
-To work around this problem the remainder of the array is sorted using a tail
+To minimalize the impact the remainder of the array is sorted using a tail
 merge.
 
-The main advantage of the tail merge is that it allows reducing the swap
+The main advantage of a tail merge is that it allows reducing the swap
 space of quadsort to **n / 2** and that the quad merge strategy works best
-on arrays of different lengths. It also simplifies the ping-pong merge routine
-which only needs to work on arrays of equal length.
+on arrays of different lengths. It also greatly simplifies the ping-pong
+merge routine which only needs to work on arrays of equal length.
 
 Rotate merge
 ------------
