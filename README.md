@@ -169,9 +169,8 @@ the chance of a wasteful run check to 2.08%.
 At the end of the loop the array has been turned into a series of ordered
 blocks of 8 elements.
 
-Ping Pong Merge
+Ping-Pong Merge
 ---------------
-Now there are a bunch of blocks of 8 sorted elements it's time to start merging.
 Traditionally mergesorts would merge two blocks to swap memory, then copy
 them back to main memory.
 ```
@@ -180,19 +179,19 @@ main memory ┌────────┐┌────────┐
                   ↓ merge ↓
 swap memory ┌──────────────────┐
             └──────────────────┘
-                   ↓ copy ↓
+                  ↓ copy ↓
 main memory ┌──────────────────┐
             └──────────────────┘
 ```
 This doubles the amount of moves and we can fix this by merging 4 blocks at once
-using a ping pong merge like so:
+using a ping-pong merge like so:
 ```
 main memory ┌────────┐┌────────┐┌────────┐┌────────┐
             └────────┘└────────┘└────────┘└────────┘
                   ↓ merge ↓           ↓ merge ↓
 swap memory ┌──────────────────┐┌──────────────────┐
             └──────────────────┘└──────────────────┘
-                           ↓ merge ↓
+                            ↓ merge ↓
 main memory ┌──────────────────────────────────────┐
             └──────────────────────────────────────┘
 ```
@@ -217,10 +216,8 @@ you can fully merge the two arrays by performing n merge operations on the start
 of each array, and n merge operations on the end of each array. The arrays must
 be of exactly equal length.
 
-The main advantage ovf a parity merge over a traditional merge is that the loop
-of a parity merge can be fully unrolled. To sort 4 blocks of 8 elements into a
-sorted block of 32 elements takes 64 comparisons, 64 moves, and requires 32
-elements of auxiliary memory.
+The main advantage of a parity merge over a traditional merge is that the loop
+of a parity merge can be fully unrolled.
 
 Branchless parity merge
 -----------------------
@@ -231,7 +228,7 @@ no additional overhead. This makes the routine up to 2.5 times faster on
 random data.
 
 The following is a visualization of an array with 256 random elements getting
-turned into sorted blocks of 32 elements using ping pong parity merges.
+turned into sorted blocks of 32 elements using ping-pong parity merges.
 
 ![quadsort visualization](/images/quadswap.gif)
 
@@ -332,6 +329,16 @@ much smaller code size. Twinsort might be of use to people who want to port or u
 pointers or gotos.
 
 - [wolfsort](https://github.com/scandum/wolfsort) is a hybrid radixsort / fluxsort with improved performance on random data. It's mostly a proof of concept that only works on unsigned 32 and 64 bit integers. It's possibly the fastest radix sort for 32 bit integers, overall fluxsort is faster for 64 bit integers.
+
+Credits
+-------
+I personally invented the quad swap, quad merge, parity merge, branchless parity merge,
+monobound binary search, bridge rotation, and trinity rotation.
+
+The ping-pong merge had been independently implemented in wikisort prior to quadsort, and
+likely by others as well.
+
+Special kudos to [Musiccombo and Co](https://www.youtube.com/c/Musicombo) for getting me interested in rotations and branchless logic.
 
 Visualization
 -------------
