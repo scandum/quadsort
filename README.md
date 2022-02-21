@@ -342,6 +342,8 @@ Performance
 -----------
 Quadsort is one of the fastest merge sorts written to date. It is faster than quicksort for most data distributions, with the notable exception of generic data.
 
+On arrays exceeding the L1 cache quicksort has an advantage due to its ability to partition. For small arrays, in large part due code specific to small array handling, quadsort has the advantage.
+
 Variants
 --------
 - [blitsort](https://github.com/scandum/blitsort) is a quadsort based rotate merge sort. It aims to be the fastest in-place stable sort.
@@ -454,41 +456,41 @@ halves each time the number of items doubles. A table with the best and average 
 
 |      Name |    Items | Type |     Best |  Average |      Reps | Samples |     Distribution |
 | --------- | -------- | ---- | -------- | -------- | --------- | ------- | ---------------- |
-|stablesort |        8 |   32 | 0.006216 | 0.006264 |     65536 |     100 |         random 8 |
-|  quadsort |        8 |   32 | 0.002582 | 0.002616 |     65536 |     100 |         random 8 |
-|   timsort |        8 |   32 | 0.006350 | 0.006527 |     65536 |     100 |         random 8 |
+|stablesort |        8 |   32 | 0.006182 | 0.006221 |     65536 |     100 |         random 8 |
+|  quadsort |        8 |   32 | 0.001628 | 0.001644 |     65536 |     100 |         random 8 |
+|   timsort |        8 |   32 | 0.006378 | 0.006680 |     65536 |     100 |         random 8 |
 |           |          |      |          |          |           |         |                  |
-|stablesort |       32 |   32 | 0.009274 | 0.009420 |     16384 |     100 |        random 32 |
-|  quadsort |       32 |   32 | 0.004139 | 0.004197 |     16384 |     100 |        random 32 |
-|   timsort |       32 |   32 | 0.013048 | 0.013224 |     16384 |     100 |        random 32 |
+|stablesort |       32 |   32 | 0.009514 | 0.009653 |     16384 |     100 |        random 32 |
+|  quadsort |       32 |   32 | 0.003978 | 0.004041 |     16384 |     100 |        random 32 |
+|   timsort |       32 |   32 | 0.013349 | 0.013524 |     16384 |     100 |        random 32 |
 |           |          |      |          |          |           |         |                  |
-|stablesort |      128 |   32 | 0.012983 | 0.013039 |      4096 |     100 |       random 128 |
-|  quadsort |      128 |   32 | 0.005409 | 0.005488 |      4096 |     100 |       random 128 |
-|   timsort |      128 |   32 | 0.019890 | 0.020001 |      4096 |     100 |       random 128 |
+|stablesort |      128 |   32 | 0.012961 | 0.013043 |      4096 |     100 |       random 128 |
+|  quadsort |      128 |   32 | 0.005179 | 0.005270 |      4096 |     100 |       random 128 |
+|   timsort |      128 |   32 | 0.019949 | 0.020191 |      4096 |     100 |       random 128 |
 |           |          |      |          |          |           |         |                  |
-|stablesort |      512 |   32 | 0.016939 | 0.017043 |      1024 |     100 |       random 512 |
-|  quadsort |      512 |   32 | 0.006991 | 0.007075 |      1024 |     100 |       random 512 |
-|   timsort |      512 |   32 | 0.024692 | 0.024837 |      1024 |     100 |       random 512 |
+|stablesort |      512 |   32 | 0.016774 | 0.016886 |      1024 |     100 |       random 512 |
+|  quadsort |      512 |   32 | 0.006800 | 0.006895 |      1024 |     100 |       random 512 |
+|   timsort |      512 |   32 | 0.024646 | 0.024794 |      1024 |     100 |       random 512 |
 |           |          |      |          |          |           |         |                  |
-|stablesort |     2048 |   32 | 0.020756 | 0.020830 |       256 |     100 |      random 2048 |
-|  quadsort |     2048 |   32 | 0.008530 | 0.008581 |       256 |     100 |      random 2048 |
-|   timsort |     2048 |   32 | 0.029035 | 0.029147 |       256 |     100 |      random 2048 |
+|stablesort |     2048 |   32 | 0.020439 | 0.020530 |       256 |     100 |      random 2048 |
+|  quadsort |     2048 |   32 | 0.008351 | 0.008394 |       256 |     100 |      random 2048 |
+|   timsort |     2048 |   32 | 0.028911 | 0.029043 |       256 |     100 |      random 2048 |
 |           |          |      |          |          |           |         |                  |
-|stablesort |     8192 |   32 | 0.024663 | 0.024730 |        64 |     100 |      random 8192 |
-|  quadsort |     8192 |   32 | 0.010177 | 0.010233 |        64 |     100 |      random 8192 |
-|   timsort |     8192 |   32 | 0.033169 | 0.033263 |        64 |     100 |      random 8192 |
+|stablesort |     8192 |   32 | 0.024204 | 0.024298 |        64 |     100 |      random 8192 |
+|  quadsort |     8192 |   32 | 0.009967 | 0.010036 |        64 |     100 |      random 8192 |
+|   timsort |     8192 |   32 | 0.033020 | 0.033134 |        64 |     100 |      random 8192 |
 |           |          |      |          |          |           |         |                  |
-|stablesort |    32768 |   32 | 0.028623 | 0.028716 |        16 |     100 |     random 32768 |
-|  quadsort |    32768 |   32 | 0.011846 | 0.011891 |        16 |     100 |     random 32768 |
-|   timsort |    32768 |   32 | 0.037333 | 0.037443 |        16 |     100 |     random 32768 |
+|stablesort |    32768 |   32 | 0.028113 | 0.028206 |        16 |     100 |     random 32768 |
+|  quadsort |    32768 |   32 | 0.011645 | 0.011692 |        16 |     100 |     random 32768 |
+|   timsort |    32768 |   32 | 0.037227 | 0.037328 |        16 |     100 |     random 32768 |
 |           |          |      |          |          |           |         |                  |
-|stablesort |   131072 |   32 | 0.032613 | 0.032729 |         4 |     100 |    random 131072 |
-|  quadsort |   131072 |   32 | 0.013536 | 0.013589 |         4 |     100 |    random 131072 |
-|   timsort |   131072 |   32 | 0.041491 | 0.041605 |         4 |     100 |    random 131072 |
+|stablesort |   131072 |   32 | 0.032113 | 0.032197 |         4 |     100 |    random 131072 |
+|  quadsort |   131072 |   32 | 0.013344 | 0.013388 |         4 |     100 |    random 131072 |
+|   timsort |   131072 |   32 | 0.041431 | 0.041528 |         4 |     100 |    random 131072 |
 |           |          |      |          |          |           |         |                  |
-|stablesort |   524288 |   32 | 0.036639 | 0.036762 |         1 |     100 |    random 524288 |
-|  quadsort |   524288 |   32 | 0.015221 | 0.015301 |         1 |     100 |    random 524288 |
-|   timsort |   524288 |   32 | 0.045715 | 0.045853 |         1 |     100 |    random 524288 |
+|stablesort |   524288 |   32 | 0.036110 | 0.036244 |         1 |     100 |    random 524288 |
+|  quadsort |   524288 |   32 | 0.015046 | 0.015115 |         1 |     100 |    random 524288 |
+|   timsort |   524288 |   32 | 0.045705 | 0.045935 |         1 |     100 |    random 524288 |
 
 </details>
 
