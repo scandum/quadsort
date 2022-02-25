@@ -241,15 +241,15 @@ To deal with this the quad merge works in a similar way to the quad swap.
 Instead of merging the ends of two arrays two items at a time, it merges
 four items at a time.
 ```
-┌───┐┌───┐┌───┐    ┌───┐┌───┐┌───┐            ╭─╮  ┌───┐┌───┐┌───┐
-│ A ││ B ││ C │    │ X ││ Y ││ Z │        ┌───│?├──┤ A ││ B ││C/Z│
-└─┬─┘└─┬─┘└───┘    └─┬─┘└─┬─┘└───┘        │   ╰┬╯  └───┘└───┘└───┘
-  └────┴─────────────┴────┴───────────────┘    │  ╭─╮  ┌───┐┌───┐┌───┐
-                                               └──│?├──┤ X ││ Y ││A/Z│
-                                                  ╰┬╯  └───┘└───┘└───┘
-                                                   │   ┌───┐┌───┐┌───┐
-                                                   └───│A/X││X/A││B/Y│
-                                                       └───┘└───┘└───┘
+┌───┐┌───┐┌───┐    ┌───┐┌───┐┌───┐            ╭───╮  ┌───┐┌───┐┌───┐
+│ A ││ B ││ C │    │ X ││ Y ││ Z │        ┌───│B<X├──┤ A ││ B ││C/Z│
+└─┬─┘└─┬─┘└───┘    └─┬─┘└─┬─┘└───┘        │   ╰─┬─╯  └───┘└───┘└───┘
+  └────┴─────────────┴────┴───────────────┘     │  ╭───╮  ┌───┐┌───┐┌───┐
+                                                └──│A>Y├──┤ X ││ Y ││A/Z│
+                                                   ╰─┬─╯  └───┘└───┘└───┘
+                                                     │    ┌───┐┌───┐┌───┐
+                                                     └────│A/X││X/A││B/Y│
+                                                          └───┘└───┘└───┘
 ```
 When merging ABC and XYZ it first checks if B is smaller or equal to X. If
 that's the case A and B are copied to swap. If not, it checks if A is greater
