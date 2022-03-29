@@ -352,17 +352,19 @@ On arrays exceeding the L1 cache quicksort has an advantage due to its ability t
 
 Variants
 --------
-- [blitsort](https://github.com/scandum/blitsort) is a quadsort based rotate merge sort. It aims to be the fastest in-place stable sort.
+- [blitsort](https://github.com/scandum/blitsort) is a hybrid stable in-place rotate quicksort / quadsort.
 
-- [fluxsort](https://github.com/scandum/fluxsort) is a hybrid stable quicksort / quadsort with improved performance on random data. It is currently the fastest comparison sort for random data.
+- [crumsort](https://github.com/scandum/crumsort) is a hybrid unstable in-place quicksort / quadsort.
 
-- [gridsort](https://github.com/scandum/gridsort) is a hybrid cubesort / quadsort. Gridsort makes O(n) moves rather than the typical O(n log n) moves. It is the fastest online sort and might be of interest to those interested in data structures.
+- [fluxsort](https://github.com/scandum/fluxsort) is a hybrid stable quicksort / quadsort.
+
+- [gridsort](https://github.com/scandum/gridsort) is a hybrid stable cubesort / quadsort. Gridsort makes O(n) moves rather than the typical O(n log n) moves. It is an online sort and might be of interest to those interested in data structures.
 
 - [twinsort](https://github.com/scandum/twinsort) is a simplified quadsort with a
 much smaller code size. Twinsort might be of use to people who want to port or understand quadsort; it does not use
 pointers or gotos.
 
-- [wolfsort](https://github.com/scandum/wolfsort) is a hybrid radixsort / fluxsort with improved performance on random data. It's mostly a proof of concept that only works on unsigned 32 and 64 bit integers. It's possibly the fastest radix sort for 32 bit integers, overall fluxsort is faster for 64 bit integers.
+- [wolfsort](https://github.com/scandum/wolfsort) is a hybrid stable radixsort / fluxsort with improved performance on random data. It's mostly a proof of concept that only works on unsigned 32 bit integers. It defaults to fluxsort for 64 bit integers since it's faster.
 
 Credits
 -------
