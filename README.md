@@ -223,9 +223,9 @@ Branchless parity merge
 -----------------------
 Since the parity merge can be unrolled it's very suitable for branchless
 optimizations to speed up the sorting of random data. Another advantage
-is that two separate memory regions can be accessed in the same loop with
-no additional overhead. This makes the routine up to 2.5 times faster on
-random data.
+is that two separate memory regions are accessed in the same loop, allowing
+out-of-order execution with no additional overhead. This makes the routine up
+to 2.5 times faster on random data.
 
 The following is a visualization of an array with 256 random elements getting
 turned into sorted blocks of 32 elements using ping-pong parity merges.
