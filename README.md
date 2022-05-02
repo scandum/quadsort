@@ -1,7 +1,7 @@
 Intro
 -----
 
-This document describes a stable bottom-up adaptive merge sort named quadsort. A [visualisation](https://github.com/scandum/quadsort#visualization) and [benchmarks](https://github.com/scandum/quadsort#benchmark-quadsort-vs-stdstable_sort-vs-timsort) are available at the bottom.
+This document describes a stable bottom-up adaptive branchless merge sort named quadsort. A [visualisation](https://github.com/scandum/quadsort#visualization) and [benchmarks](https://github.com/scandum/quadsort#benchmark-quadsort-vs-stdstable_sort-vs-timsort) are available at the bottom.
 
 
 The quad swap
@@ -224,7 +224,7 @@ Branchless parity merge
 Since the parity merge can be unrolled it's very suitable for branchless
 optimizations to speed up the sorting of random data. Another advantage
 is that two separate memory regions are accessed in the same loop, allowing
-out-of-order execution with no additional overhead. This makes the routine up
+instruction-level parallelism with no additional overhead. This makes the routine up
 to 2.5 times faster on random data.
 
 The following is a visualization of an array with 256 random elements getting
@@ -342,7 +342,7 @@ Quadsort uses the same interface as qsort, which is described in [man qsort](htt
 
 Memory
 ------
-By default quadsort uses n / 4 swap memory. If memory allocation fails quadsort will switch to sorting in-place through rotations.
+By default quadsort uses between n and n / 4 swap memory. If memory allocation fails quadsort will switch to sorting in-place through rotations. The minimum memory requirement is 32 elements of stack memory.
 
 Performance
 -----------
@@ -358,7 +358,7 @@ Variants
 
 - [fluxsort](https://github.com/scandum/fluxsort) is a hybrid stable quicksort / quadsort.
 
-- [gridsort](https://github.com/scandum/gridsort) is a hybrid stable cubesort / quadsort. Gridsort makes O(n) moves rather than the typical O(n log n) moves. It is an online sort and might be of interest to those interested in data structures.
+- [gridsort](https://github.com/scandum/gridsort) is a hybrid stable cubesort / quadsort. Gridsort makes O(n) moves rather than the typical O(n log n) moves. It is an online sort and might be of interest to those interested in data structures and sorting very large arrays.
 
 - [twinsort](https://github.com/scandum/twinsort) is a simplified quadsort with a
 much smaller code size. Twinsort might be of use to people who want to port or understand quadsort; it does not use
@@ -373,6 +373,8 @@ monobound binary search, bridge rotation, and trinity rotation.
 
 The ping-pong merge had been independently implemented in wikisort prior to quadsort, and
 likely by others as well.
+
+The monobound binary search has been independently implemented, often referred to as a branchless binary search.
 
 Special kudos to [Musiccombo and Co](https://www.youtube.com/c/Musicombo) for getting me interested in rotations and branchless logic.
 
