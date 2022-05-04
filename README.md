@@ -184,7 +184,7 @@ main memory ┌──────────────────┐
             └──────────────────┘
 ```
 This doubles the amount of moves and we can fix this by merging 4 blocks at once
-using a ping-pong merge like so:
+using a quad merge / ping-pong merge like so:
 ```
 main memory ┌────────┐┌────────┐┌────────┐┌────────┐
             └────────┘└────────┘└────────┘└────────┘
@@ -232,12 +232,13 @@ turned into sorted blocks of 32 elements using ping-pong parity merges.
 
 ![quadsort visualization](/images/quadswap.gif)
 
-Quad merge
-----------
-While a branchless parity merge sorts random data faster, it sorts
-ordered data slower.
+Quad galloping merge
+--------------------
+While a branchless parity merge sorts random data faster, it sorts ordered data
+slower. One way to solve this problem is by using the galloping merge concept first
+introduced by timsort. 
 
-To deal with this the quad merge works in a similar way to the quad swap.
+The quad galloping merge works in a similar way to the quad swap.
 Instead of merging the ends of two arrays two items at a time, it merges
 four items at a time.
 ```
@@ -285,7 +286,7 @@ while (l < l_size - 1 && r < r_size - 1)
     }
 }
 ```
-Overall the quad merge gives a decent performance gain.
+Overall the quad galloping merge gives a decent performance gain.
 
 Merge strategy
 --------------
