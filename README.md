@@ -219,6 +219,10 @@ be of exactly equal length.
 The main advantage of a parity merge over a traditional merge is that the loop
 of a parity merge can be fully unrolled.
 
+If the arrays are not of equal length a hybrid parity merge can be performed. One
+way to do so is using n parity merges where n is the size of the smaller array,
+before switching to a traditional merge.
+
 Branchless parity merge
 -----------------------
 Since the parity merge can be unrolled it's very suitable for branchless
@@ -286,7 +290,7 @@ while (l < l_size - 1 && r < r_size - 1)
     }
 }
 ```
-Overall the quad galloping merge gives a decent performance gain.
+Overall the quad galloping merge gives a slight performance gain for both ordered and random data.
 
 Merge strategy
 --------------
@@ -294,7 +298,7 @@ Quadsort will merge blocks of 8 into blocks of 32, which it will merge into
 blocks of 128, 512, 2048, 8192, etc.
 
 For each ping-pong merge quadsort will perform two comparisons to see if it will be faster
-to parity merge or quad merge, and pick the best option.
+to use a parity merge or a quad galloping merge, and pick the best option.
 
 Tail merge
 ----------
