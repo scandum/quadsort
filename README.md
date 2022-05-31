@@ -228,8 +228,11 @@ Branchless parity merge
 Since the parity merge can be unrolled it's very suitable for branchless
 optimizations to speed up the sorting of random data. Another advantage
 is that two separate memory regions are accessed in the same loop, allowing
-instruction-level parallelism with no additional overhead. This makes the routine up
-to 2.5 times faster on random data.
+memory-level parallelism. This makes the routine up to 2.5 times faster for
+random data on most hardware.
+
+Increasing the memory regions from two to four can result in both performance
+gains and performance losses.
 
 The following is a visualization of an array with 256 random elements getting
 turned into sorted blocks of 32 elements using ping-pong parity merges.
@@ -239,8 +242,8 @@ turned into sorted blocks of 32 elements using ping-pong parity merges.
 Quad galloping merge
 --------------------
 While a branchless parity merge sorts random data faster, it sorts ordered data
-slower. One way to solve this problem is by using the galloping merge concept first
-introduced by timsort. 
+slower. One way to solve this problem is by using a method with a resemblance
+to the galloping merge concept first introduced by timsort.
 
 The quad galloping merge works in a similar way to the quad swap.
 Instead of merging the ends of two arrays two items at a time, it merges
@@ -369,11 +372,13 @@ Variants
 much smaller code size. Twinsort might be of use to people who want to port or understand quadsort; it does not use
 pointers or gotos.
 
-- [wolfsort](https://github.com/scandum/wolfsort) is a hybrid stable radixsort / fluxsort with improved performance on random data. It's mostly a proof of concept that only works on unsigned 32 bit integers. It defaults to fluxsort for 64 bit integers since it's faster.
+- [wolfsort](https://github.com/scandum/wolfsort) is a hybrid stable radixsort / fluxsort with improved performance on random data. It's mostly a proof of concept that only works on unsigned 32 bit integers.
+
+- [Robin Hood Sort](https://github.com/mlochbaum/rhsort) is a hybrid stable radixsort / dropsort with improved performance on random and generic data. It has a compilation option to use quadsort for its merging.
 
 Credits
 -------
-I personally invented the quad swap, quad merge, parity merge, branchless parity merge,
+I personally invented the quad swap, quad galloping merge, parity merge, branchless parity merge,
 monobound binary search, bridge rotation, and trinity rotation.
 
 The ping-pong merge had been independently implemented in wikisort prior to quadsort, and
