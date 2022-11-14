@@ -357,6 +357,8 @@ Quadsort is one of the fastest merge sorts written to date. It is faster than qu
 
 On arrays exceeding the L1 cache quicksort has an advantage due to its ability to partition. For small arrays quadsort has a significant advantage due to quicksort's inability to cost effectively pick a reliable pivot.
 
+To take full advantage of branchless operations the cmp macro needs to be uncommented in bench.c, which will increase the performance by 30% on primitive types.
+
 Variants
 --------
 - [blitsort](https://github.com/scandum/blitsort) is a hybrid stable in-place rotate quicksort / quadsort.
