@@ -408,7 +408,7 @@ Colors are used to differentiate various operations. Quad swaps are in cyan, rev
 
 [![quadsort benchmark](/images/quadsort.gif)](https://www.youtube.com/watch?v=GJjH_99BS70)
 
-There's also a [YouTube video of a java port of quadsort](https://www.youtube.com/watch?v=drSeVadf05M) in [ArrayV](https://github.com/Gaming32/ArrayV-v4.0) on a wide variety of data distributions.
+The [visualization is available on YouTube](https://www.youtube.com/watch?v=GJjH_99BS70) and there's also a [YouTube video of a java port of quadsort](https://www.youtube.com/watch?v=drSeVadf05M) in [ArrayV](https://github.com/Gaming32/ArrayV-v4.0) on a wide variety of data distributions.
 
 Benchmark: quadsort vs std::stable_sort vs timsort
 --------------------------------------------------
