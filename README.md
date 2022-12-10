@@ -347,6 +347,8 @@ Interface
 ---------
 Quadsort uses the same interface as qsort, which is described in [man qsort](https://man7.org/linux/man-pages/man3/qsort.3p.html).
 
+In addition to supporting `(l - r)` and `((l > r) - (l < r))` for the comparison function, `(l > r)` is valid as well. Special note should be taken that C++ sorts use `(l < r)` for the comparison function, which is incompatible with the C standard. When porting quadsort to C++ or Rust, switch `(l, r)` to `(r, l)` for every comparison.
+
 Memory
 ------
 By default quadsort uses between n and n / 4 swap memory. If memory allocation fails quadsort will switch to sorting in-place through rotations. The minimum memory requirement is 32 elements of stack memory.
