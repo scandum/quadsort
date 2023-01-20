@@ -168,9 +168,9 @@ the chance of a wasteful run check to 2.08%.
 At the end of the loop the array has been turned into a series of ordered
 blocks of 8 elements.
 
-Ping-Pong Merge
----------------
-Traditionally mergesorts would merge two blocks to swap memory, then copy
+Ping-Pong Quad Merge
+--------------------
+Most textbook mergesort examples merge two blocks to swap memory, then copy
 them back to main memory.
 ```
 main memory ┌────────┐┌────────┐
@@ -194,6 +194,8 @@ swap memory ┌──────────────────┐┌─�
 main memory ┌──────────────────────────────────────┐
             └──────────────────────────────────────┘
 ```
+
+It is possible to interleave the two merges to swap memory for increased memory-level parallelism, but this can both increase and decrease performance.
 
 Skipping
 --------
@@ -312,9 +314,9 @@ To minimalize the impact the remainder of the array is sorted using a tail
 merge.
 
 The main advantage of a tail merge is that it allows reducing the swap
-space of quadsort to **n / 2** and that the quad merge strategy works best
+space of quadsort to **n / 2** and that the galloping merge strategy works best
 on arrays of different lengths. It also greatly simplifies the ping-pong
-merge routine which only needs to work on arrays of equal length.
+quad merge routine which only needs to work on arrays of equal length.
 
 Rotate merge
 ------------
@@ -384,7 +386,7 @@ Credits
 I personally invented the quad swap, quad galloping merge, parity merge, branchless parity merge,
 monobound binary search, bridge rotation, and trinity rotation.
 
-The ping-pong merge had been independently implemented in wikisort prior to quadsort, and
+The ping-pong quad merge had been independently implemented in wikisort prior to quadsort, and
 likely by others as well.
 
 The monobound binary search has been independently implemented, often referred to as a branchless binary search.
