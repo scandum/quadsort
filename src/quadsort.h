@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2014-2021 Igor van den Hoven ivdhoven@gmail.com
+	Copyright (C) 2014-2022 Igor van den Hoven ivdhoven@gmail.com
 */
 
 /*
@@ -24,7 +24,7 @@
 */
 
 /*
-	quadsort 1.1.5.2
+	quadsort 1.1.5.4
 */
 
 #ifndef QUADSORT_H
@@ -34,10 +34,28 @@
 #include <stdio.h>
 #include <assert.h>
 #include <errno.h>
+#include <stdalign.h>
 
 typedef int CMPFUNC (const void *a, const void *b);
 
 //#define cmp(a,b) (*(a) > *(b))
+
+
+// When sorting an array of pointers, like a string array, the QUAD_CACHE needs
+// to be set for proper performance when sorting large arrays.
+// quadsort_prim() can be used to sort arrays of 32 and 64 bit integers
+// without a comparison function or cache restrictions.
+
+// With a 6 MB L3 cache a value of 262144 works well.
+
+#ifdef cmp
+  #define QUAD_CACHE 4294967295
+#else
+//#define QUAD_CACHE 131072
+  #define QUAD_CACHE 262144
+//#define QUAD_CACHE 524288
+//#define QUAD_CACHE 4294967295
+#endif
 
 #define parity_merge_two(array, swap, x, y, ptl, ptr, pts, cmp)  \
 {  \
@@ -65,47 +83,6 @@ typedef int CMPFUNC (const void *a, const void *b);
 	*pts = cmp(ptl, ptr)  > 0 ? *ptl : *ptr;  \
 }
 
-//////////////////////////////////////////////////////////
-//┌────────────────────────────────────────────────────┐//
-//│                █████┐    ██████┐ ██████┐████████┐  │//
-//│               ██┌──██┐   ██┌──██┐└─██┌─┘└──██┌──┘  │//
-//│               └█████┌┘   ██████┌┘  ██│     ██│     │//
-//│               ██┌──██┐   ██┌──██┐  ██│     ██│     │//
-//│               └█████┌┘   ██████┌┘██████┐   ██│     │//
-//│                └────┘    └─────┘ └─────┘   └─┘     │//
-//└────────────────────────────────────────────────────┘//
-//////////////////////////////////////////////////////////
-
-#undef VAR
-#undef FUNC
-#undef STRUCT
-
-#define VAR char
-#define FUNC(NAME) NAME##8
-#define STRUCT(NAME) struct NAME##8
-
-#include "quadsort.c"
-
-//////////////////////////////////////////////////////////
-//┌────────────────────────────────────────────────────┐//
-//│           ▄██┐   █████┐    ██████┐ ██████┐████████┐│//
-//│          ████│  ██┌───┘    ██┌──██┐└─██┌─┘└──██┌──┘│//
-//│          └─██│  ██████┐    ██████┌┘  ██│     ██│   │//
-//│            ██│  ██┌──██┐   ██┌──██┐  ██│     ██│   │//
-//│          ██████┐└█████┌┘   ██████┌┘██████┐   ██│   │//
-//│          └─────┘ └────┘    └─────┘ └─────┘   └─┘   │//
-//└────────────────────────────────────────────────────┘//
-//////////////////////////////////////////////////////////
-
-#undef VAR
-#undef FUNC
-#undef STRUCT
-
-#define VAR short
-#define FUNC(NAME) NAME##16
-#define STRUCT(NAME) struct NAME##16
-
-#include "quadsort.c"
 
 //////////////////////////////////////////////////////////
 // ┌───────────────────────────────────────────────────┐//
@@ -118,15 +95,39 @@ typedef int CMPFUNC (const void *a, const void *b);
 // └───────────────────────────────────────────────────┘//
 //////////////////////////////////////////////////////////
 
-#undef VAR
-#undef FUNC
-#undef STRUCT
-
 #define VAR int
 #define FUNC(NAME) NAME##32
-#define STRUCT(NAME) struct NAME##32
 
 #include "quadsort.c"
+
+#undef VAR
+#undef FUNC
+
+// quadsort_prim
+
+#define VAR int
+#define FUNC(NAME) NAME##_int32
+#ifndef cmp
+  #define cmp(a,b) (*(a) > *(b))
+  #include "quadsort.c"
+  #undef cmp
+#else
+  #include "quadsort.c"
+#endif
+#undef VAR
+#undef FUNC
+
+#define VAR unsigned int
+#define FUNC(NAME) NAME##_uint32
+#ifndef cmp
+  #define cmp(a,b) (*(a) > *(b))
+  #include "quadsort.c"
+  #undef cmp
+#else
+  #include "quadsort.c"
+#endif
+#undef VAR
+#undef FUNC
 
 //////////////////////////////////////////////////////////
 // ┌───────────────────────────────────────────────────┐//
@@ -139,15 +140,83 @@ typedef int CMPFUNC (const void *a, const void *b);
 // └───────────────────────────────────────────────────┘//
 //////////////////////////////////////////////////////////
 
-#undef VAR
-#undef FUNC
-#undef STRUCT
-
 #define VAR long long
 #define FUNC(NAME) NAME##64
-#define STRUCT(NAME) struct NAME##64
 
 #include "quadsort.c"
+
+#undef VAR
+#undef FUNC
+
+// quadsort_prim
+
+#define VAR long long
+#define FUNC(NAME) NAME##_int64
+#ifndef cmp
+  #define cmp(a,b) (*(a) > *(b))
+  #include "quadsort.c"
+  #undef cmp
+#else
+  #include "quadsort.c"
+#endif
+#undef VAR
+#undef FUNC
+
+#define VAR unsigned long long
+#define FUNC(NAME) NAME##_uint64
+#ifndef cmp
+  #define cmp(a,b) (*(a) > *(b))
+  #include "quadsort.c"
+  #undef cmp
+#else
+  #include "quadsort.c"
+#endif
+#undef VAR
+#undef FUNC
+
+// This section is outside of 32/64 bit pointer territory, so no cache checks
+// necessary, unless sorting 32+ byte structures.
+
+#undef QUAD_CACHE
+#define QUAD_CACHE 4294967295
+
+//////////////////////////////////////////////////////////
+//┌────────────────────────────────────────────────────┐//
+//│                █████┐    ██████┐ ██████┐████████┐  │//
+//│               ██┌──██┐   ██┌──██┐└─██┌─┘└──██┌──┘  │//
+//│               └█████┌┘   ██████┌┘  ██│     ██│     │//
+//│               ██┌──██┐   ██┌──██┐  ██│     ██│     │//
+//│               └█████┌┘   ██████┌┘██████┐   ██│     │//
+//│                └────┘    └─────┘ └─────┘   └─┘     │//
+//└────────────────────────────────────────────────────┘//
+//////////////////////////////////////////////////////////
+
+#define VAR char
+#define FUNC(NAME) NAME##8
+
+#include "quadsort.c"
+
+#undef VAR
+#undef FUNC
+
+//////////////////////////////////////////////////////////
+//┌────────────────────────────────────────────────────┐//
+//│           ▄██┐   █████┐    ██████┐ ██████┐████████┐│//
+//│          ████│  ██┌───┘    ██┌──██┐└─██┌─┘└──██┌──┘│//
+//│          └─██│  ██████┐    ██████┌┘  ██│     ██│   │//
+//│            ██│  ██┌──██┐   ██┌──██┐  ██│     ██│   │//
+//│          ██████┐└█████┌┘   ██████┌┘██████┐   ██│   │//
+//│          └─────┘ └────┘    └─────┘ └─────┘   └─┘   │//
+//└────────────────────────────────────────────────────┘//
+//////////////////////////////////////////////////////////
+
+#define VAR short
+#define FUNC(NAME) NAME##16
+
+#include "quadsort.c"
+
+#undef VAR
+#undef FUNC
 
 //////////////////////////////////////////////////////////
 //┌────────────────────────────────────────────────────┐//
@@ -160,16 +229,36 @@ typedef int CMPFUNC (const void *a, const void *b);
 //└────────────────────────────────────────────────────┘//
 //////////////////////////////////////////////////////////
 
-#undef VAR
-#undef FUNC
-#undef STRUCT
+// 128 reflects the name, though the actual size is 80, 96, or 128 bits,
+// depending on platform.
 
 #define VAR long double
 #define FUNC(NAME) NAME##128
-#define STRUCT(NAME) struct NAME##128
+#include "quadsort.c"
+#undef VAR
+#undef FUNC
+
+///////////////////////////////////////////////////////////
+//┌─────────────────────────────────────────────────────┐//
+//│ ██████┐██┐   ██┐███████┐████████┐ ██████┐ ███┐  ███┐│//
+//│██┌────┘██│   ██│██┌────┘└──██┌──┘██┌───██┐████┐████││//
+//│██│     ██│   ██│███████┐   ██│   ██│   ██│██┌███┌██││//
+//│██│     ██│   ██│└────██│   ██│   ██│   ██│██│└█┌┘██││//
+//│└██████┐└██████┌┘███████│   ██│   └██████┌┘██│ └┘ ██││//
+//│ └─────┘ └─────┘ └──────┘   └─┘    └─────┘ └─┘    └─┘│//
+//└─────────────────────────────────────────────────────┘//
+///////////////////////////////////////////////////////////
+
+/*
+typedef struct {char bytes[32];} struct256;
+#define VAR struct256
+#define FUNC(NAME) NAME##256
 
 #include "quadsort.c"
 
+#undef VAR
+#undef FUNC
+*/
 
 ///////////////////////////////////////////////////////////////////////////////
 //┌─────────────────────────────────────────────────────────────────────────┐//
@@ -192,27 +281,76 @@ void quadsort(void *array, size_t nmemb, size_t size, CMPFUNC *cmp)
 	switch (size)
 	{
 		case sizeof(char):
-			return quadsort8(array, nmemb, cmp);
+			quadsort8(array, nmemb, cmp);
+			return;
 
 		case sizeof(short):
-			return quadsort16(array, nmemb, cmp);
+			quadsort16(array, nmemb, cmp);
+			return;
 
 		case sizeof(int):
-			return quadsort32(array, nmemb, cmp);
+			quadsort32(array, nmemb, cmp);
+			return;
 
 		case sizeof(long long):
-			return quadsort64(array, nmemb, cmp);
+			quadsort64(array, nmemb, cmp);
+			return;
 
 		case sizeof(long double):
-			return quadsort128(array, nmemb, cmp);
+			quadsort128(array, nmemb, cmp);
+			return;
+
+//		case sizeof(struct256):
+//			quadsort256(array, nmemb, cmp);
+			return;
 
 		default:
-			return assert(size == sizeof(char) || size == sizeof(short) || size == sizeof(int) || size == sizeof(long long) || size == sizeof(long double));
+			assert(size == sizeof(char) || size == sizeof(short) || size == sizeof(int) || size == sizeof(long long) || size == sizeof(long double));
+//			qsort(array, nmemb, size, cmp);
 	}
 }
 
-#undef VAR
-#undef FUNC
-#undef STRUCT
+// suggested size values for primitives:
+
+//		case  0: unsigned char
+//		case  1: signed char
+//		case  2: signed short
+//		case  3: unsigned short
+//		case  4: signed int
+//		case  5: unsigned int
+//		case  6: float
+//		case  7: double
+//		case  8: signed long long
+//		case  9: unsigned long long
+//		case  ?: long double, use sizeof(long double):
+
+void quadsort_prim(void *array, size_t nmemb, size_t size)
+{
+	if (nmemb < 2)
+	{
+		return;
+	}
+
+	switch (size)
+	{
+		case 4:
+			quadsort_int32(array, nmemb, NULL);
+			return;
+		case 5:
+			quadsort_uint32(array, nmemb, NULL);
+			return;
+		case 8:
+			quadsort_int64(array, nmemb, NULL);
+			return;
+		case 9:
+			quadsort_uint64(array, nmemb, NULL);
+			return;
+		default:
+			assert(size == sizeof(int) || size == sizeof(int) + 1 || size == sizeof(long long) || size == sizeof(long long) + 1);
+			return;
+	}
+}
+
+#undef QUAD_CACHE
 
 #endif
