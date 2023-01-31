@@ -10,7 +10,7 @@ Quadsort starts out with an analyzer that has the following tasks:
 1. Detect ordered data with minimal comparisons.
 2. Detect reverse order data with minimal comparisons.
 3. Do the above without impacting performance on random data.
-4. Exit the quad swap analyzer with sorted blocks of 32 elements.
+4. Exit the quad swap analyzer with sorted blocks of 8 elements.
 
 Ordered data handling
 ---------------------
@@ -22,12 +22,12 @@ were all in order.
 
 What remains is 3 more comparisons on elements (2,3), (4,5), and (6,7) to
 determine if all 8 elements are in order. Traditional sorts would
-do this with 7 individual comparisons, which would result in 3.5 branch mispredictions
-on random data on average. Using quadsort's method results in 0.94 branch mispredictions
-on random data on average.
+do this with 7 branched individual comparisons, which would result in 3.5
+branch mispredictions on random data on average. Using quadsort's method
+results in 0.2 branch mispredictions on random data on average.
 
 If the data is in order quadsort moves on to the next 8 elements. If the data turns
-out to be neither in order, or in reverse order, 4 branchless swaps are performed
+out to be neither in order or in reverse order, 4 branchless swaps are performed
 using the stored comparison results, followed by a branchless parity merge. More on
 that later.
 
@@ -52,9 +52,8 @@ detection the best you can do is sort it in **n** comparisons and **n log n** mo
 
 Run detection, as the name implies, comes with a detection cost. Thanks
 to the laws of probability a quad swap can cheat however. The chance of
-4 pairs of elements being in reverse order is 1 in 24. So when sorting
-random data we'll only make a wasteful run check in 4.16% of cases,
-which in turn would result in 0.81 branch mispredictions on average.
+4 separate pairs of elements being in reverse order is 1 in 16. So there's
+a 6.25% chance quadsort makes a wasteful run check.
 
 What about run detection for in-order data? While we're turning
 **n log n** moves into **n** moves with reverse order run detection, we'd be
