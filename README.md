@@ -560,12 +560,12 @@ halves each time the number of items doubles.  A table with the best and average
 
 </details>
 
-Benchmark: quadsort vs pdqsort (pattern defeating quicksort)
+Benchmark: quadsort vs pdqsort vs fluxsort
 ------------------------------------------------------------
 The following benchmark was on WSL 2 gcc version 7.5.0 (Ubuntu 7.5.0-3ubuntu1~18.04)
 using the [wolfsort benchmark](https://github.com/scandum/wolfsort).
 The source code was compiled using `g++ -O3 -w -fpermissive bench.c`. Pdqsort is a branchless
-quicksort/insertionsort hybrid. [Fluxsort](https://github.com/scandum/fluxsort) is a branchless quicksert/mergesort hybrid. Each test
+quicksort/heapsort/insertionsort hybrid. [Fluxsort](https://github.com/scandum/fluxsort) is a branchless quicksort/mergesort hybrid. Each test
 was ran 100 times on 100,000 elements. Comparisons are fully inlined. A table with the best and
 average time in seconds can be uncollapsed below the bar graph.
 
