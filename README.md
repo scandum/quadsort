@@ -22,9 +22,9 @@ were all in order.
 
 What remains is 3 more comparisons on elements (2,3), (4,5), and (6,7) to
 determine if all 8 elements are in order. Traditional sorts would
-do this with 7 branched individual comparisons, which would result in 3.5
+do this with 7 branched individual comparisons, which should result in 3.2
 branch mispredictions on random data on average. Using quadsort's method
-results in 0.2 branch mispredictions on random data on average.
+should result in 0.2 branch mispredictions on random data on average.
 
 If the data is in order quadsort moves on to the next 8 elements. If the data turns
 out to be neither in order or in reverse order, 4 branchless swaps are performed
@@ -114,7 +114,8 @@ Parity merge
 A parity merge takes advantage of the fact that if you have two n length arrays,
 you can fully merge the two arrays by performing n merge operations on the start
 of each array, and n merge operations on the end of each array. The arrays must
-be of exactly equal length.
+be of exactly equal length. Another way to describe the parity merge would be as
+a bidirectional unguarded merge.
 
 The main advantage of a parity merge over a traditional merge is that the loop
 of a parity merge can be fully unrolled.
@@ -345,7 +346,7 @@ on 100,000 elements. A table with the best and average time in seconds can be un
 |  quadsort |   100000 |   64 | 0.002507 | 0.002528 |         0 |     100 |     random order |
 |   timsort |   100000 |   64 | 0.007761 | 0.007806 |         0 |     100 |     random order |
 
-|      Name |    Items | Type |     Best |  Average |     Loops | Samples |     Distribution |
+|      Name |    Items | Type |     Best |  Average |  Compares | Samples |     Distribution |
 | --------- | -------- | ---- | -------- | -------- | --------- | ------- | ---------------- |
 |stablesort |   100000 |   32 | 0.006110 | 0.006160 |         0 |     100 |     random order |
 |  quadsort |   100000 |   32 | 0.002452 | 0.002469 |         0 |     100 |     random order |
