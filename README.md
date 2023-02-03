@@ -336,61 +336,61 @@ on 100,000 elements. A table with the best and average time in seconds can be un
 
 |      Name |    Items | Type |     Best |  Average |  Compares | Samples |     Distribution |
 | --------- | -------- | ---- | -------- | -------- | --------- | ------- | ---------------- |
-|stablesort |   100000 |  128 | 0.010998 | 0.011096 |         0 |     100 |     random order |
-|  quadsort |   100000 |  128 | 0.009800 | 0.009888 |         0 |     100 |     random order |
-|   timsort |   100000 |  128 | 0.012655 | 0.012742 |         0 |     100 |     random order |
+|stablesort |   100000 |  128 | 0.010958 | 0.011215 |         0 |     100 |     random order |
+|  fluxsort |   100000 |  128 | 0.008589 | 0.008837 |         0 |     100 |     random order |
+|   timsort |   100000 |  128 | 0.012799 | 0.013185 |         0 |     100 |     random order |
 
 |      Name |    Items | Type |     Best |  Average |  Compares | Samples |     Distribution |
 | --------- | -------- | ---- | -------- | -------- | --------- | ------- | ---------------- |
-|stablesort |   100000 |   64 | 0.006054 | 0.006128 |         0 |     100 |     random order |
-|  quadsort |   100000 |   64 | 0.002507 | 0.002528 |         0 |     100 |     random order |
-|   timsort |   100000 |   64 | 0.007761 | 0.007806 |         0 |     100 |     random order |
+|stablesort |   100000 |   64 | 0.006134 | 0.006232 |         0 |     100 |     random order |
+|  fluxsort |   100000 |   64 | 0.001945 | 0.001994 |         0 |     100 |     random order |
+|   timsort |   100000 |   64 | 0.007824 | 0.008070 |         0 |     100 |     random order |
 
-|      Name |    Items | Type |     Best |  Average |  Compares | Samples |     Distribution |
+|      Name |    Items | Type |     Best |  Average |     Loops | Samples |     Distribution |
 | --------- | -------- | ---- | -------- | -------- | --------- | ------- | ---------------- |
-|stablesort |   100000 |   32 | 0.006110 | 0.006160 |         0 |     100 |     random order |
-|  quadsort |   100000 |   32 | 0.002452 | 0.002469 |         0 |     100 |     random order |
-|   timsort |   100000 |   32 | 0.007620 | 0.007660 |         0 |     100 |     random order |
+|stablesort |   100000 |   32 | 0.005995 | 0.006068 |         0 |     100 |     random order |
+|  fluxsort |   100000 |   32 | 0.001841 | 0.001890 |         0 |     100 |     random order |
+|   timsort |   100000 |   32 | 0.007593 | 0.007773 |         0 |     100 |     random order |
 |           |          |      |          |          |           |         |                  |
-|stablesort |   100000 |   32 | 0.003956 | 0.003989 |         0 |     100 |     random % 100 |
-|  quadsort |   100000 |   32 | 0.001791 | 0.001805 |         0 |     100 |     random % 100 |
-|   timsort |   100000 |   32 | 0.005625 | 0.005660 |         0 |     100 |     random % 100 |
+|stablesort |   100000 |   32 | 0.003815 | 0.003841 |         0 |     100 |     random % 100 |
+|  fluxsort |   100000 |   32 | 0.000655 | 0.000680 |         0 |     100 |     random % 100 |
+|   timsort |   100000 |   32 | 0.005608 | 0.005666 |         0 |     100 |     random % 100 |
 |           |          |      |          |          |           |         |                  |
-|stablesort |   100000 |   32 | 0.000821 | 0.000840 |         0 |     100 |  ascending order |
-|  quadsort |   100000 |   32 | 0.000052 | 0.000052 |         0 |     100 |  ascending order |
+|stablesort |   100000 |   32 | 0.000672 | 0.000733 |         0 |     100 |  ascending order |
+|  fluxsort |   100000 |   32 | 0.000044 | 0.000045 |         0 |     100 |  ascending order |
 |   timsort |   100000 |   32 | 0.000045 | 0.000045 |         0 |     100 |  ascending order |
 |           |          |      |          |          |           |         |                  |
-|stablesort |   100000 |   32 | 0.001511 | 0.001533 |         0 |     100 |    ascending saw |
-|  quadsort |   100000 |   32 | 0.000614 | 0.000618 |         0 |     100 |    ascending saw |
-|   timsort |   100000 |   32 | 0.000841 | 0.000849 |         0 |     100 |    ascending saw |
+|stablesort |   100000 |   32 | 0.001360 | 0.001410 |         0 |     100 |    ascending saw |
+|  fluxsort |   100000 |   32 | 0.000328 | 0.000330 |         0 |     100 |    ascending saw |
+|   timsort |   100000 |   32 | 0.000840 | 0.000852 |         0 |     100 |    ascending saw |
 |           |          |      |          |          |           |         |                  |
-|stablesort |   100000 |   32 | 0.000901 | 0.000920 |         0 |     100 |       pipe organ |
-|  quadsort |   100000 |   32 | 0.000269 | 0.000271 |         0 |     100 |       pipe organ |
-|   timsort |   100000 |   32 | 0.000179 | 0.000184 |         0 |     100 |       pipe organ |
+|stablesort |   100000 |   32 | 0.001121 | 0.001154 |         0 |     100 |       pipe organ |
+|  fluxsort |   100000 |   32 | 0.000205 | 0.000207 |         0 |     100 |       pipe organ |
+|   timsort |   100000 |   32 | 0.000465 | 0.000469 |         0 |     100 |       pipe organ |
 |           |          |      |          |          |           |         |                  |
-|stablesort |   100000 |   32 | 0.000930 | 0.000950 |         0 |     100 | descending order |
-|  quadsort |   100000 |   32 | 0.000059 | 0.000059 |         0 |     100 | descending order |
-|   timsort |   100000 |   32 | 0.000101 | 0.000101 |         0 |     100 | descending order |
+|stablesort |   100000 |   32 | 0.000904 | 0.000920 |         0 |     100 | descending order |
+|  fluxsort |   100000 |   32 | 0.000055 | 0.000055 |         0 |     100 | descending order |
+|   timsort |   100000 |   32 | 0.000088 | 0.000092 |         0 |     100 | descending order |
 |           |          |      |          |          |           |         |                  |
-|stablesort |   100000 |   32 | 0.001510 | 0.001520 |         0 |     100 |   descending saw |
-|  quadsort |   100000 |   32 | 0.000615 | 0.000619 |         0 |     100 |   descending saw |
-|   timsort |   100000 |   32 | 0.000842 | 0.000852 |         0 |     100 |   descending saw |
+|stablesort |   100000 |   32 | 0.001603 | 0.001641 |         0 |     100 |   descending saw |
+|  fluxsort |   100000 |   32 | 0.000418 | 0.000427 |         0 |     100 |   descending saw |
+|   timsort |   100000 |   32 | 0.000788 | 0.000816 |         0 |     100 |   descending saw |
 |           |          |      |          |          |           |         |                  |
-|stablesort |   100000 |   32 | 0.002158 | 0.002188 |         0 |     100 |      random tail |
-|  quadsort |   100000 |   32 | 0.000813 | 0.000820 |         0 |     100 |      random tail |
-|   timsort |   100000 |   32 | 0.002001 | 0.002022 |         0 |     100 |      random tail |
+|stablesort |   100000 |   32 | 0.002029 | 0.002095 |         0 |     100 |      random tail |
+|  fluxsort |   100000 |   32 | 0.000623 | 0.000627 |         0 |     100 |      random tail |
+|   timsort |   100000 |   32 | 0.001996 | 0.002041 |         0 |     100 |      random tail |
 |           |          |      |          |          |           |         |                  |
-|stablesort |   100000 |   32 | 0.003638 | 0.003668 |         0 |     100 |      random half |
-|  quadsort |   100000 |   32 | 0.001452 | 0.001465 |         0 |     100 |      random half |
-|   timsort |   100000 |   32 | 0.004035 | 0.004056 |         0 |     100 |      random half |
+|stablesort |   100000 |   32 | 0.003491 | 0.003539 |         0 |     100 |      random half |
+|  fluxsort |   100000 |   32 | 0.001071 | 0.001078 |         0 |     100 |      random half |
+|   timsort |   100000 |   32 | 0.004025 | 0.004056 |         0 |     100 |      random half |
 |           |          |      |          |          |           |         |                  |
-|stablesort |   100000 |   32 | 0.001104 | 0.001134 |         0 |     100 |  ascending tiles |
-|  quadsort |   100000 |   32 | 0.000819 | 0.000829 |         0 |     100 |  ascending tiles |
-|   timsort |   100000 |   32 | 0.000874 | 0.000980 |         0 |     100 |  ascending tiles |
+|stablesort |   100000 |   32 | 0.000918 | 0.000940 |         0 |     100 |  ascending tiles |
+|  fluxsort |   100000 |   32 | 0.000293 | 0.000296 |         0 |     100 |  ascending tiles |
+|   timsort |   100000 |   32 | 0.000850 | 0.000931 |         0 |     100 |  ascending tiles |
 |           |          |      |          |          |           |         |                  |
-|stablesort |   100000 |   32 | 0.001779 | 0.001885 |         0 |     100 |     bit reversal |
-|  quadsort |   100000 |   32 | 0.002238 | 0.002249 |         0 |     100 |     bit reversal |
-|   timsort |   100000 |   32 | 0.002289 | 0.003090 |         0 |     100 |     bit reversal |
+|stablesort |   100000 |   32 | 0.001168 | 0.001431 |         0 |     100 |     bit reversal |
+|  fluxsort |   100000 |   32 | 0.001700 | 0.001731 |         0 |     100 |     bit reversal |
+|   timsort |   100000 |   32 | 0.002261 | 0.002940 |         0 |     100 |     bit reversal |
 
 </details>
 
