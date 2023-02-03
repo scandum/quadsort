@@ -515,50 +515,33 @@ void FUNC(galloping_merge)(VAR *dest, VAR *from, size_t left, size_t right, CMPF
 
 void FUNC(quad_merge_block)(VAR *array, VAR *swap, size_t block, CMPFUNC *cmp)
 {
-	VAR *pts, *c, *c_max;
+	VAR *pt1, *pt2, *pt3;
 	size_t block_x_2 = block * 2;
 
-	c_max = array + block;
+	pt1 = array + block;
+	pt2 = pt1 + block;
+	pt3 = pt2 + block;
 
-	if (cmp(c_max - 1, c_max) <= 0)
+	switch ((cmp(pt1 - 1, pt1) <= 0) | (cmp(pt3 - 1, pt3) <= 0) * 2)
 	{
-		c_max += block_x_2;
-
-		if (cmp(c_max - 1, c_max) <= 0)
-		{
-			c_max -= block;
-
-			if (cmp(c_max - 1, c_max) <= 0)
-			{
+		case 0:
+			FUNC(galloping_merge)(swap, array, block, block, cmp);
+			FUNC(galloping_merge)(swap + block_x_2, pt2, block, block, cmp);
+			break;
+		case 1:
+			memcpy(swap, array, block_x_2 * sizeof(VAR));
+			FUNC(galloping_merge)(swap + block_x_2, pt2, block, block, cmp);
+			break;
+		case 2:
+			FUNC(galloping_merge)(swap, array, block, block, cmp);
+			memcpy(swap + block_x_2, pt2, block_x_2 * sizeof(VAR));
+			break;
+		case 3:
+			if (cmp(pt2 - 1, pt2) <= 0)
 				return;
-			}
-			pts = swap;
-
-			c = array;
-
-			do *pts++ = *c++; while (c < c_max); // step 1
-
-			c_max = c + block_x_2;
-
-			do *pts++ = *c++; while (c < c_max); // step 2
-
-			FUNC(galloping_merge)(array, swap, block_x_2, block_x_2, cmp); // step 3
-			return;
-		}
-		pts = swap;
-
-		c = array;
-		c_max = array + block_x_2;
-
-		do *pts++ = *c++; while (c < c_max); // step 1
+			memcpy(swap, array, block_x_2 * 2 * sizeof(VAR));
 	}
-	else
-	{
-		FUNC(galloping_merge)(swap, array, block, block, cmp); // step 1
-	}
-	FUNC(galloping_merge)(swap + block_x_2, array + block_x_2, block, block, cmp); // step 2
-
-	FUNC(galloping_merge)(array, swap, block_x_2, block_x_2, cmp); // step 3
+	FUNC(galloping_merge)(array, swap, block_x_2, block_x_2, cmp);
 }
 
 size_t FUNC(quad_merge)(VAR *array, VAR *swap, size_t swap_size, size_t nmemb, size_t block, CMPFUNC *cmp)
@@ -651,13 +634,13 @@ void FUNC(partial_backward_merge)(VAR *array, VAR *swap, size_t nmemb, size_t bl
 
 	while (s > swap + 1 && m > array + 1)
 	{
-		if (cmp(m - 1, s) > 0)
-		{
-			*e-- = *m--; *e-- = *m--;
-		}
-		else if (cmp(m, s - 1) <= 0)
+		if (cmp(m, s - 1) <= 0)
 		{
 			*e-- = *s--; *e-- = *s--;
+		}
+		else if (cmp(m - 1, s) > 0)
+		{
+			*e-- = *m--; *e-- = *m--;
 		}
 		else
 		{
