@@ -114,7 +114,7 @@ Parity merge
 A parity merge takes advantage of the fact that if you have two n length arrays,
 you can fully merge the two arrays by performing n merge operations on the start
 of each array, and n merge operations on the end of each array. The arrays must
-be of exactly equal length. Another way to describe the parity merge would be as
+be of equal length. Another way to describe the parity merge would be as
 a bidirectional unguarded merge.
 
 The main advantage of a parity merge over a traditional merge is that the loop
@@ -140,15 +140,14 @@ turned into sorted blocks of 32 elements using ping-pong parity merges.
 
 ![quadsort visualization](/images/quadswap.gif)
 
-Quad galloping merge
---------------------
+Cross merge
+-----------
 While a branchless parity merge sorts random data faster, it sorts ordered data
 slower. One way to solve this problem is by using a method with a resemblance
 to the galloping merge concept first introduced by timsort.
 
-The quad galloping merge works in a similar way to the quad swap.
-Instead of merging the ends of two arrays two items at a time, it merges
-four items at a time.
+The cross merge works in a similar way to the quad swap.
+Instead of merging two arrays two items at a time, it merges four items at a time.
 ```
 ┌───┐┌───┐┌───┐    ┌───┐┌───┐┌───┐            ╭───╮  ┌───┐┌───┐┌───┐
 │ A ││ B ││ C │    │ X ││ Y ││ Z │        ┌───│B<X├──┤ A ││ B ││C/X│
@@ -194,10 +193,10 @@ while (l < l_size - 1 && r < r_size - 1)
     }
 }
 ```
-Overall the quad galloping merge gives a decent performance gain for both ordered
+Overall the cross merge gives a decent performance gain for both ordered
 and random data, particularly when the two arrays are of unequal length. When
-two arrays are of equal length quadsort looks 8 elements ahead, and performs an
-8 element parity merge if it can't skip ahead.
+two arrays are of near equal length quadsort looks 8 elements ahead, and performs
+an 8 element parity merge if it can't skip ahead.
 
 Merge strategy
 --------------
@@ -205,7 +204,7 @@ Quadsort will merge blocks of 8 into blocks of 32, which it will merge into
 blocks of 128, 512, 2048, 8192, etc.
 
 For each ping-pong merge quadsort will perform two comparisons to see if it will be faster
-to use a parity merge or a quad galloping merge, and pick the best option.
+to use a parity merge or a cross merge, and pick the best option.
 
 Tail merge
 ----------
@@ -217,7 +216,7 @@ To minimalize the impact the remainder of the array is sorted using a tail
 merge.
 
 The main advantage of a tail merge is that it allows reducing the swap
-space of quadsort to **n / 2** and that the galloping merge strategy works best
+space of quadsort to **n / 2** and that the cross merge strategy works best
 on arrays of different lengths. It also greatly simplifies the ping-pong
 quad merge routine which only needs to work on arrays of equal length.
 
@@ -266,7 +265,9 @@ Quadsort is one of the fastest merge sorts written to date. It is faster than qu
 
 Compared to Timsort, Quadsort has similar overall adaptivity while being much faster on random data, even without branchless optimizations.
 
-Quicksort has an overall advantage as the array size increases beyond the L1 cache, which could be due to more efficient partitioning. For small arrays quadsort has a significant advantage due to quicksort's inability to cost effectively pick a reliable pivot.
+Quicksort has a slight advantage on random data as the array size increases beyond the L1 cache. For small arrays quadsort has a significant advantage due to quicksort's inability to cost effectively pick a reliable pivot. Subsequently, the only way for quicksort to rival quadsort is to cheat and become a hybrid sort, by using branchless merges to sort small partitions.
+
+When using the clang compiler quadsort can use branchless ternary comparisons. Since most programming languages only support ternary merges `? :` and not ternary partitions `: ?` this gives branchless mergesorts an additional advantage over branchless quicksorts. However, since the gcc compiler doesn't support branchless ternary merges, and the hack to perform branchless merges is less efficient than the hack to perform branchless partitions, branchless quicksorts have an advantage for gcc.
 
 To take full advantage of branchless operations the cmp macro needs to be uncommented in bench.c, which will increase the performance by 30% on primitive types. The quadsort_prim function can be used to access primitive comparisons directly. 
 
@@ -292,7 +293,7 @@ pointers or gotos. It is a bit dated and isn't branchless.
 
 Credits
 -------
-I personally invented the quad swap analyzer, quad galloping merge, parity merge, branchless parity merge,
+I personally invented the quad swap analyzer, cross merge, parity merge, branchless parity merge,
 monobound binary search, bridge rotation, and trinity rotation.
 
 The ping-pong quad merge had been independently implemented in wikisort prior to quadsort, and
