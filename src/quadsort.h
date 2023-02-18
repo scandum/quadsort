@@ -24,7 +24,7 @@
 */
 
 /*
-	quadsort 1.1.5.4
+	quadsort 1.2.1.1
 */
 
 #ifndef QUADSORT_H
@@ -58,32 +58,64 @@ typedef int CMPFUNC (const void *a, const void *b);
 //#define QUAD_CACHE 4294967295
 #endif
 
+// utilize branchless ternary operations in clang
+
+#if !defined __clang__
+#define head_branchless_merge(ptd, x, ptl, ptr, cmp)  \
+	x = cmp(ptl, ptr) <= 0;  \
+	*ptd = *ptl;  \
+	ptl += x;  \
+	ptd[x] = *ptr;  \
+	ptr += !x;  \
+	ptd++;
+#else
+#define head_branchless_merge(ptd, x, ptl, ptr, cmp)  \
+	*ptd++ = cmp(ptl, ptr) <= 0 ? *ptl++ : *ptr++;
+#endif
+
+#if !defined __clang__
+#define tail_branchless_merge(tpd, x, tpl, tpr, cmp)  \
+	y = cmp(tpl, tpr) <= 0;  \
+	*tpd = *tpl;  \
+	tpl -= !x;  \
+	tpd--;  \
+	tpd[x] = *tpr;  \
+	tpr -= y;
+#else
+#define tail_branchless_merge(tpd, x, tpl, tpr, cmp)  \
+	*tpd-- = cmp(tpl, tpr) > 0 ? *tpl-- : *tpr--;
+#endif
+
+// guarantee small parity merges are inlined with minimal overhead
+
 #define parity_merge_two(array, swap, x, y, ptl, ptr, pts, cmp)  \
-{  \
-	ptl = array + 0; ptr = array + 2; pts = swap + 0;  \
-	x = cmp(ptl, ptr) <= 0; y = !x; pts[x] = *ptr; ptr += y; pts[y] = *ptl; ptl += x; pts++;  \
+	ptl = array; ptr = array + 2; pts = swap;  \
+	head_branchless_merge(pts, x, ptl, ptr, cmp);  \
 	*pts = cmp(ptl, ptr) <= 0 ? *ptl : *ptr;  \
   \
 	ptl = array + 1; ptr = array + 3; pts = swap + 3;  \
-	x = cmp(ptl, ptr) <= 0; y = !x; pts--; pts[x] = *ptr; ptr -= x; pts[y] = *ptl; ptl -= y;  \
-	*pts = cmp(ptl, ptr)  > 0 ? *ptl : *ptr;  \
-}
+	tail_branchless_merge(pts, y, ptl, ptr, cmp);  \
+	*pts = cmp(ptl, ptr)  > 0 ? *ptl : *ptr;
 
 #define parity_merge_four(array, swap, x, y, ptl, ptr, pts, cmp)  \
-{  \
 	ptl = array + 0; ptr = array + 4; pts = swap;  \
-	x = cmp(ptl, ptr) <= 0; y = !x; pts[x] = *ptr; ptr += y; pts[y] = *ptl; ptl += x; pts++;  \
-	x = cmp(ptl, ptr) <= 0; y = !x; pts[x] = *ptr; ptr += y; pts[y] = *ptl; ptl += x; pts++;  \
-	x = cmp(ptl, ptr) <= 0; y = !x; pts[x] = *ptr; ptr += y; pts[y] = *ptl; ptl += x; pts++;  \
+	head_branchless_merge(pts, x, ptl, ptr, cmp);  \
+	head_branchless_merge(pts, x, ptl, ptr, cmp);  \
+	head_branchless_merge(pts, x, ptl, ptr, cmp);  \
 	*pts = cmp(ptl, ptr) <= 0 ? *ptl : *ptr;  \
   \
 	ptl = array + 3; ptr = array + 7; pts = swap + 7;  \
-	x = cmp(ptl, ptr) <= 0; y = !x; pts--; pts[x] = *ptr; ptr -= x; pts[y] = *ptl; ptl -= y;  \
-	x = cmp(ptl, ptr) <= 0; y = !x; pts--; pts[x] = *ptr; ptr -= x; pts[y] = *ptl; ptl -= y;  \
-	x = cmp(ptl, ptr) <= 0; y = !x; pts--; pts[x] = *ptr; ptr -= x; pts[y] = *ptl; ptl -= y;  \
-	*pts = cmp(ptl, ptr)  > 0 ? *ptl : *ptr;  \
-}
+	tail_branchless_merge(pts, y, ptl, ptr, cmp);  \
+	tail_branchless_merge(pts, y, ptl, ptr, cmp);  \
+	tail_branchless_merge(pts, y, ptl, ptr, cmp);  \
+	*pts = cmp(ptl, ptr)  > 0 ? *ptl : *ptr;
 
+#define swap_branchless(pta, swap, x, y, cmp)  \
+	x = cmp(pta, pta + 1) > 0;  \
+	y = !x;  \
+	swap = pta[y];  \
+	pta[0] = pta[x];  \
+	pta[1] = swap;
 
 //////////////////////////////////////////////////////////
 // ┌───────────────────────────────────────────────────┐//
