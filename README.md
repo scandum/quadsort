@@ -228,7 +228,7 @@ to **n / 4**. Rotations can be performed with minimal performance loss by using
 
 Big O
 -----
-```cobol
+```
                  ┌───────────────────────┐┌───────────────────────┐
                  │comparisons            ││swap memory            │
 ┌───────────────┐├───────┬───────┬───────┤├───────┬───────┬───────┤┌──────┐┌─────────┐┌─────────┐
