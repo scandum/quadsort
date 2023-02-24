@@ -1066,11 +1066,13 @@ void FUNC(blit_merge)(VAR *array, VAR *swap, size_t swap_size, size_t nmemb, siz
 
 void FUNC(quadsort)(void *array, size_t nmemb, CMPFUNC *cmp)
 {
+	VAR *pta = (VAR *) array;
+
 	if (nmemb < 32)
 	{
-		FUNC(tail_swap)(array, nmemb, cmp);
+		FUNC(tail_swap)(pta, nmemb, cmp);
 	}
-	else if (FUNC(quad_swap)(array, nmemb, cmp) == 0)
+	else if (FUNC(quad_swap)(pta, nmemb, cmp) == 0)
 	{
 		VAR *swap = NULL;
 		size_t block, swap_size = 32;
@@ -1080,21 +1082,21 @@ void FUNC(quadsort)(void *array, size_t nmemb, CMPFUNC *cmp)
 			swap_size *= 4;
 		}
 
-		swap = malloc(swap_size * sizeof(VAR));
+		swap = (VAR *) malloc(swap_size * sizeof(VAR));
 
 		if (swap == NULL)
 		{
 			VAR stack[512];
 
-			FUNC(tail_merge)(array, stack, 32, nmemb, 32, cmp);
+			FUNC(tail_merge)(pta, stack, 32, nmemb, 32, cmp);
 
-			FUNC(blit_merge)(array, stack, 32, nmemb, 64, cmp);
+			FUNC(blit_merge)(pta, stack, 32, nmemb, 64, cmp);
 
 			return;
 		}
-		block = FUNC(quad_merge)(array, swap, swap_size, nmemb, 32, cmp);
+		block = FUNC(quad_merge)(pta, swap, swap_size, nmemb, 32, cmp);
 
-		FUNC(blit_merge)(array, swap, swap_size, nmemb, block, cmp);
+		FUNC(blit_merge)(pta, swap, swap_size, nmemb, block, cmp);
 
 		free(swap);
 	}
@@ -1102,16 +1104,19 @@ void FUNC(quadsort)(void *array, size_t nmemb, CMPFUNC *cmp)
 
 void FUNC(quadsort_swap)(void *array, void *swap, size_t swap_size, size_t nmemb, CMPFUNC *cmp)
 {
+	VAR *pta = (VAR *) array;
+	VAR *pts = (VAR *) swap;
+
 	if (nmemb < 32)
 	{
-		FUNC(tail_swap)(array, nmemb, cmp);
+		FUNC(tail_swap)(pta, nmemb, cmp);
 	}
-	else if (FUNC(quad_swap)(array, nmemb, cmp) == 0)
+	else if (FUNC(quad_swap)(pta, nmemb, cmp) == 0)
 	{
 		size_t block;
 
-		block = FUNC(quad_merge)(array, swap, swap_size, nmemb, 32, cmp);
+		block = FUNC(quad_merge)(pta, pts, swap_size, nmemb, 32, cmp);
 
-		FUNC(blit_merge)(array, swap, swap_size, nmemb, block, cmp);
+		FUNC(blit_merge)(pta, pts, swap_size, nmemb, block, cmp);
 	}
 }

@@ -34,7 +34,7 @@
 
 	or
 
-	g++ -O3 -w -fpermissive bench.c
+	g++ -O3 bench.c
 */
 
 #include <stdlib.h>
@@ -47,7 +47,7 @@
 
 //#define cmp(a,b) (*(a) > *(b)) // uncomment for faster primitive comparisons
 
-char *sorts[] = { "*", "qsort", "quadsort" };
+const char *sorts[] = { "*", "qsort", "quadsort" };
 
 //#define SKIP_STRINGS
 //#define SKIP_DOUBLES
@@ -267,15 +267,15 @@ void seed_rand(unsigned long long seed)
 	srand(seed);
 }
 
-void test_sort(void *array, void *unsorted, void *valid, int minimum, int maximum, int samples, int repetitions, SRTFUNC *srt, char *name, char *desc, size_t size, CMPFUNC *cmpf)
+void test_sort(void *array, void *unsorted, void *valid, int minimum, int maximum, int samples, int repetitions, SRTFUNC *srt, const char *name, const char *desc, size_t size, CMPFUNC *cmpf)
 {
 	long long start, end, total, best, average_time, average_comp;
 	char temp[100];
-	size_t sam, max;
+	size_t sam;
 	static char compare = 0;
-	long long *ptla = (long long *) array, *ptlv = valid;
-	long double *ptda = (long double *) array, *ptdv = valid;
-	int *pta = (int *) array, *ptv = (int *) valid, cnt, rep, name32;
+	long long *ptla = (long long *) array, *ptlv = (long long *) valid;
+	long double *ptda = (long double *) array, *ptdv = (long double *) valid;
+	int *pta = (int *) array, *ptv = (int *) valid, rep, cnt, max, name32;
 
 #ifdef SKASORT_HPP
 	void *swap;
@@ -692,7 +692,7 @@ unsigned int bit_reverse(unsigned int x)
     return((x >> 16) | (x << 15));
 }
 
-void run_test(void *a_array, void *r_array, void *v_array, int minimum, int maximum, int samples, int repetitions, int copies, char *desc, size_t size, CMPFUNC *cmpf)
+void run_test(void *a_array, void *r_array, void *v_array, int minimum, int maximum, int samples, int repetitions, int copies, const char *desc, size_t size, CMPFUNC *cmpf)
 {
 	int cnt, rep;
 
