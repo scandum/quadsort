@@ -271,11 +271,10 @@ void test_sort(void *array, void *unsorted, void *valid, int minimum, int maximu
 {
 	long long start, end, total, best, average_time, average_comp;
 	char temp[100];
-	size_t sam;
 	static char compare = 0;
 	long long *ptla = (long long *) array, *ptlv = (long long *) valid;
 	long double *ptda = (long double *) array, *ptdv = (long double *) valid;
-	int *pta = (int *) array, *ptv = (int *) valid, rep, cnt, max, name32;
+	int *pta = (int *) array, *ptv = (int *) valid, rep, sam, max, cnt, name32;
 
 #ifdef SKASORT_HPP
 	void *swap;
@@ -704,7 +703,7 @@ void run_test(void *a_array, void *r_array, void *v_array, int minimum, int maxi
 	}
 	quadsort(v_array, maximum, size, cmpf);
 
-	for (cnt = 0 ; cnt < sizeof(sorts) / sizeof(char *) ; cnt++)
+	for (cnt = 0 ; (size_t) cnt < sizeof(sorts) / sizeof(char *) ; cnt++)
 	{
 		test_sort(a_array, r_array, v_array, minimum, maximum, samples, repetitions, qsort, sorts[cnt], desc, size, cmpf);
 	}
@@ -713,7 +712,7 @@ void run_test(void *a_array, void *r_array, void *v_array, int minimum, int maxi
 void range_test(int max, int samples, int repetitions, int seed)
 {
 	int cnt, last;
-	size_t mem = max * 10 > 32768 * 64 ? max * 10 : 32768 * 64;
+	int mem = max * 10 > 32768 * 64 ? max * 10 : 32768 * 64;
 	char dist[40];
 
 	int *a_array = (int *) malloc(max * sizeof(int));
@@ -738,7 +737,7 @@ void range_test(int max, int samples, int repetitions, int seed)
 				memcpy(v_array, r_array, repetitions * sizeof(int));
 				quadsort(v_array, repetitions, sizeof(int), cmp_int);
 
-				for (cnt = 0 ; cnt < sizeof(sorts) / sizeof(char *) ; cnt++)
+				for (cnt = 0 ; (size_t) cnt < sizeof(sorts) / sizeof(char *) ; cnt++)
 				{
 					test_sort(a_array, r_array, v_array, last, repetitions, 50, samples, qsort, sorts[cnt], dist, sizeof(int), cmp_int);
 				}
@@ -764,7 +763,7 @@ void range_test(int max, int samples, int repetitions, int seed)
 
 			sprintf(dist, "random %d", max);
 
-			for (cnt = 0 ; cnt < sizeof(sorts) / sizeof(char *) ; cnt++)
+			for (cnt = 0 ; (size_t) cnt < sizeof(sorts) / sizeof(char *) ; cnt++)
 			{
 				test_sort(a_array, r_array, v_array, max, max, 10, repetitions, qsort, sorts[cnt], dist, sizeof(int), cmp_int);
 			}
@@ -781,7 +780,7 @@ void range_test(int max, int samples, int repetitions, int seed)
 
 				sprintf(dist, "random %d", repetitions);
 
-				for (cnt = 0 ; cnt < sizeof(sorts) / sizeof(char *) ; cnt++)
+				for (cnt = 0 ; (size_t) cnt < sizeof(sorts) / sizeof(char *) ; cnt++)
 				{
 					test_sort(a_array, r_array, v_array, repetitions, repetitions, 100, samples, qsort, sorts[cnt], dist, sizeof(int), cmp_int);
 				}
@@ -802,7 +801,7 @@ int main(int argc, char **argv)
 	int samples = 10;
 	int repetitions = 1;
 	int seed = 0;
-	size_t cnt, mem;
+	int cnt, mem;
 	VAR *a_array, *r_array, *v_array, sum;
 
 	if (argc >= 1 && argv[1] && *argv[1])
@@ -1000,7 +999,7 @@ int main(int argc, char **argv)
 	memcpy(dv_array, dr_array, max * sizeof(long double));
 	quadsort(dv_array, max, sizeof(long double), cmp_long_double);
 
-	for (cnt = 0 ; cnt < sizeof(sorts) / sizeof(char *) ; cnt++)
+	for (cnt = 0 ; (size_t) cnt < sizeof(sorts) / sizeof(char *) ; cnt++)
 	{
 		test_sort(da_array, dr_array, dv_array, max, max, samples, repetitions, qsort, sorts[cnt], "random order", sizeof(long double), cmp_long_double);
 	}
@@ -1036,7 +1035,7 @@ int main(int argc, char **argv)
 	memcpy(lv_array, lr_array, max * sizeof(long long));
 	quadsort(lv_array, max, sizeof(long long), cmp_long);
 
-	for (cnt = 0 ; cnt < sizeof(sorts) / sizeof(char *) ; cnt++)
+	for (cnt = 0 ; (size_t) cnt < sizeof(sorts) / sizeof(char *) ; cnt++)
 	{
 		test_sort(la_array, lr_array, lv_array, max, max, samples, repetitions, qsort, sorts[cnt], "random order", sizeof(long long), cmp_long);
 	}
@@ -1053,16 +1052,16 @@ int main(int argc, char **argv)
 	r_array = (VAR *) malloc(mem * sizeof(VAR));
 	v_array = (VAR *) malloc(max * sizeof(VAR));
 
-	size_t quad0 = 0;
-	size_t nmemb = max;
-	size_t half1 = nmemb / 2;
-	size_t half2 = nmemb - half1;
-	size_t quad1 = half1 / 2;
-	size_t quad2 = half1 - quad1;
-	size_t quad3 = half2 / 2;
-	size_t quad4 = half2 - quad3;
+	int quad0 = 0;
+	int nmemb = max;
+	int half1 = nmemb / 2;
+	int half2 = nmemb - half1;
+	int quad1 = half1 / 2;
+	int quad2 = half1 - quad1;
+	int quad3 = half2 / 2;
+	int quad4 = half2 - quad3;
 
-	size_t span3 = quad1 + quad2 + quad3;
+	int span3 = quad1 + quad2 + quad3;
 
 	// random
 
