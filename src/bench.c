@@ -343,6 +343,8 @@ void test_sort(void *array, void *unsorted, void *valid, int minimum, int maximu
 #endif
 #ifdef FLUXSORT_H
 				case 'f' + 'l' * 32 + 'u' * 1024: fluxsort(array, max, size, cmpf); break;
+				case 's' + '_' * 32 + 'f' * 1024: fluxsort_size(array, max, size, cmpf); break;
+
 #endif
 #ifdef GRIDSORT_H
 				case 'g' + 'r' * 32 + 'i' * 1024: gridsort(array, max, size, cmpf); break;
@@ -355,6 +357,7 @@ void test_sort(void *array, void *unsorted, void *valid, int minimum, int maximu
 #endif
 #ifdef QUADSORT_H
 				case 'q' + 'u' * 32 + 'a' * 1024: quadsort(array, max, size, cmpf); break;
+				case 's' + '_' * 32 + 'q' * 1024: quadsort_size(array, max, size, cmpf); break;
 #endif
 #ifdef SKIPSORT_H
 				case 's' + 'k' * 32 + 'i' * 1024: skipsort(array, max, size, cmpf); break;
@@ -473,7 +476,7 @@ void test_sort(void *array, void *unsorted, void *valid, int minimum, int maximu
 				break;
 			}
 		}
-		else if (cmpf == cmp_long_double_ptr)
+		else if (size == sizeof(int *) && cmpf == cmp_long_double_ptr)
 		{
 			long double **pptda = (long double **) array;
 
@@ -930,6 +933,7 @@ int main(int argc, char **argv)
 		}
 		run_test(la_array, lr_array, lv_array, max, max, samples, repetitions, 0, "random long", sizeof(long long *), cmp_long_ptr);
 
+
 		free(la_array);
 		free(lr_array);
 		free(lv_array);
@@ -1003,6 +1007,8 @@ int main(int argc, char **argv)
 	{
 		test_sort(da_array, dr_array, dv_array, max, max, samples, repetitions, qsort, sorts[cnt], "random order", sizeof(long double), cmp_long_double);
 	}
+
+	test_sort(da_array, dr_array, dv_array, max, max, samples, repetitions, qsort, "s_quadsort", "random order", sizeof(long double), cmp_long_double_ptr);
 
 	free(da_array);
 	free(dr_array);

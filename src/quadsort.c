@@ -1109,3 +1109,4 @@ void FUNC(quadsort_swap)(void *array, void *swap, size_t swap_size, size_t nmemb
 		FUNC(blit_merge)(pta, pts, swap_size, nmemb, block, cmp);
 	}
 }
+
