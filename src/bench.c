@@ -56,7 +56,7 @@ const char *sorts[] = { "*", "qsort", "quadsort" };
   #include "quadsort.h" // curl "https://raw.githubusercontent.com/scandum/quadsort/master/src/quadsort.{c,h}" -o "quadsort.#1"
 #endif
 #if __has_include("skipsort.h")
-  #include "skipsort.h"
+  #include "skipsort.h" // curl "https://raw.githubusercontent.com/scandum/wolfsort/master/src/skipsort.{c,h}" -o "skipsort.#1"
 #endif
 #if __has_include("wolfsort.h")
   #include "wolfsort.h" // curl "https://raw.githubusercontent.com/scandum/wolfsort/master/src/wolfsort.{c,h}" -o "wolfsort.#1"
@@ -284,7 +284,9 @@ void test_sort(void *array, void *unsorted, void *valid, int minimum, int maximu
 
 	if (minimum == 7 && maximum == 7)
 	{
+		pta = (int *) unsorted;
 		printf("\e[1;32m%10d %10d %10d %10d %10d %10d %10d\e[0m\n", pta[0], pta[1], pta[2], pta[3], pta[4], pta[5], pta[6]);
+		pta = (int *) array;
 	}
 
 	for (sam = 0 ; sam < samples ; sam++)

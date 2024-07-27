@@ -1,4 +1,4 @@
-// quadsort 1.2.1.2 - Igor van den Hoven ivdhoven@gmail.com
+// quadsort 1.2.1.3 - Igor van den Hoven ivdhoven@gmail.com
 
 #ifndef QUADSORT_H
 #define QUADSORT_H
@@ -63,16 +63,16 @@ typedef int CMPFUNC (const void *a, const void *b);
 
 // guarantee small parity merges are inlined with minimal overhead
 
-#define parity_merge_two(array, swap, x, y, ptl, ptr, pts, cmp)  \
+#define parity_merge_two(array, swap, x, ptl, ptr, pts, cmp)  \
 	ptl = array; ptr = array + 2; pts = swap;  \
 	head_branchless_merge(pts, x, ptl, ptr, cmp);  \
 	*pts = cmp(ptl, ptr) <= 0 ? *ptl : *ptr;  \
   \
 	ptl = array + 1; ptr = array + 3; pts = swap + 3;  \
-	tail_branchless_merge(pts, y, ptl, ptr, cmp);  \
+	tail_branchless_merge(pts, x, ptl, ptr, cmp);  \
 	*pts = cmp(ptl, ptr)  > 0 ? *ptl : *ptr;
 
-#define parity_merge_four(array, swap, x, y, ptl, ptr, pts, cmp)  \
+#define parity_merge_four(array, swap, x, ptl, ptr, pts, cmp)  \
 	ptl = array + 0; ptr = array + 4; pts = swap;  \
 	head_branchless_merge(pts, x, ptl, ptr, cmp);  \
 	head_branchless_merge(pts, x, ptl, ptr, cmp);  \
@@ -80,10 +80,25 @@ typedef int CMPFUNC (const void *a, const void *b);
 	*pts = cmp(ptl, ptr) <= 0 ? *ptl : *ptr;  \
   \
 	ptl = array + 3; ptr = array + 7; pts = swap + 7;  \
-	tail_branchless_merge(pts, y, ptl, ptr, cmp);  \
-	tail_branchless_merge(pts, y, ptl, ptr, cmp);  \
-	tail_branchless_merge(pts, y, ptl, ptr, cmp);  \
+	tail_branchless_merge(pts, x, ptl, ptr, cmp);  \
+	tail_branchless_merge(pts, x, ptl, ptr, cmp);  \
+	tail_branchless_merge(pts, x, ptl, ptr, cmp);  \
 	*pts = cmp(ptl, ptr)  > 0 ? *ptl : *ptr;
+
+
+#if !defined __clang__
+#define branchless_swap(pta, swap, x, cmp)  \
+	x = cmp(pta, pta + 1) > 0;  \
+	swap = pta[!x];  \
+	pta[0] = pta[x];  \
+	pta[1] = swap;
+#else
+#define branchless_swap(pta, swap, x, cmp)  \
+	x = 0;  \
+	swap = cmp(pta, pta + 1) > 0 ? pta[x++] : pta[1];  \
+	pta[0] = pta[x];  \
+	pta[1] = swap;
+#endif
 
 #define swap_branchless(pta, swap, x, y, cmp)  \
 	x = cmp(pta, pta + 1) > 0;  \
@@ -373,6 +388,10 @@ void quadsort_size(void *array, size_t nmemb, size_t size, CMPFUNC *cmp)
 	char **pti, *pta, *pts;
 	size_t index, offset;
 
+	if (nmemb < 2)
+	{
+		return;
+	}
 	pta = (char *) array;
 	pti = (char **) malloc(nmemb * sizeof(char *));
 
